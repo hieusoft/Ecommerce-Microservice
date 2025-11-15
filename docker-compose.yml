@@ -1,0 +1,57 @@
+version: '3.9'
+services:
+  auth-service:
+    image: your-dockerhub-username/auth-service:latest
+    ports:
+      - "5001:5001"
+    restart: always
+
+  payment-service:
+    image: your-dockerhub-username/payment-service:latest
+    ports:
+      - "5004:5004"
+    restart: always
+
+  product-service:
+    image: your-dockerhub-username/product-service:latest
+    ports:
+      - "5002:5002"
+    restart: always
+
+  order-service:
+    image: your-dockerhub-username/order-service:latest
+    ports:
+      - "5003:5003"
+    restart: always
+
+  inventory-service:
+    image: your-dockerhub-username/inventory-service:latest
+    ports:
+      - "5005:5005"
+    restart: always
+
+  notification-service:
+    image: your-dockerhub-username/notification-service:latest
+    ports:
+      - "5006:5006"
+    restart: always
+
+  ai-recommendation-service:
+    image: your-dockerhub-username/ai-recommendation-service:latest
+    ports:
+      - "5007:5007"
+    restart: always
+
+  api-gateway:
+    image: your-dockerhub-username/api-gateway:latest
+    ports:
+      - "8000:80"
+    restart: always
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.0
+    environment:
+      - discovery.type=single-node
+    ports:
+      - "9200:9200"
+    restart: always
