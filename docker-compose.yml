@@ -1,51 +1,119 @@
 version: '3.9'
 services:
+  # --- Databases ---
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver
+    environment:
+      SA_PASSWORD: "YourStrong!Passw0rd"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    restart: always
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "rootpassword"
+      MYSQL_DATABASE: "microservices_db"
+    ports:
+      - "3306:3306"
+    restart: always
+
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    restart: always
+
+  # --- Backend services ---
   auth-service:
     image: your-dockerhub-username/auth-service:latest
     ports:
       - "5001:5001"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=AuthDb;User Id=sa;Password=YourStrong!Passw0rd;
+    depends_on:
+      - sqlserver
     restart: always
 
   payment-service:
     image: your-dockerhub-username/payment-service:latest
     ports:
       - "5004:5004"
-    restart: always
-
-  product-service:
-    image: your-dockerhub-username/product-service:latest
-    ports:
-      - "5002:5002"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=PaymentDb;User Id=sa;Password=YourStrong!Passw0rd;
+    depends_on:
+      - sqlserver
     restart: always
 
   order-service:
     image: your-dockerhub-username/order-service:latest
     ports:
       - "5003:5003"
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_DATABASE=microservices_db
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=rootpassword
+    depends_on:
+      - mysql
     restart: always
 
   inventory-service:
     image: your-dockerhub-username/inventory-service:latest
     ports:
       - "5005:5005"
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_DATABASE=microservices_db
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=rootpassword
+    depends_on:
+      - mysql
+    restart: always
+
+  product-service:
+    image: your-dockerhub-username/product-service:latest
+    ports:
+      - "5002:5002"
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/productdb
+    depends_on:
+      - mongodb
     restart: always
 
   notification-service:
     image: your-dockerhub-username/notification-service:latest
     ports:
       - "5006:5006"
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/notificationdb
+    depends_on:
+      - mongodb
     restart: always
 
   ai-recommendation-service:
     image: your-dockerhub-username/ai-recommendation-service:latest
     ports:
       - "5007:5007"
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/aidb
+    depends_on:
+      - mongodb
     restart: always
 
   api-gateway:
     image: your-dockerhub-username/api-gateway:latest
     ports:
       - "8000:80"
+    depends_on:
+      - auth-service
+      - payment-service
+      - product-service
+      - order-service
     restart: always
 
   elasticsearch:
