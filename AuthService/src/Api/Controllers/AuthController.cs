@@ -1,5 +1,6 @@
 using Application.DTOs.Auth;
 using Application.UseCases;
+using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
@@ -56,8 +57,12 @@ namespace Api.Controllers
         {
             try
             {
-                var accessToken = await _authUseCases.RefreshTokenAsync(dto);
-                return Ok(new { accessToken });
+                var (newAccessToken, newRefreshToken) = await _authUseCases.RefreshTokenAsync(dto);
+                return Ok(new
+                {
+                    newAccessToken,
+                    newRefreshToken
+                });
             }
             catch (Exception ex)
             {

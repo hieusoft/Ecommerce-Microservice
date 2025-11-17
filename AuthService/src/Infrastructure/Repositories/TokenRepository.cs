@@ -20,6 +20,11 @@ namespace Infrastructure.Repositories
             await _context.RefreshTokens.AddAsync(token);
             await _context.SaveChangesAsync();
         }
+        public async Task UpdateRefreshTokenAsync(RefreshToken token)
+        {
+            _context.RefreshTokens.Update(token);
+            await _context.SaveChangesAsync();
+        }
 
         public async Task<RefreshToken?> GetRefreshTokenAsync(string token)
         {

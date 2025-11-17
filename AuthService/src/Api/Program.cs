@@ -1,5 +1,6 @@
 using Application.Interfaces;
 using Application.UseCases;
+using AspNetCoreRateLimit;
 using Infrastructure.DbContext;
 using Infrastructure.Repositories;
 using Infrastructure.Security;
@@ -85,10 +86,20 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddAuthorization();
+builder.Services.AddMemoryCache();
 
+builder.Services.Configure<IpRateLimitOptions>(
+    builder.Configuration.GetSection("IpRateLimiting"));
+
+builder.Services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
+builder.Services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
+builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+builder.Services.AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrategy>();
+
+builder.Services.AddInMemoryRateLimiting();
 var app = builder.Build();
+app.UseIpRateLimiting();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

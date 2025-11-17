@@ -143,24 +143,35 @@ public class AuthUseCases
 
         await _emailService.SendVerificationEmailAsync(user.Email, user.UserName, verificationToken);
     }
-    public async Task<string> RefreshTokenAsync(RefreshTokenRequestDto dto)
+    public async Task<(string accessToken, string refreshToken)> RefreshTokenAsync(RefreshTokenRequestDto dto)
     {
       
-        var token = await _tokenRepository.GetRefreshTokenAsync(dto.RefreshToken);
-
-        if (token == null || token.ExpiresAt < DateTime.UtcNow)
+        var oldToken = await _tokenRepository.GetRefreshTokenAsync(dto.RefreshToken);
+        if (oldToken == null || oldToken.ExpiresAt < DateTime.UtcNow || oldToken.Revoked)
             throw new Exception("Invalid or expired refresh token");
 
+
   
-        var user = await _userRepository.GetByIdAsync(token.UserId);
+        var user = await _userRepository.GetByIdAsync(oldToken.UserId);
 
         if (user == null)
             throw new Exception("User not found");
 
         var roles = user.UserRoles?.Select(ur => ur.Role.RoleName) ?? new List<string>();
+        var newAccessToken = _jwtService.GenerateAccessToken(user.UserId, user.Email, roles);
 
-        var accessToken = _jwtService.GenerateAccessToken(user.UserId, user.Email, roles);
+        var newRefreshToken = _jwtService.GenerateRefreshToken();
 
-        return accessToken;
+        var refreshEntity = new RefreshToken
+        {
+            UserId = user.UserId,
+            Token = newRefreshToken,
+            ExpiresAt = DateTime.UtcNow.AddDays(7)
+        };
+        await _tokenRepository.AddRefreshTokenAsync(refreshEntity);
+        oldToken.Revoked = true;
+        await _tokenRepository.UpdateRefreshTokenAsync(oldToken);
+        return (newAccessToken, newRefreshToken);
+    
     }
 }

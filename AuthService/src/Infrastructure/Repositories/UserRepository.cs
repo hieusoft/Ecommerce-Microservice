@@ -58,12 +58,12 @@ namespace Infrastructure.Repositories
             }
             catch (DbUpdateException dbEx)
             {
-                // Thông tin chi tiết về lỗi SQL
+            
                 Console.WriteLine("DbUpdateException: " + dbEx.Message);
                 if (dbEx.InnerException != null)
                     Console.WriteLine("InnerException: " + dbEx.InnerException.Message);
 
-                throw; // Optional: ném lại để tầng trên xử lý
+                throw; 
             }
             catch (Exception ex)
             {
@@ -104,9 +104,11 @@ namespace Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public Task UpdateEmailVerificationTokenAsync(EmailVerificationToken token)
+        public async Task UpdateEmailVerificationTokenAsync(EmailVerificationToken token)
         {
-            throw new NotImplementedException();
+            token.Verified = true;
+            _context.EmailVerificationTokens.Update(token);
+            await _context.SaveChangesAsync();
         }
 
         public Task<PasswordResetToken?> GetPasswordResetTokenAsync(string token)
@@ -114,9 +116,13 @@ namespace Infrastructure.Repositories
             throw new NotImplementedException();
         }
 
-        public Task AddPasswordResetTokenAsync(PasswordResetToken token)
+        public async Task AddPasswordResetTokenAsync(PasswordResetToken token)
         {
-            throw new NotImplementedException();
+            if (token == null)
+                throw new ArgumentNullException(nameof(token));
+
+            await _context.PasswordResetTokens.AddAsync(token);
+            await _context.SaveChangesAsync();
         }
 
         public Task UpdatePasswordResetTokenAsync(PasswordResetToken token)
