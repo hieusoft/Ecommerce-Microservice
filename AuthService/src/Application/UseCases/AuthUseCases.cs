@@ -145,22 +145,20 @@ public class AuthUseCases
     }
     public async Task<string> RefreshTokenAsync(RefreshTokenRequestDto dto)
     {
-        // Lấy refresh token từ repository
+      
         var token = await _tokenRepository.GetRefreshTokenAsync(dto.RefreshToken);
 
         if (token == null || token.ExpiresAt < DateTime.UtcNow)
             throw new Exception("Invalid or expired refresh token");
 
-        // Lấy user theo token
+  
         var user = await _userRepository.GetByIdAsync(token.UserId);
 
         if (user == null)
             throw new Exception("User not found");
 
-        // Lấy roles của user
         var roles = user.UserRoles?.Select(ur => ur.Role.RoleName) ?? new List<string>();
 
-        // Tạo access token mới
         var accessToken = _jwtService.GenerateAccessToken(user.UserId, user.Email, roles);
 
         return accessToken;

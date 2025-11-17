@@ -88,10 +88,14 @@ namespace Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public Task<EmailVerificationToken?> GetEmailVerificationTokenAsync(string token)
+        public async Task<EmailVerificationToken?> GetEmailVerificationTokenAsync(string token)
         {
-            throw new NotImplementedException();
+
+            return await _context.EmailVerificationTokens
+                
+                .FirstOrDefaultAsync(t=> t.Token == token);
         }
+
 
         public async Task AddEmailVerificationTokenAsync(EmailVerificationToken token)
         {

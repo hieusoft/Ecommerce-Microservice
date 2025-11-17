@@ -108,7 +108,7 @@ namespace Api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error verifying email");
+                _logger.LogError(ex, "Error verifying email"); 
                 return BadRequest(new { message = ex.Message });
             }
         }
