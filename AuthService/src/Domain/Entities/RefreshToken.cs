@@ -15,5 +15,6 @@ namespace Domain.Entities
         public DateTime ExpiresAt { get; set; }
         public bool Revoked { get; set; } = false;
         public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
     }
 }

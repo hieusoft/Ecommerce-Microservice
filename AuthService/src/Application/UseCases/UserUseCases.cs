@@ -82,9 +82,59 @@ namespace Application.UseCases
             if (user.UserRoles == null)
                 user.UserRoles = new List<UserRole>();
 
-            if (!user.UserRoles.Any(ur => ur.RoleId == role.RoleId))
-                user.UserRoles.Add(new UserRole { RoleId = role.RoleId, UserId = user.UserId });
+           
+            var hasRole = user.UserRoles.Any(ur => ur.RoleId == role.RoleId);
+            if (hasRole)
+                throw new Exception("User already has this role");
 
+            
+            user.UserRoles.Add(new UserRole { RoleId = role.RoleId, UserId = user.UserId });
+
+           
+            user.TokenVersion += 1;
+
+            await _userRepository.UpdateAsync(user);
+        }
+
+        public async Task RemoveRoleAsync(RemoveRoleRequestDto dto)
+        {
+            var user = await _userRepository.GetByIdAsync(dto.UserId);
+            if (user == null) throw new Exception("User not found");
+
+            var role = await _roleRepository.GetByNameAsync(dto.RoleName);
+            if (role == null) throw new Exception("Role not found");
+
+            if (user.UserRoles == null || !user.UserRoles.Any(ur => ur.RoleId == role.RoleId))
+                throw new Exception("User does not have this role");
+
+            var userRole = user.UserRoles.First(ur => ur.RoleId == role.RoleId);
+            user.UserRoles.Remove(userRole);
+            user.TokenVersion += 1;
+
+            await _userRepository.UpdateAsync(user);
+        }
+        public async Task BanUserAsync(int userId)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null) throw new Exception("User not found");
+
+            if (user.IsBanned) throw new Exception("User is already banned");
+
+            user.IsBanned = true;
+          
+
+            await _userRepository.UpdateAsync(user);
+        }
+
+        public async Task UnbanUserAsync(int userId)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null) throw new Exception("User not found");
+
+            if (!user.IsBanned) throw new Exception("User is not banned");
+
+            user.IsBanned = false;
+           
             await _userRepository.UpdateAsync(user);
         }
     }

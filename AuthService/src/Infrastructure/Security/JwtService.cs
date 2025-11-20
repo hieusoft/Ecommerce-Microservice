@@ -25,13 +25,15 @@ namespace Infrastructure.Security
             _refreshTokenLength = int.Parse(configuration["Jwt:RefreshTokenLength"] ?? "64");
         }
 
-        public string GenerateAccessToken(int userId, string email, IEnumerable<string> roles)
+       
+        public string GenerateAccessToken(int userId, string email, IEnumerable<string> roles, int tokenVersion)
         {
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
                 new Claim(ClaimTypes.Email, email),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim("tokenVersion", tokenVersion.ToString())
             };
 
             foreach (var role in roles)
@@ -62,4 +64,3 @@ namespace Infrastructure.Security
         }
     }
 }
-

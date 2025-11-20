@@ -8,7 +8,8 @@ namespace Application.Interfaces
 {
     public interface IJwtService
     {
-        string GenerateAccessToken(int userId, string email, IEnumerable<string> roles);
+        string GenerateAccessToken(int userId, string email, IEnumerable<string> roles, int tokenVersion);
+
         string GenerateRefreshToken();
     }
 }

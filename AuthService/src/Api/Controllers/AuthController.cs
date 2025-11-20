@@ -92,8 +92,14 @@ namespace Api.Controllers
         {
             try
             {
-                await _authUseCases.ResetPasswordAsync(dto);
-                return Ok(new { message = "Password has been reset successfully" });
+                var (accessToken, refreshToken) = await _authUseCases.ResetPasswordAsync(dto);
+               
+                return Ok(new
+                {
+                    message = "Password has been reset successfully",
+                    accessToken,
+                    refreshToken
+                });
             }
             catch (Exception ex)
             {

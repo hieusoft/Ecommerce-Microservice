@@ -1,4 +1,4 @@
-﻿// AuthService.Api/Middleware/EmailResendThrottleMiddleware.cs
+﻿
 using Microsoft.AspNetCore.Http;
 using System.Collections.Concurrent;
 

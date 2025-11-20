@@ -95,6 +95,51 @@ namespace Api.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+        [HttpPost("remove-role")]
+        public async Task<IActionResult> RemoveRole([FromBody] RemoveRoleRequestDto dto)
+        {
+            try
+            {
+                await _userUseCases.RemoveRoleAsync(dto);
+                return Ok(new { message = "Role removed successfully" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error removing role");
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+        [Authorize(Roles = "Admin,Manager")]
+        [HttpPost("ban-user")]
+        public async Task<IActionResult> BanUser([FromBody] BanUserRequestDto dto)
+        {
+            try
+            {
+                await _userUseCases.BanUserAsync(dto.UserId);
+                return Ok(new { message = "User has been banned successfully" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error banning user");
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+        [Authorize(Roles = "Admin,Manager")]
+        [HttpPost("unban-user")]
+        public async Task<IActionResult> UnbanUser([FromBody] BanUserRequestDto dto)
+        {
+            try
+            {
+                await _userUseCases.UnbanUserAsync(dto.UserId);
+                return Ok(new { message = "User has been unbanned successfully" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error unbanning user");
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
     }
 }
 

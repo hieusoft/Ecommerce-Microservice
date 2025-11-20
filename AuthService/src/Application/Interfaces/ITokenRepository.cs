@@ -10,6 +10,7 @@ namespace Application.Interfaces
     {
         Task AddRefreshTokenAsync(RefreshToken token);
         Task<RefreshToken> GetRefreshTokenAsync(string token);
+        Task<RefreshToken> GetRefreshTokenByUserIdAsync(int userId);
         Task UpdateRefreshTokenAsync(RefreshToken token);
         Task DeleteRefreshTokenAsync(RefreshToken token);
     }

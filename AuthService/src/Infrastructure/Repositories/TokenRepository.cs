@@ -22,7 +22,16 @@ namespace Infrastructure.Repositories
         }
         public async Task UpdateRefreshTokenAsync(RefreshToken token)
         {
-            _context.RefreshTokens.Update(token);
+            var oldToken = await _context.RefreshTokens
+            .FirstOrDefaultAsync(t => t.UserId == token.UserId);
+
+
+            oldToken.Token = token.Token;
+            oldToken.ExpiresAt = token.ExpiresAt;
+            oldToken.Revoked = false;
+
+          
+            _context.RefreshTokens.Update(oldToken);
             await _context.SaveChangesAsync();
         }
 
@@ -38,6 +47,13 @@ namespace Infrastructure.Repositories
             token.Revoked = true;
             _context.RefreshTokens.Update(token);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<RefreshToken> GetRefreshTokenByUserIdAsync(int userId)
+        {
+            return await _context.RefreshTokens
+               .SingleOrDefaultAsync(r => r.UserId == userId);
+
         }
     }
 }

@@ -88,47 +88,9 @@ namespace Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<EmailVerificationToken?> GetEmailVerificationTokenAsync(string token)
-        {
+       
 
-            return await _context.EmailVerificationTokens
-                
-                .FirstOrDefaultAsync(t=> t.Token == token);
-        }
-
-
-        public async Task AddEmailVerificationTokenAsync(EmailVerificationToken token)
-        {
-            token.CreatedAt = DateTime.UtcNow;
-            _context.EmailVerificationTokens.Add(token);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task UpdateEmailVerificationTokenAsync(EmailVerificationToken token)
-        {
-            token.Verified = true;
-            _context.EmailVerificationTokens.Update(token);
-            await _context.SaveChangesAsync();
-        }
-
-        public Task<PasswordResetToken?> GetPasswordResetTokenAsync(string token)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task AddPasswordResetTokenAsync(PasswordResetToken token)
-        {
-            if (token == null)
-                throw new ArgumentNullException(nameof(token));
-
-            await _context.PasswordResetTokens.AddAsync(token);
-            await _context.SaveChangesAsync();
-        }
-
-        public Task UpdatePasswordResetTokenAsync(PasswordResetToken token)
-        {
-            throw new NotImplementedException();
-        }
+       
 
         public Task<IEnumerable<EmailVerificationToken>> GetEmailVerificationTokensByUserIdAsync(int userId)
         {

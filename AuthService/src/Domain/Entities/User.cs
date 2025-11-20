@@ -9,8 +9,9 @@ namespace Domain.Entities
         public string UserName { get; set; } = null!;
         public string Email { get; set; } = null!;
         public string PasswordHash { get; set; } = null!;
-        public string PasswordSalt { get; set; } = null!;
         public bool EmailVerified { get; set; } = false;
+        public int TokenVersion { get; set; } = 1;
+        public bool IsBanned { get; set; } = false;
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 

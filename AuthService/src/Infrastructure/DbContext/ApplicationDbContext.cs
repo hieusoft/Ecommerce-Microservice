@@ -27,9 +27,11 @@ namespace Infrastructure.DbContext
                 entity.Property(e => e.UserName).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.Email).IsRequired().HasMaxLength(255);
                 entity.Property(e => e.PasswordHash).IsRequired();
-                entity.Property(e => e.PasswordSalt).IsRequired();
                 entity.Property(e => e.EmailVerified).HasDefaultValue(false);
-
+                entity.Property(e => e.TokenVersion)
+                      .IsRequired()
+                      .HasDefaultValue(1);
+                entity.Property(e => e.IsBanned).HasDefaultValue(false);
                 entity.HasIndex(e => e.Email).IsUnique();
             });
 
@@ -41,7 +43,7 @@ namespace Infrastructure.DbContext
                 entity.HasIndex(e => e.RoleName).IsUnique();
             });
 
-            // UserRole configuration (many-to-many)
+          
             modelBuilder.Entity<UserRole>(entity =>
             {
                 entity.HasKey(e => new { e.UserId, e.RoleId });
@@ -55,17 +57,18 @@ namespace Infrastructure.DbContext
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // RefreshToken configuration
             modelBuilder.Entity<RefreshToken>(entity =>
             {
                 entity.HasKey(e => e.TokenId);
                 entity.Property(e => e.Token).IsRequired();
                 entity.HasOne(e => e.User)
-                    .WithMany(u => u.RefreshTokens)
-                    .HasForeignKey(e => e.UserId)
-                    .OnDelete(DeleteBehavior.Cascade);
-                entity.HasIndex(e => e.Token).IsUnique();
+                      .WithMany(u => u.RefreshTokens)
+                      .HasForeignKey(e => e.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);           
+                entity.HasIndex(e => e.UserId).IsUnique();
             });
+
+
             modelBuilder.Entity<EmailVerificationToken>(entity =>
             {
                 entity.HasKey(e => e.Id);
