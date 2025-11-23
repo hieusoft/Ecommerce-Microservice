@@ -52,16 +52,7 @@ public class AuthUseCases
         var refreshToken = _jwtService.GenerateRefreshToken();
 
         var existingToken = await _tokenRepository.GetRefreshTokenByUserIdAsync(user.UserId);
-        _rabbitMqService.Publish("user_registered", new
-        {
-            user.UserId,
-            user.Email
-        });
-        _rabbitMqService.Publish("email_verification_requested", new
-        {
-            user.Email,
-            Token = "xxxx"
-        });
+     
         if (existingToken == null)
         {
           
@@ -77,10 +68,16 @@ public class AuthUseCases
            
             existingToken.Token = refreshToken;
             existingToken.ExpiresAt = DateTime.UtcNow.AddDays(7);
-            existingToken.Revoked = false;
+         
 
             await _tokenRepository.UpdateRefreshTokenAsync(existingToken);
         }
+        _rabbitMqService.Publish("auth_events", "email.verification_requested", new
+        {
+            user.UserId,
+            user.Email
+        });
+      
 
         return (accessToken, refreshToken);
     }
@@ -97,7 +94,6 @@ public class AuthUseCases
         var user = new User
         {
             Email = dto.Email,
-            UserName = dto.UserName,
             PasswordHash = passwordHash,
             EmailVerified = false
 
@@ -109,7 +105,11 @@ public class AuthUseCases
             user.UserRoles = new List<UserRole>();
         user.UserRoles.Add(new UserRole { RoleId = role.RoleId, UserId = user.UserId });
         await _userRepository.AddAsync(user);
-    
+        _rabbitMqService.Publish("auth_events", "user.registered", new
+        {
+            user.UserId,
+            user.Email
+        });
 
         var verificationToken = _jwtService.GenerateRefreshToken();
 
@@ -120,18 +120,15 @@ public class AuthUseCases
             ExpiresAt = DateTime.UtcNow.AddHours(24),
             Verified = false
         });
-        _rabbitMqService.Publish("user_registered", new
+
+        _rabbitMqService.Publish("auth_events", "email.verification_requested", new
         {
             user.UserId,
-            user.Email
-        });
-      
-        await _emailService.SendVerificationEmailAsync(user.Email, user.UserName, verificationToken);
-        _rabbitMqService.Publish("email_verification_requested", new
-        {
             user.Email,
-            Token = "xxxx"
+            Token = verificationToken
         });
+
+
     }
     
     public async Task ForgotPasswordAsync(ForgotPasswordRequestDto dto)
@@ -147,8 +144,14 @@ public class AuthUseCases
             ExpiresAt = DateTime.UtcNow.AddHours(1),
             Used = false
         });
+        _rabbitMqService.Publish("auth_events", "password.reset_requested", new
+        {
+            user.UserId,
+            user.Email,
+            Token = resetToken
+        });
 
-        await _emailService.SendPasswordResetEmailAsync(user.Email, user.UserName, resetToken);
+
     }
     public async Task<(string accessToken, string refreshToken)> ResetPasswordAsync(ResetPasswordRequestDto dto)
     {
@@ -192,10 +195,16 @@ public class AuthUseCases
         {
             existingToken.Token = refreshToken;
             existingToken.ExpiresAt = DateTime.UtcNow.AddDays(7);
-            existingToken.Revoked = false;
+       
 
             await _tokenRepository.UpdateRefreshTokenAsync(existingToken);
         }
+        _rabbitMqService.Publish("auth_events", "password.reset_completed", new
+        {
+            user.UserId,
+            user.Email,
+            ResetAt = DateTime.UtcNow
+        });
 
         return (accessToken, refreshToken);
     }
@@ -212,6 +221,12 @@ public class AuthUseCases
 
         token.Verified = true;
         await _emailVerificationTokenRepository.UpdateEmailVerificationTokenAsync(token);
+        _rabbitMqService.Publish("auth_events", "email.verified", new
+        {
+            user.UserId,
+            user.Email,
+            VerifiedAt = DateTime.UtcNow
+        });
     }
 
     public async Task ResendVerificationEmailAsync(ForgotPasswordRequestDto dto)
@@ -249,14 +264,19 @@ public class AuthUseCases
                 Verified = false
             });
         }
-        await _emailService.SendVerificationEmailAsync(user.Email, user.UserName, verificationToken);
+        _rabbitMqService.Publish("auth_events", "email.verification_requested", new
+        {
+            user.UserId,
+            user.Email,
+            Token = verificationToken
+        });
     }
 
     public async Task<(string accessToken, string refreshToken)> RefreshTokenAsync(RefreshTokenRequestDto dto)
     {
       
         var oldToken = await _tokenRepository.GetRefreshTokenAsync(dto.RefreshToken);
-        if (oldToken == null || oldToken.ExpiresAt < DateTime.UtcNow || oldToken.Revoked)
+        if (oldToken == null || oldToken.ExpiresAt < DateTime.UtcNow)
             throw new Exception("Invalid or expired refresh token");
 
         var user = await _userRepository.GetByIdAsync(oldToken.UserId);

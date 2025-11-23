@@ -87,19 +87,34 @@ namespace Infrastructure.Repositories
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
         }
-
-       
-
-       
-
-        public Task<IEnumerable<EmailVerificationToken>> GetEmailVerificationTokensByUserIdAsync(int userId)
+        public async Task<UserContacts?> GetContactByIdAsync(int contactId)
         {
-            throw new NotImplementedException();
+            return await _context.UserContacts
+                .FirstOrDefaultAsync(c => c.ContactId == contactId);
+        }
+        public async Task<IEnumerable<UserContacts>> GetContactsByUserIdAsync(int userId)
+        {
+            return await _context.UserContacts
+                .Where(c => c.UserId == userId)
+                .ToListAsync();
         }
 
-        public Task<IEnumerable<PasswordResetToken>> GetPasswordResetTokensByUserIdAsync(int userId)
+        public async Task AddContactAsync(UserContacts contact)
         {
-            throw new NotImplementedException();
+            await _context.UserContacts.AddAsync(contact);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateContactAsync(UserContacts contact)
+        {
+            _context.UserContacts.Update(contact);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteContactAsync(UserContacts contact)
+        {
+            _context.UserContacts.Remove(contact);
+            await _context.SaveChangesAsync();
         }
     }
 }

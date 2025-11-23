@@ -1,0 +1,14 @@
+﻿{% extends "layout.html" %}
+
+{% block ImageUrl %}https://example.com/images/promo_banner.jpg{% endblock %}
+
+{% block Header %}Khuyến mãi đặc biệt{% endblock %}
+
+{% block Body %}
+<p>Xin chào {{UserName}},</p>
+<p>Snowell Electric gửi đến bạn ưu đãi đặc biệt: <strong>{{PromotionDetail}}</strong></p>
+<p>Nhanh tay nhận ưu đãi trước khi hết hạn!</p>
+<p style="text-align:center;">
+    <a href="{{PromotionLink}}" class="btn">Nhận ưu đãi</a>
+</p>
+{% endblock %}

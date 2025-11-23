@@ -1,0 +1,17 @@
+﻿{% extends "layout.html" %}
+
+{% block Header %}Xác thực Email{% endblock %}
+
+{% block Body %}
+<p>Xin chào {{UserName}},</p>
+
+<p>Cảm ơn bạn đã đăng ký tài khoản tại <strong>Snowell Electric</strong>!</p>
+
+<p>Để hoàn tất quá trình đăng ký, vui lòng xác thực email bằng cách nhấn nút bên dưới:</p>
+
+<p style="text-align:center;">
+    <a href="{{VerificationLink}}" class="btn">Xác thực Email</a>
+</p>
+
+<p>Nếu bạn không đăng ký tài khoản, vui lòng bỏ qua email này.</p>
+{% endblock %}

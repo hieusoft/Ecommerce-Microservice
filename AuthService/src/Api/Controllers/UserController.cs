@@ -19,6 +19,7 @@ namespace Api.Controllers
             _logger = logger;
         }
 
+        // --- User Methods ---
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
@@ -95,6 +96,7 @@ namespace Api.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
         [HttpPost("remove-role")]
         public async Task<IActionResult> RemoveRole([FromBody] RemoveRoleRequestDto dto)
         {
@@ -109,6 +111,7 @@ namespace Api.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
         [Authorize(Roles = "Admin,Manager")]
         [HttpPost("ban-user")]
         public async Task<IActionResult> BanUser([FromBody] BanUserRequestDto dto)
@@ -124,6 +127,7 @@ namespace Api.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
         [Authorize(Roles = "Admin,Manager")]
         [HttpPost("unban-user")]
         public async Task<IActionResult> UnbanUser([FromBody] BanUserRequestDto dto)
@@ -140,6 +144,82 @@ namespace Api.Controllers
             }
         }
 
+        [HttpGet("{userId}/contacts")]
+        public async Task<IActionResult> GetContactsByUser(int userId)
+        {
+            
+            try
+            {
+                var contacts = await _userUseCases.GetContactsByUserIdAsync(userId);
+                return Ok(contacts);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting contacts");
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("contacts/{contactId}")]
+        public async Task<IActionResult> GetContactById(int contactId)
+        {
+            try
+            {
+                var contact = await _userUseCases.GetContactByIdAsync(contactId);
+                if (contact == null)
+                    return NotFound(new { message = "Contact not found" });
+                return Ok(contact);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting contact");
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("contacts")]
+        public async Task<IActionResult> AddContact([FromBody] AddUserContactRequestDto dto)
+        {
+            try
+            {
+                await _userUseCases.AddContactAsync(dto);
+                return Ok(new { message = "Contact added successfully" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding contact");
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPut("contacts")]
+        public async Task<IActionResult> UpdateContact([FromBody] UpdateUserContactRequestDto dto)
+        {
+            try
+            {
+                await _userUseCases.UpdateContactAsync(dto);
+                return Ok(new { message = "Contact updated successfully" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating contact");
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpDelete("contacts/{contactId}")]
+        public async Task<IActionResult> DeleteContact(int contactId)
+        {
+            try
+            {
+                await _userUseCases.DeleteContactAsync(contactId);
+                return Ok(new { message = "Contact deleted successfully" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting contact");
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }
-

@@ -13,6 +13,7 @@ namespace Infrastructure.DbContext
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
+        public DbSet<UserContacts> UserContacts { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<EmailVerificationToken> EmailVerificationTokens { get; set; }
         public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
@@ -24,7 +25,6 @@ namespace Infrastructure.DbContext
             modelBuilder.Entity<User>(entity =>
             {
                 entity.HasKey(e => e.UserId);
-                entity.Property(e => e.UserName).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.Email).IsRequired().HasMaxLength(255);
                 entity.Property(e => e.PasswordHash).IsRequired();
                 entity.Property(e => e.EmailVerified).HasDefaultValue(false);
@@ -56,6 +56,36 @@ namespace Infrastructure.DbContext
                     .HasForeignKey(e => e.RoleId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
+            modelBuilder.Entity<UserContacts>(entity =>
+            {
+                entity.HasKey(e => e.ContactId);
+
+                entity.Property(e => e.AddressLine)
+                      .IsRequired()
+                      .HasMaxLength(255);
+
+                entity.Property(e => e.City)
+                      .HasMaxLength(100);
+
+                entity.Property(e => e.PhoneNumber)
+                      .IsRequired()
+                      .HasMaxLength(20);
+
+                entity.Property(e => e.IsDefault)
+                      .HasDefaultValue(false);
+
+                entity.Property(e => e.CreatedAt)
+                      .HasDefaultValueSql("GETDATE()");
+
+                entity.Property(e => e.UpdatedAt)
+                      .HasDefaultValueSql("GETDATE()");
+
+                entity.HasOne(e => e.User)
+                      .WithMany(u => u.UserContacts)
+                      .HasForeignKey(e => e.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
 
             modelBuilder.Entity<RefreshToken>(entity =>
             {
@@ -85,7 +115,6 @@ namespace Infrastructure.DbContext
                 entity.HasIndex(e => e.Token).IsUnique();
             });
 
-            // PasswordResetToken configuration
             modelBuilder.Entity<PasswordResetToken>(entity =>
             {
                 entity.HasKey(e => e.Id);

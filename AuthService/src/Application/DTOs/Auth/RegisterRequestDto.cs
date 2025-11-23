@@ -9,9 +9,7 @@ namespace Application.DTOs.Auth
 {
     public class RegisterRequestDto
     {
-        [Required]
-        [StringLength(50, MinimumLength = 3)]
-        public string UserName { get; set; } = null!;
+
 
         [Required]
         [EmailAddress]

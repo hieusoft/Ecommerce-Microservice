@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace Infrastructure.Services
@@ -31,12 +32,29 @@ namespace Infrastructure.Services
             }
         }
 
-        private IModel GetOrCreateChannel(string queueName)
+        
+        private IModel GetOrCreateChannel(string key)
         {
-            if (_channels.ContainsKey(queueName))
-                return _channels[queueName];
+            if (_channels.TryGetValue(key, out var ch))
+                return ch;
 
             var channel = _connection.CreateModel();
+            _channels[key] = channel;
+            return channel;
+        }
+
+     
+        public void DeclareExchange(string exchangeName, string exchangeType = ExchangeType.Direct)
+        {
+            var channel = GetOrCreateChannel($"exchange:{exchangeName}");
+            channel.ExchangeDeclare(exchange: exchangeName, type: exchangeType, durable: true);
+        }
+
+        public void DeclareQueueAndBind(string queueName, string exchangeName, IEnumerable<string> routingKeys)
+        {
+            var channel = GetOrCreateChannel($"queue:{queueName}");
+
+          
             channel.QueueDeclare(
                 queue: queueName,
                 durable: true,
@@ -45,13 +63,21 @@ namespace Infrastructure.Services
                 arguments: null
             );
 
-            _channels[queueName] = channel;
-            return channel;
+         
+            foreach (var key in routingKeys)
+            {
+                channel.QueueBind(
+                    queue: queueName,
+                    exchange: exchangeName,
+                    routingKey: key
+                );
+            }
         }
 
-        public void Publish(string queueName, object message)
+
+        public void Publish(string exchangeName, string routingKey, object message)
         {
-            var channel = GetOrCreateChannel(queueName);
+            var channel = GetOrCreateChannel($"exchange:{exchangeName}");
 
             var json = JsonConvert.SerializeObject(message);
             var body = Encoding.UTF8.GetBytes(json);
@@ -60,12 +86,13 @@ namespace Infrastructure.Services
             props.Persistent = true;
 
             channel.BasicPublish(
-                exchange: "",
-                routingKey: queueName,
+                exchange: exchangeName,
+                routingKey: routingKey,
                 basicProperties: props,
                 body: body
             );
         }
+
 
         public void Dispose()
         {
@@ -78,5 +105,7 @@ namespace Infrastructure.Services
             _connection?.Close();
             _connection?.Dispose();
         }
+
+      
     }
 }

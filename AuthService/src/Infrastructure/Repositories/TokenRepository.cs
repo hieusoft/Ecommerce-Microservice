@@ -28,7 +28,7 @@ namespace Infrastructure.Repositories
 
             oldToken.Token = token.Token;
             oldToken.ExpiresAt = token.ExpiresAt;
-            oldToken.Revoked = false;
+      
 
           
             _context.RefreshTokens.Update(oldToken);
@@ -39,12 +39,12 @@ namespace Infrastructure.Repositories
         {
             return await _context.RefreshTokens
                 .Include(t => t.User)
-                .FirstOrDefaultAsync(t => t.Token == token && !t.Revoked);
+                .FirstOrDefaultAsync(t => t.Token == token);
         }
 
         public async Task DeleteRefreshTokenAsync(RefreshToken token)
         {
-            token.Revoked = true;
+          
             _context.RefreshTokens.Update(token);
             await _context.SaveChangesAsync();
         }

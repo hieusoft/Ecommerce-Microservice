@@ -1,0 +1,47 @@
+CREATE TABLE DeliveryMethods (
+    DeliveryMethodId INT PRIMARY KEY IDENTITY(1,1),
+    Name NVARCHAR(50) NOT NULL,       -- Email, InApp, Push, SMS...
+    Description NVARCHAR(255) NULL    -- Mô tả kênh gửi
+);
+
+-- Ví dụ dữ liệu
+INSERT INTO DeliveryMethods (Name, Description)
+VALUES
+('Email', 'Gửi email tới user'),
+('InApp', 'Hiển thị trong website'),
+('Push', 'Thông báo push mobile'),
+('SMS', 'Gửi tin nhắn SMS');
+
+CREATE TABLE Notifications (
+    NotificationId INT PRIMARY KEY IDENTITY(1,1),
+    Title NVARCHAR(255) NOT NULL,
+    Content NVARCHAR(MAX) NOT NULL,
+    CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    CreatedBy INT NULL,       -- ID người tạo thông báo
+    IsSystem BIT NOT NULL DEFAULT 0
+);
+
+-- Ví dụ dữ liệu
+INSERT INTO Notifications (Title, Content, CreatedBy, IsSystem)
+VALUES 
+('Sale Valentine 20%', 'Ưu đãi đặc biệt giảm 20% cho tất cả sản phẩm', NULL, 1),
+('Server bảo trì', 'Hệ thống sẽ bảo trì vào 12h trưa hôm nay', 1, 1);
+CREATE TABLE UserNotifications (
+    UserNotificationId INT PRIMARY KEY IDENTITY(1,1),
+    UserId INT NOT NULL,
+    NotificationId INT NOT NULL,
+    Status INT NOT NULL DEFAULT 0,       -- 0 = Unread, 1 = Read
+    SentAt DATETIME2 NULL,               -- thời điểm gửi (email/in-app)
+    ReadAt DATETIME2 NULL,               -- thời điểm user đọc
+    DeliveryMethodId INT NOT NULL,       -- FK tới bảng DeliveryMethods
+    Metadata NVARCHAR(MAX) NULL,         -- JSON log: retry, lỗi gửi...
+
+    CONSTRAINT FK_UserNotifications_Notifications
+        FOREIGN KEY (NotificationId)
+        REFERENCES Notifications(NotificationId)
+        ON DELETE CASCADE,
+
+    CONSTRAINT FK_UserNotifications_DeliveryMethods
+        FOREIGN KEY (DeliveryMethodId)
+        REFERENCES DeliveryMethods(DeliveryMethodId)
+);

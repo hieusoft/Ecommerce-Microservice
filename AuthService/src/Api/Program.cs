@@ -125,6 +125,52 @@ builder.Services.AddSingleton<IRabbitMqService, RabbitMqService>();
 
 builder.Services.AddInMemoryRateLimiting();
 var app = builder.Build();
+using (var scope = app.Services.CreateScope())
+{
+    var rabbitMqService = scope.ServiceProvider.GetRequiredService<IRabbitMqService>();
+
+ 
+    rabbitMqService.DeclareExchange("auth_events", RabbitMQ.Client.ExchangeType.Direct);
+
+    rabbitMqService.DeclareQueueAndBind(
+        queueName: "email_service_queue",
+        exchangeName: "auth_events",
+        routingKeys: new[]
+        {
+            "email.verification_requested",
+            "email.verified",
+            "password.reset_requested",
+            "password.reset_completed"
+        }
+    );
+
+
+    rabbitMqService.DeclareQueueAndBind(
+        queueName: "notification_service_queue",
+        exchangeName: "auth_events",
+        routingKeys: new[]
+        {
+            "user.registered",
+            "user.banned",
+            "user.unbanned",
+        }
+    );
+
+
+    //rabbitMqService.DeclareQueueAndBind(
+    //    queueName: "user_history_queue",
+    //    exchangeName: "auth_events",
+    //    routingKeys: new[]
+    //    {
+    //        "user.registered",
+    //        "user.logged_in",
+    //        "user.banned",
+    //        "user.unbanned"
+    //    }
+    //);
+}
+
+
 app.UseIpRateLimiting();
 
 if (app.Environment.IsDevelopment())

@@ -1,0 +1,84 @@
+-- Bảng Users
+CREATE TABLE Users (
+    UserId INT IDENTITY(1,1) PRIMARY KEY,
+  
+    Email NVARCHAR(100) NOT NULL UNIQUE,
+    PasswordHash NVARCHAR(255) NOT NULL,
+    EmailVerified BIT NOT NULL DEFAULT 0,   
+    TokenVersion INT NOT NULL DEFAULT 1,
+    IsBanned BIT NOT NULL DEFAULT 0,    
+    CreatedAt DATETIME2 DEFAULT GETDATE(),
+    UpdatedAt DATETIME2 DEFAULT GETDATE()
+);
+GO
+
+-- Bảng Roles
+CREATE TABLE Roles (
+    RoleId INT IDENTITY(1,1) PRIMARY KEY,
+    RoleName NVARCHAR(50) NOT NULL UNIQUE
+);
+GO 
+
+-- Bảng UserRoles
+CREATE TABLE UserRoles (
+    UserId INT NOT NULL,
+    RoleId INT NOT NULL,
+    PRIMARY KEY (UserId, RoleId),
+    CONSTRAINT FK_UserRoles_Users FOREIGN KEY (UserId) REFERENCES Users(UserId),
+    CONSTRAINT FK_UserRoles_Roles FOREIGN KEY (RoleId) REFERENCES Roles(RoleId)
+);
+GO
+
+-- Bảng RefreshTokens
+CREATE TABLE RefreshTokens (
+    TokenId INT IDENTITY(1,1) PRIMARY KEY,
+    UserId INT NOT NULL,
+    Token NVARCHAR(500) NOT NULL,
+    ExpiresAt DATETIME2 NOT NULL,
+    CreatedAt DATETIME2 DEFAULT GETDATE(),
+    UpdatedAt DATETIME2 DEFAULT GETDATE(),
+
+    CONSTRAINT FK_RefreshTokens_Users FOREIGN KEY (UserId) REFERENCES Users(UserId)
+);
+GO
+CREATE TABLE PasswordResetTokens (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    UserId INT NOT NULL,
+    Token NVARCHAR(500) NOT NULL,
+    ExpiresAt DATETIME2 NOT NULL,
+    Used BIT DEFAULT 0,
+    CreatedAt DATETIME2 DEFAULT GETDATE(),
+    UpdatedAt DATETIME2 DEFAULT GETDATE(),
+
+    FOREIGN KEY (UserId) REFERENCES Users(UserId)
+);
+
+CREATE TABLE EmailVerificationTokens (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    UserId INT NOT NULL,
+    Token NVARCHAR(500) NOT NULL,
+    ExpiresAt DATETIME2 NOT NULL,
+    Verified BIT DEFAULT 0,
+    CreatedAt DATETIME2 DEFAULT GETDATE(),
+UpdatedAt DATETIME2 DEFAULT GETDATE(),
+    FOREIGN KEY (UserId) REFERENCES Users(UserId)
+);
+CREATE TABLE UserContacts (
+    ContactId INT IDENTITY(1,1) PRIMARY KEY,
+    UserId INT NOT NULL,
+    AddressLine NVARCHAR(255) NOT NULL,  
+    City NVARCHAR(100),                  
+    PhoneNumber NVARCHAR(20) NOT NULL, 
+    IsDefault BIT DEFAULT 0,             
+    CreatedAt DATETIME2 DEFAULT GETDATE(),
+    UpdatedAt DATETIME2 DEFAULT GETDATE(),
+    FOREIGN KEY (UserId) REFERENCES Users(UserId)
+);
+
+
+INSERT INTO Roles (RoleName) VALUES 
+('User'),
+('Admin'),
+('Shipper'),
+('Manager'),
+('Support');

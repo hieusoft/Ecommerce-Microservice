@@ -13,11 +13,13 @@ namespace Application.UseCases
     {
         private readonly IUserRepository _userRepository;
         private readonly IRoleRepository _roleRepository;
+        private readonly IRabbitMqService _rabbitMqService;
 
-        public UserUseCases(IUserRepository userRepository, IRoleRepository roleRepository)
+        public UserUseCases(IUserRepository userRepository, IRoleRepository roleRepository, IRabbitMqService rabbitMqService)
         {
             _userRepository = userRepository;
             _roleRepository = roleRepository;
+            _rabbitMqService = rabbitMqService;
         }
         public async Task<IEnumerable<UserResponseDto>> GetAllUsersAsync()
         {
@@ -26,7 +28,6 @@ namespace Application.UseCases
             {
                 UserId = u.UserId,
                 Email = u.Email,
-                UserName = u.UserName,
                 Roles = u.UserRoles?.Select(ur => ur.Role.RoleName).ToList() ?? new List<string>()
             });
         }
@@ -46,7 +47,6 @@ namespace Application.UseCases
             {
                 UserId = user.UserId,
                 Email = user.Email,
-                UserName = user.UserName,
                 Roles = user.UserRoles?.Select(ur => ur.Role.RoleName).ToList() ?? new List<string>()
             };
         }
@@ -57,7 +57,6 @@ namespace Application.UseCases
             var user = await _userRepository.GetByIdAsync(dto.UserId);
             if (user == null) throw new Exception("User not found");
 
-            user.UserName = dto.UserName;
             user.Email = dto.Email;
 
             await _userRepository.UpdateAsync(user);
@@ -117,13 +116,14 @@ namespace Application.UseCases
         {
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null) throw new Exception("User not found");
-
             if (user.IsBanned) throw new Exception("User is already banned");
-
             user.IsBanned = true;
-          
-
             await _userRepository.UpdateAsync(user);
+            _rabbitMqService.Publish("auth_events", "user.banned", new
+            {
+                user.UserId,
+                user.Email
+            });
         }
 
         public async Task UnbanUserAsync(int userId)
@@ -136,6 +136,110 @@ namespace Application.UseCases
             user.IsBanned = false;
            
             await _userRepository.UpdateAsync(user);
+            _rabbitMqService.Publish("auth_events", "user.unbanned", new
+            {
+                user.UserId,
+                user.Email
+            });
         }
+        public async Task<IEnumerable<UserContactResponseDto>> GetContactsByUserIdAsync(int userId)
+        {
+            var contacts = await _userRepository.GetContactsByUserIdAsync(userId);
+            return contacts.Select(c => new UserContactResponseDto
+            {
+                ContactId = c.ContactId,
+                UserId = c.UserId,
+                AddressLine = c.AddressLine,
+                City = c.City,
+                PhoneNumber = c.PhoneNumber,
+                IsDefault = c.IsDefault
+            });
+        }
+
+        public async Task<UserContactResponseDto?> GetContactByIdAsync(int contactId)
+        {
+            var contact = await _userRepository.GetContactByIdAsync(contactId);
+            if (contact == null) return null;
+
+            return new UserContactResponseDto
+            {
+                ContactId = contact.ContactId,
+                UserId = contact.UserId,
+                AddressLine = contact.AddressLine,
+                City = contact.City,
+                PhoneNumber = contact.PhoneNumber,
+                IsDefault = contact.IsDefault
+            };
+        }
+
+        public async Task AddContactAsync(AddUserContactRequestDto dto)
+        {
+            var user = await _userRepository.GetByIdAsync(dto.UserId);
+            if (user == null) throw new Exception("User not found");
+            var contact = new UserContacts
+            {
+                UserId = dto.UserId,
+                AddressLine = dto.AddressLine,
+                City = dto.City,
+                PhoneNumber = dto.PhoneNumber,
+                IsDefault = dto.IsDefault
+            };
+
+            if (contact.IsDefault)
+            {
+              
+                var existingContacts = await _userRepository.GetContactsByUserIdAsync(dto.UserId);
+                foreach (var c in existingContacts)
+                {
+                    if (c.IsDefault)
+                    {
+                        c.IsDefault = false;
+                        await _userRepository.UpdateContactAsync(c);
+                    }
+                }
+            }
+
+            await _userRepository.AddContactAsync(contact);
+        }
+
+        public async Task UpdateContactAsync(UpdateUserContactRequestDto dto)
+        {
+            var contact = await _userRepository.GetContactByIdAsync(dto.ContactId);
+            if (contact == null) throw new Exception("Contact not found");
+
+            contact.AddressLine = dto.AddressLine;
+            contact.City = dto.City;
+            contact.PhoneNumber = dto.PhoneNumber;
+
+            if (dto.IsDefault && !contact.IsDefault)
+            {
+                // Nếu đánh dấu default, reset các contact khác
+                var existingContacts = await _userRepository.GetContactsByUserIdAsync(contact.UserId);
+                foreach (var c in existingContacts)
+                {
+                    if (c.IsDefault)
+                    {
+                        c.IsDefault = false;
+                        await _userRepository.UpdateContactAsync(c);
+                    }
+                }
+                contact.IsDefault = true;
+            }
+            else if (!dto.IsDefault)
+            {
+                contact.IsDefault = false;
+            }
+
+            await _userRepository.UpdateContactAsync(contact);
+        }
+
+        public async Task DeleteContactAsync(int contactId)
+        {
+            var contact = await _userRepository.GetContactByIdAsync(contactId);
+            if (contact == null) throw new Exception("Contact not found");
+
+            await _userRepository.DeleteContactAsync(contact);
+        }
+
     }
 }
