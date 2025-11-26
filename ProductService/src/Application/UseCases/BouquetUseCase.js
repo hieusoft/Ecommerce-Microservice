@@ -19,7 +19,7 @@ class BouquetUseCase {
         
         const bouquet = await this.bouquetRepository.createBouquet(dto);
         
-        // Sử dụng this.rabbitService thay vì global.rabbitService
+       
         if (this.rabbitService) {
             await this.rabbitService.publish('bouquetExchange', 'createBouquet', {
                 action: 'BOUQUET_CREATED',
@@ -43,7 +43,7 @@ class BouquetUseCase {
         
         const bouquet = await this.bouquetRepository.updateBouquet(id, dto);
         
-        // Sử dụng this.rabbitService
+
         if (this.rabbitService) {
             await this.rabbitService.publish('bouquetExchange', 'updateBouquet', {
                 action: 'BOUQUET_UPDATED',
@@ -78,7 +78,6 @@ class BouquetUseCase {
         
         const result = await this.bouquetRepository.deleteBouquet(id);
         
-        // Sử dụng this.rabbitService
         if (this.rabbitService && result) {
             await this.rabbitService.publish('bouquetExchange', 'deleteBouquet', {
                 action: 'BOUQUET_DELETED',

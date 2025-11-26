@@ -151,9 +151,19 @@ module.exports = {
       },
       Flower: {
         type: "object",
-        properties: { name: { type: "string" }, color: { type: "string" }, price: { type: "number" } },
+        properties: {
+          name: { type: "string" },
+          color: { type: "string" },
+          price: { type: "number" },
+          images: {
+            type: "array",
+            items: { type: "string", format: "byte" },
+            description: "List of images for flower (Base64 format)"
+          }
+        },
         required: ["name", "price"]
       },
+
       Occasion: { type: "object", properties: { name: { type: "string" }, description: { type: "string" } } },
       Greeting: { type: "object", properties: { text: { type: "string" }, occasionId: { type: "string" } }, required: ["text"] }
     }

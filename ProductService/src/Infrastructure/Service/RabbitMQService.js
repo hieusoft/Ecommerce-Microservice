@@ -2,7 +2,7 @@ const amqplib = require('amqplib');
 const IRabbitMqService = require('../../Application/Interfaces/IRabbitMqService');
 
 class RabbitMqService extends IRabbitMqService {
-    constructor(url) {
+    constructor(url = 'amqp://guest:guest@localhost:5672') {
         super();
         this.url = url;
         this.connection = null;
@@ -11,7 +11,10 @@ class RabbitMqService extends IRabbitMqService {
 
     async _getOrCreateChannel(key) {
         if (this.channels.has(key)) return this.channels.get(key);
-        if (!this.connection) this.connection = await amqplib.connect(this.url);
+
+        if (!this.connection)
+            this.connection = await amqplib.connect(this.url);
+
         const channel = await this.connection.createChannel();
         this.channels.set(key, channel);
         return channel;
@@ -24,7 +27,13 @@ class RabbitMqService extends IRabbitMqService {
 
     async declareQueueAndBind(queueName, exchangeName, routingKeys = []) {
         const channel = await this._getOrCreateChannel(`queue:${queueName}`);
-        await channel.assertQueue(queueName, { durable: true });
+
+        await channel.assertQueue(queueName, {
+            durable: true,
+            exclusive: false,
+            autoDelete: false
+        });
+
         for (const key of routingKeys) {
             await channel.bindQueue(queueName, exchangeName, key);
         }
@@ -32,16 +41,21 @@ class RabbitMqService extends IRabbitMqService {
 
     async publish(exchangeName, routingKey, message) {
         const channel = await this._getOrCreateChannel(`exchange:${exchangeName}`);
-        const buffer = Buffer.from(JSON.stringify(message));
-        channel.publish(exchangeName, routingKey, buffer, { persistent: true });
+
+        const body = Buffer.from(JSON.stringify(message));
+
+        channel.publish(exchangeName, routingKey, body, {
+            persistent: true
+        });
     }
 
     async consume(queueName, onMessage) {
         const channel = await this._getOrCreateChannel(`queue:${queueName}`);
-        await channel.consume(queueName, (msg) => {
-            if (msg !== null) {
-                const content = JSON.parse(msg.content.toString());
-                onMessage(content);
+
+        await channel.consume(queueName, msg => {
+            if (msg) {
+                const data = JSON.parse(msg.content.toString());
+                onMessage(data);
                 channel.ack(msg);
             }
         });
@@ -51,7 +65,9 @@ class RabbitMqService extends IRabbitMqService {
         for (const ch of this.channels.values()) {
             await ch.close();
         }
-        if (this.connection) await this.connection.close();
+        if (this.connection) {
+            await this.connection.close();
+        }
     }
 }
 

@@ -33,7 +33,7 @@ async function startServer() {
         });
         console.log('✓ MongoDB connected');
 
-        // Khởi tạo RabbitMQ service (không dùng global)
+       
         const rabbitService = new RabbitMqService(
             process.env.RABBITMQ_URL || 'amqp://guest:guest@localhost:5672'
         );
@@ -44,9 +44,31 @@ async function startServer() {
             'updateBouquet',
             'deleteBouquet'
         ]);
+
+        await rabbitService.declareExchange('flowerExchange', 'direct');
+        await rabbitService.declareQueueAndBind('flowerQueue', 'flowerExchange', [
+            'createFlower',
+            'updateFlower',
+            'deleteFlower'
+        ]);
+
+        await rabbitService.declareExchange('occasionExchange', 'direct');
+        await rabbitService.declareQueueAndBind('occasionQueue', 'occasionExchange', [
+            'createOccasion',
+            'updateOccasion',
+            'deleteOccasion'
+        ]);
+
+        await rabbitService.declareExchange('greetingExchange', 'direct');
+        await rabbitService.declareQueueAndBind('greetingQueue', 'greetingExchange', [
+            'createGreeting',
+            'updateGreeting',
+            'deleteGreeting'
+        ]);
+
         console.log('✓ RabbitMQ configured');
 
-        // Inject rabbitService vào từng route
+      
         app.use('/api/bouquets', BouquetRoutes(rabbitService));
         app.use('/api/flowers', FlowerRoutes(rabbitService));
         app.use('/api/occasions', OccasionRoutes(rabbitService));
@@ -58,7 +80,7 @@ async function startServer() {
             console.log(`✓ Server running on port ${PORT}`);
         });
 
-        // Graceful shutdown
+       
         const gracefulShutdown = async (signal) => {
             console.log(`\n${signal} received. Shutting down gracefully...`);
             try {
