@@ -1,11 +1,15 @@
 const express = require('express');
-const router = express.Router();
 const OccasionController = require('../Controllers/OccasionController');
-const occasionController = new OccasionController();
 
-router.post('/', occasionController.createOccasion);
-router.get('/:id', occasionController.getOccasionById);
-router.get('/', occasionController.getAllOccasions);
-router.put('/:id', occasionController.updateOccasion);
-router.delete('/:id', occasionController.deleteOccasion);
-module.exports = router;
+module.exports = (rabbitService) => {
+    const router = express.Router();
+    const occasionController = new OccasionController(rabbitService);
+
+    router.post('/', (req, res) => occasionController.createOccasion(req, res));
+    router.get('/:id', (req, res) => occasionController.getOccasionById(req, res));
+    router.get('/', (req, res) => occasionController.getAllOccasions(req, res));
+    router.put('/:id', (req, res) => occasionController.updateOccasion(req, res));
+    router.delete('/:id', (req, res) => occasionController.deleteOccasion(req, res));
+
+    return router;
+};

@@ -1,6 +1,7 @@
 class OccasionUseCase {
-    constructor(occasionRepository) {
+    constructor(occasionRepository,rabbitService) {
         this.occasionRepository = occasionRepository;
+        this.rabbitService = rabbitService;
     }
     async createOccasion(dto) {
         return await this.occasionRepository.createOccasion(dto);

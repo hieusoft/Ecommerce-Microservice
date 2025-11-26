@@ -12,8 +12,6 @@ const GreetingRoutes = require('./src/Api/routes/GreetingRouters');
 const RabbitMqService = require('./src/Infrastructure/Service/RabbitMQService');
 const swaggerDocs = require('./src/swagger');
 
-global.rabbitService = new RabbitMqService(process.env.RABBITMQ_URL || 'amqp://guest:guest@localhost:5672');
-
 const app = express();
 app.use(express.json());
 
@@ -35,43 +33,60 @@ async function startServer() {
         });
         console.log('✓ MongoDB connected');
 
-        // Setup RabbitMQ với global instance
-        await global.rabbitService.declareExchange('bouquetExchange', 'direct');
-        await global.rabbitService.declareQueueAndBind('bouquetQueue', 'bouquetExchange', [
+        // Khởi tạo RabbitMQ service (không dùng global)
+        const rabbitService = new RabbitMqService(
+            process.env.RABBITMQ_URL || 'amqp://guest:guest@localhost:5672'
+        );
+
+        await rabbitService.declareExchange('bouquetExchange', 'direct');
+        await rabbitService.declareQueueAndBind('bouquetQueue', 'bouquetExchange', [
             'createBouquet',
             'updateBouquet',
             'deleteBouquet'
         ]);
         console.log('✓ RabbitMQ configured');
 
-        app.use('/api/bouquets', BouquetRoutes);
-        app.use('/api/flowers', FlowerRoutes);
-        app.use('/api/occasions', OccasionRoutes);
-        app.use('/api/greetings', GreetingRoutes);
+        // Inject rabbitService vào từng route
+        app.use('/api/bouquets', BouquetRoutes(rabbitService));
+        app.use('/api/flowers', FlowerRoutes(rabbitService));
+        app.use('/api/occasions', OccasionRoutes(rabbitService));
+        app.use('/api/greetings', GreetingRoutes(rabbitService));
 
         swaggerDocs(app);
 
-        app.listen(PORT, () => {
+        const server = app.listen(PORT, () => {
             console.log(`✓ Server running on port ${PORT}`);
         });
+
+        // Graceful shutdown
+        const gracefulShutdown = async (signal) => {
+            console.log(`\n${signal} received. Shutting down gracefully...`);
+            try {
+                server.close(() => {
+                    console.log('✓ HTTP server closed');
+                });
+                
+                await rabbitService.close();
+                console.log('✓ RabbitMQ connection closed');
+                
+                await mongoose.connection.close();
+                console.log('✓ MongoDB connection closed');
+                
+                console.log('✓ Cleanup complete');
+                process.exit(0);
+            } catch (err) {
+                console.error('✗ Error during shutdown:', err);
+                process.exit(1);
+            }
+        };
+
+        process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+        process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 
     } catch (err) {
         console.error('✗ Server startup failed:', err);
         process.exit(1);
     }
 }
-
-process.on('SIGINT', async () => {
-    console.log('\nShutting down gracefully...');
-    try {
-        await global.rabbitService.close();
-        await mongoose.connection.close();
-        console.log('✓ Cleanup complete');
-        process.exit(0);
-    } catch (err) {
-        console.error('✗ Error during shutdown:', err);
-        process.exit(1);
-    }
-});
 
 startServer();

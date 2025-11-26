@@ -3,8 +3,8 @@ const RepositoryFactory = require('../../Infrastructure/Persistence/Factory/Repo
 const OccasionUseCase = require('../../Application/UseCases/OccasionUseCase');
 const occasionRepo = RepositoryFactory.occasion();
 class OccasionController {
-    constructor() {
-        this.occasionUseCase = new OccasionUseCase(occasionRepo);
+    constructor(rabbitService) {
+        this.occasionUseCase = new OccasionUseCase(occasionRepo,rabbitService);
     }
 
     createOccasion = async (req, res) => {

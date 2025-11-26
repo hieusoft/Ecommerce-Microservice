@@ -1,13 +1,15 @@
 const express = require('express');
-const router = express.Router();
-
 const FlowerController = require('../Controllers/FlowerController');
-const flowerController = new FlowerController();
 
-router.post('/', flowerController.createFlower);
-router.get('/:id', flowerController.getFlowerById);
-router.get('/', flowerController.getAllFlowers);
-router.put('/:id', flowerController.updateFlower);
-router.delete('/:id', flowerController.deleteFlower);
+module.exports = (rabbitService) => {
+    const router = express.Router();
+    const flowerController = new FlowerController(rabbitService);
 
-module.exports = router; 
+    router.post('/', (req, res) => flowerController.createFlower(req, res));
+    router.get('/:id', (req, res) => flowerController.getFlowerById(req, res));
+    router.get('/', (req, res) => flowerController.getAllFlowers(req, res));
+    router.put('/:id', (req, res) => flowerController.updateFlower(req, res));
+    router.delete('/:id', (req, res) => flowerController.deleteFlower(req, res));
+
+    return router;
+};

@@ -1,6 +1,7 @@
 class GreetingUseCase {
-    constructor (greetingRepository) {
+    constructor (greetingRepository, rabbitService) {
         this.greetingRepository = greetingRepository;
+        this.rabbitService = rabbitService;
     }
     async getGreetingById(id) {
         return await this.greetingRepository.getGreetingById(id);

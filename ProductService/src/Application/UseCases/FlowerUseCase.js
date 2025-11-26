@@ -1,5 +1,6 @@
 class FlowerUseCase {
-    constructor(flowerRepository) {
+    constructor(flowerRepository, rabbitService) {
+        this.rabbitService = rabbitService;
         this.flowerRepository = flowerRepository;
     }
     async createFlower(dto) {
@@ -14,9 +15,9 @@ class FlowerUseCase {
     }
     async updateFlower(id, dto) {
         return await this.flowerRepository.updateFlower(id, dto);
-    }   
+    }
     async deleteFlower(id) {
         return await this.flowerRepository.deleteFlower(id);
-    }   
+    }
 }
 module.exports = FlowerUseCase;

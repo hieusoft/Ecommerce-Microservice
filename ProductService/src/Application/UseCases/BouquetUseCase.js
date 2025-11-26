@@ -4,8 +4,9 @@ const path = require('path');
 const fs = require('fs');
 
 class BouquetUseCase {
-    constructor(bouquetRepository) {
+    constructor(bouquetRepository, rabbitService) {
         this.bouquetRepository = bouquetRepository;
+        this.rabbitService = rabbitService;
         this.imageService = new getImageService('bouquets');
     }
 
@@ -18,15 +19,17 @@ class BouquetUseCase {
         
         const bouquet = await this.bouquetRepository.createBouquet(dto);
         
-        
-        await global.rabbitService.publish('bouquetExchange', 'createBouquet', {
-            action: 'BOUQUET_CREATED',
-            bouquetId: bouquet._id,
-            name: bouquet.name,
-            price: bouquet.price,
-            images: bouquet.images,
-            timestamp: new Date()
-        });
+        // Sử dụng this.rabbitService thay vì global.rabbitService
+        if (this.rabbitService) {
+            await this.rabbitService.publish('bouquetExchange', 'createBouquet', {
+                action: 'BOUQUET_CREATED',
+                bouquetId: bouquet._id,
+                name: bouquet.name,
+                price: bouquet.price,
+                images: bouquet.images,
+                timestamp: new Date()
+            });
+        }
         
         return bouquet;
     }
@@ -40,12 +43,15 @@ class BouquetUseCase {
         
         const bouquet = await this.bouquetRepository.updateBouquet(id, dto);
         
-        await global.rabbitService.publish('bouquetExchange', 'updateBouquet', {
-            action: 'BOUQUET_UPDATED',
-            bouquetId: id,
-            updates: dto,
-            timestamp: new Date()
-        });
+        // Sử dụng this.rabbitService
+        if (this.rabbitService) {
+            await this.rabbitService.publish('bouquetExchange', 'updateBouquet', {
+                action: 'BOUQUET_UPDATED',
+                bouquetId: id,
+                updates: dto,
+                timestamp: new Date()
+            });
+        }
         
         return bouquet;
     }
@@ -72,11 +78,14 @@ class BouquetUseCase {
         
         const result = await this.bouquetRepository.deleteBouquet(id);
         
-        await global.rabbitService.publish('bouquetExchange', 'deleteBouquet', {
-            action: 'BOUQUET_DELETED',
-            bouquetId: id,
-            timestamp: new Date()
-        });
+        // Sử dụng this.rabbitService
+        if (this.rabbitService && result) {
+            await this.rabbitService.publish('bouquetExchange', 'deleteBouquet', {
+                action: 'BOUQUET_DELETED',
+                bouquetId: id,
+                timestamp: new Date()
+            });
+        }
         
         return result;
     }

@@ -4,8 +4,8 @@ const RepositoryFactory = require('../../Infrastructure/Persistence/Factory/Repo
 
 const flowerRepo = RepositoryFactory.flower();
 class FlowerController {
-    constructor() {
-        this.flowerUseCase = new FlowerUseCase(flowerRepo);
+    constructor(rabbitService) {
+        this.flowerUseCase = new FlowerUseCase(flowerRepo, rabbitService);
     }
     createFlower = async (req, res) => {
         try {

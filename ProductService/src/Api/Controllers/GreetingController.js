@@ -3,8 +3,8 @@ const RepositoryFactory = require('../../Infrastructure/Persistence/Factory/Repo
 const GreetingUseCase = require('../../Application/UseCases/GreetingUseCase');
 const greetingRepo = RepositoryFactory.greeting();
 class GreetingController {
-    constructor() {
-        this.greetingUseCase = new GreetingUseCase(greetingRepo);
+    constructor(rabbitService) {
+        this.greetingUseCase = new GreetingUseCase(greetingRepo,rabbitService);
     }
     createGreeting = async (req, res) => {
         try {

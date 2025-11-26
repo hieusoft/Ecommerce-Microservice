@@ -1,13 +1,13 @@
-
 const BouquetUseCase = require('../../Application/UseCases/BouquetUseCase');
 const BouquetDTO = require('../../Application/DTOs/Bouquet/BouquetDTO');
 const RepositoryFactory = require('../../Infrastructure/Persistence/Factory/RepositoryFactory');
 
 const bouquetRepo = RepositoryFactory.bouquet();
 
-class BouquetController{
-    constructor(){
-        this.bouquetUseCase = new BouquetUseCase(bouquetRepo);
+class BouquetController {
+    constructor(rabbitService) {
+       
+        this.bouquetUseCase = new BouquetUseCase(bouquetRepo, rabbitService);
     }
 
     createBouquet = async (req, res) => {
@@ -19,6 +19,7 @@ class BouquetController{
             res.status(400).json({ error: error.message });
         }
     }
+
     getBouquetById = async (req, res) => {
         try {
             const bouquet = await this.bouquetUseCase.getBouquetById(req.params.id);
@@ -39,6 +40,7 @@ class BouquetController{
             res.status(400).json({ error: error.message });
         }
     }
+
     updateBouquet = async (req, res) => {
         try {
             const updatedBouquet = await this.bouquetUseCase.updateBouquet(req.params.id, req.body);
@@ -62,6 +64,7 @@ class BouquetController{
             res.status(400).json({ error: error.message });
         }
     }
+
     searchBouquets = async (req, res) => {
         try {
             const qr = req.query;
@@ -71,6 +74,6 @@ class BouquetController{
             res.status(400).json({ error: error.message });
         }
     }
-
 }
+
 module.exports = BouquetController;

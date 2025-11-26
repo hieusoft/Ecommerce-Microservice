@@ -1,15 +1,18 @@
 const express = require('express');
-const router = express.Router();
-
 const BouquetController = require('../Controllers/BouquetController');
-const bouquetController = new BouquetController();
-
-router.get('/results', bouquetController.searchBouquets);
-router.post('/', bouquetController.createBouquet);
-router.get('/:id', bouquetController.getBouquetById);
-router.get('/', bouquetController.getAllBouquets);
-router.put('/:id', bouquetController.updateBouquet);
-router.delete('/:id', bouquetController.deleteBouquet);
 
 
-module.exports = router; 
+module.exports = (rabbitService) => {
+    const router = express.Router();
+
+    const bouquetController = new BouquetController(rabbitService);
+
+    router.get('/results', (req, res) => bouquetController.searchBouquets(req, res));
+    router.post('/', (req, res) => bouquetController.createBouquet(req, res));
+    router.get('/:id', (req, res) => bouquetController.getBouquetById(req, res));
+    router.get('/', (req, res) => bouquetController.getAllBouquets(req, res));
+    router.put('/:id', (req, res) => bouquetController.updateBouquet(req, res));
+    router.delete('/:id', (req, res) => bouquetController.deleteBouquet(req, res));
+
+    return router;
+};
