@@ -18,7 +18,7 @@ app.use(express.json());
 app.use('/uploads/bouquets', express.static(path.join(__dirname, 'uploads', 'bouquets')));
 
 app.use(cors({
-    origin: '*',          
+    origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -33,34 +33,34 @@ async function startServer() {
         });
         console.log('✓ MongoDB connected');
 
-       
+
         const rabbitService = new RabbitMqService(
             process.env.RABBITMQ_URL || 'amqp://guest:guest@localhost:5672'
         );
 
-        await rabbitService.declareExchange('bouquetExchange', 'direct');
-        await rabbitService.declareQueueAndBind('bouquetQueue', 'bouquetExchange', [
+        await rabbitService.declareExchange('product_event', 'direct');
+        await rabbitService.declareQueueAndBind('bouquetQueue', 'product_event', [
             'createBouquet',
             'updateBouquet',
             'deleteBouquet'
         ]);
 
-        await rabbitService.declareExchange('flowerExchange', 'direct');
-        await rabbitService.declareQueueAndBind('flowerQueue', 'flowerExchange', [
+
+        await rabbitService.declareQueueAndBind('flowerQueue', 'product_event', [
             'createFlower',
             'updateFlower',
             'deleteFlower'
         ]);
 
-        await rabbitService.declareExchange('occasionExchange', 'direct');
-        await rabbitService.declareQueueAndBind('occasionQueue', 'occasionExchange', [
+
+        await rabbitService.declareQueueAndBind('occasionQueue', 'product_event', [
             'createOccasion',
             'updateOccasion',
             'deleteOccasion'
         ]);
 
-        await rabbitService.declareExchange('greetingExchange', 'direct');
-        await rabbitService.declareQueueAndBind('greetingQueue', 'greetingExchange', [
+
+        await rabbitService.declareQueueAndBind('greetingQueue', 'product_event', [
             'createGreeting',
             'updateGreeting',
             'deleteGreeting'
@@ -68,7 +68,7 @@ async function startServer() {
 
         console.log('✓ RabbitMQ configured');
 
-      
+
         app.use('/api/bouquets', BouquetRoutes(rabbitService));
         app.use('/api/flowers', FlowerRoutes(rabbitService));
         app.use('/api/occasions', OccasionRoutes(rabbitService));
@@ -77,23 +77,23 @@ async function startServer() {
         swaggerDocs(app);
 
         const server = app.listen(PORT, () => {
-            console.log(`✓ Server running on port ${PORT}`);
+            console.log(`✓ Server running at http://localhost:${PORT}/api-docs`);
         });
 
-       
+
         const gracefulShutdown = async (signal) => {
             console.log(`\n${signal} received. Shutting down gracefully...`);
             try {
                 server.close(() => {
                     console.log('✓ HTTP server closed');
                 });
-                
+
                 await rabbitService.close();
                 console.log('✓ RabbitMQ connection closed');
-                
+
                 await mongoose.connection.close();
                 console.log('✓ MongoDB connection closed');
-                
+
                 console.log('✓ Cleanup complete');
                 process.exit(0);
             } catch (err) {

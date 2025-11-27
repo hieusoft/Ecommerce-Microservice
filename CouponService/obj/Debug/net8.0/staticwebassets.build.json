@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "LKzjpn2qlRkZJwCPS0eT1PUr4PLuAZT3hoPUzVSBWyU=",
+  "Source": "CouponService",
+  "BasePath": "_content/CouponService",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}

@@ -1,0 +1,153 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\JpLaptop\\Desktop\\project\\CouponService\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{B35296A8-75DF-4A04-B77A-9EDFD4C9DFF6}|CouponService.csproj|c:\\users\\jplaptop\\desktop\\project\\couponservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B35296A8-75DF-4A04-B77A-9EDFD4C9DFF6}|CouponService.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B35296A8-75DF-4A04-B77A-9EDFD4C9DFF6}|CouponService.csproj|c:\\users\\jplaptop\\desktop\\project\\couponservice\\service\\rabbitmqservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B35296A8-75DF-4A04-B77A-9EDFD4C9DFF6}|CouponService.csproj|solutionrelative:service\\rabbitmqservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B35296A8-75DF-4A04-B77A-9EDFD4C9DFF6}|CouponService.csproj|c:\\users\\jplaptop\\desktop\\project\\couponservice\\controllers\\couponcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B35296A8-75DF-4A04-B77A-9EDFD4C9DFF6}|CouponService.csproj|solutionrelative:controllers\\couponcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B35296A8-75DF-4A04-B77A-9EDFD4C9DFF6}|CouponService.csproj|c:\\users\\jplaptop\\desktop\\project\\couponservice\\models\\coupon.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B35296A8-75DF-4A04-B77A-9EDFD4C9DFF6}|CouponService.csproj|solutionrelative:models\\coupon.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B35296A8-75DF-4A04-B77A-9EDFD4C9DFF6}|CouponService.csproj|c:\\users\\jplaptop\\desktop\\project\\couponservice\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{B35296A8-75DF-4A04-B77A-9EDFD4C9DFF6}|CouponService.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B35296A8-75DF-4A04-B77A-9EDFD4C9DFF6}|CouponService.csproj|c:\\users\\jplaptop\\desktop\\project\\couponservice\\data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B35296A8-75DF-4A04-B77A-9EDFD4C9DFF6}|CouponService.csproj|solutionrelative:data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B35296A8-75DF-4A04-B77A-9EDFD4C9DFF6}|CouponService.csproj|c:\\users\\jplaptop\\desktop\\project\\couponservice\\couponservice.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{B35296A8-75DF-4A04-B77A-9EDFD4C9DFF6}|CouponService.csproj|solutionrelative:couponservice.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 1,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedHeight": 200,
+          "SelectedChildIndex": 3,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{0ad07096-bba9-4900-a651-0598d26f6d24}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "RabbitMqService.cs",
+              "DocumentMoniker": "C:\\Users\\JpLaptop\\Desktop\\project\\CouponService\\Service\\RabbitMqService.cs",
+              "RelativeDocumentMoniker": "Service\\RabbitMqService.cs",
+              "ToolTip": "C:\\Users\\JpLaptop\\Desktop\\project\\CouponService\\Service\\RabbitMqService.cs",
+              "RelativeToolTip": "Service\\RabbitMqService.cs",
+              "ViewState": "AgIAADIAAAAAAAAAAAAwwEQAAABaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-27T18:48:15.924Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "CouponController.cs",
+              "DocumentMoniker": "C:\\Users\\JpLaptop\\Desktop\\project\\CouponService\\Controllers\\CouponController.cs",
+              "RelativeDocumentMoniker": "Controllers\\CouponController.cs",
+              "ToolTip": "C:\\Users\\JpLaptop\\Desktop\\project\\CouponService\\Controllers\\CouponController.cs",
+              "RelativeToolTip": "Controllers\\CouponController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-27T18:32:53.091Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\JpLaptop\\Desktop\\project\\CouponService\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "C:\\Users\\JpLaptop\\Desktop\\project\\CouponService\\Program.cs*",
+              "RelativeToolTip": "Program.cs*",
+              "ViewState": "AgIAABwAAAAAAAAAAAAawCEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-27T12:38:16.953Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\JpLaptop\\Desktop\\project\\CouponService\\appsettings.json",
+              "RelativeDocumentMoniker": "appsettings.json",
+              "ToolTip": "C:\\Users\\JpLaptop\\Desktop\\project\\CouponService\\appsettings.json",
+              "RelativeToolTip": "appsettings.json",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAAgAAAB4AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-11-27T18:28:03.753Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Coupon.cs",
+              "DocumentMoniker": "C:\\Users\\JpLaptop\\Desktop\\project\\CouponService\\Models\\Coupon.cs",
+              "RelativeDocumentMoniker": "Models\\Coupon.cs",
+              "ToolTip": "C:\\Users\\JpLaptop\\Desktop\\project\\CouponService\\Models\\Coupon.cs",
+              "RelativeToolTip": "Models\\Coupon.cs",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAAABoAAAAbAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-27T18:26:24.551Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "AppDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\JpLaptop\\Desktop\\project\\CouponService\\Data\\AppDbContext.cs",
+              "RelativeDocumentMoniker": "Data\\AppDbContext.cs",
+              "ToolTip": "C:\\Users\\JpLaptop\\Desktop\\project\\CouponService\\Data\\AppDbContext.cs",
+              "RelativeToolTip": "Data\\AppDbContext.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-27T18:26:23.829Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "CouponService",
+              "DocumentMoniker": "C:\\Users\\JpLaptop\\Desktop\\project\\CouponService\\CouponService.csproj",
+              "RelativeDocumentMoniker": "CouponService.csproj",
+              "ToolTip": "C:\\Users\\JpLaptop\\Desktop\\project\\CouponService\\CouponService.csproj",
+              "RelativeToolTip": "CouponService.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-11-27T18:06:18.235Z",
+              "EditorCaption": ""
+            }
+          ]
+        },
+        {
+          "DockedHeight": 200,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

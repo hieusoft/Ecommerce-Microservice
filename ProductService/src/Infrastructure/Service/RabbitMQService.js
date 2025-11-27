@@ -2,7 +2,7 @@ const amqplib = require('amqplib');
 const IRabbitMqService = require('../../Application/Interfaces/IRabbitMqService');
 
 class RabbitMqService extends IRabbitMqService {
-    constructor(url = 'amqp://guest:guest@localhost:5672') {
+    constructor(url) {
         super();
         this.url = url;
         this.connection = null;

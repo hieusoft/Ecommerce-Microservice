@@ -5,7 +5,7 @@ class OccasionUseCase {
     }
     async createOccasion(dto) {
         const occasion = await this.occasionRepository.createOccasion(dto);
-        await this.rabbitService.publish('occasionExchange', 'createOccasion', {
+        await this.rabbitService.publish('product_event', 'createOccasion', {
             action: 'OCCASION_CREATED',
             occasionId: occasion._id,
             name: occasion.name,
@@ -22,7 +22,7 @@ class OccasionUseCase {
     }
     async updateOccasion(id, dto) {
         const occasion = await this.occasionRepository.createOccasion(dto);
-        await this.rabbitService.publish('occasionExchange', 'updateOccasion', {
+        await this.rabbitService.publish('product_event', 'updateOccasion', {
             action: 'OCCASION_UPDATED',
             occasionId: id,
             updates: dto,
@@ -31,7 +31,7 @@ class OccasionUseCase {
         return occasion;
     }
     async deleteOccasion(id) {
-        await this.rabbitService.publish('occasionExchange', 'deleteOccasion', {
+        await this.rabbitService.publish('product_event', 'deleteOccasion', {
             action: 'OCCASION_DELETED',
             occasionId: id,
             timestamp: new Date()

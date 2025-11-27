@@ -12,7 +12,7 @@ class GreetingUseCase {
     }
     async createGreeting(dto) {
         const greeting = await this.greetingRepository.createGreeting(dto)
-        await this.rabbitService.publish('greetingExchange', 'createGreeting', {
+        await this.rabbitService.publish('product_event', 'createGreeting', {
             action: 'GREETING_CREATED',
             greetingId: greeting._id,
             message: greeting.text,
@@ -23,7 +23,7 @@ class GreetingUseCase {
     async updateGreeting(id, dto) {
 
         const greeting =  await this.greetingRepository.updateGreeting(id, dto);
-        await this.rabbitService.publish('greetingExchange', 'updateGreeting', {
+        await this.rabbitService.publish('product_event', 'updateGreeting', {
             action: 'GREETING_UPDATED',
             greetingId: id,
             updates: dto,
@@ -34,7 +34,7 @@ class GreetingUseCase {
     async deleteGreeting(id) {
 
         const result = await this.greetingRepository.deleteGreeting(id);
-        await this.rabbitService.publish('greetingExchange', 'deleteGreeting', {
+        await this.rabbitService.publish('product_event', 'deleteGreeting', {
             action: 'GREETING_DELETED',
             greetingId: id,
             timestamp: new Date()

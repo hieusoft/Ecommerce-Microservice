@@ -21,7 +21,7 @@ class BouquetUseCase {
         
        
         if (this.rabbitService) {
-            await this.rabbitService.publish('bouquetExchange', 'createBouquet', {
+            await this.rabbitService.publish('product_event', 'createBouquet', {
                 action: 'BOUQUET_CREATED',
                 bouquetId: bouquet._id,
                 name: bouquet.name,
@@ -45,7 +45,7 @@ class BouquetUseCase {
         
 
         if (this.rabbitService) {
-            await this.rabbitService.publish('bouquetExchange', 'updateBouquet', {
+            await this.rabbitService.publish('product_event', 'updateBouquet', {
                 action: 'BOUQUET_UPDATED',
                 bouquetId: id,
                 updates: dto,
@@ -79,7 +79,7 @@ class BouquetUseCase {
         const result = await this.bouquetRepository.deleteBouquet(id);
         
         if (this.rabbitService && result) {
-            await this.rabbitService.publish('bouquetExchange', 'deleteBouquet', {
+            await this.rabbitService.publish('product_event', 'deleteBouquet', {
                 action: 'BOUQUET_DELETED',
                 bouquetId: id,
                 timestamp: new Date()

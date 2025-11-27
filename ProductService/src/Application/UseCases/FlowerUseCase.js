@@ -15,7 +15,7 @@ class FlowerUseCase {
             dto.images = await this.imageService.saveBase64Images(dto.images);
         }
         const flower = await this.flowerRepository.createFlower(dto)
-        await this.rabbitService.publish('flowerExchange', 'createFlower', {
+        await this.rabbitService.publish('product_event', 'createFlower', {
             action: 'FLOWER_CREATED',
             flowerId: flower._id,
             name: flower.name,
@@ -40,7 +40,7 @@ class FlowerUseCase {
             dto.images = await this.imageService.saveBase64Images(dto.images);
         }
 
-        await this.rabbitService.publish('flowerExchange', 'updateFlower', {
+        await this.rabbitService.publish('product_event', 'updateFlower', {
             action: 'FLOWER_UPDATED',
             flowerId: id,
             updates: dto,
@@ -63,7 +63,7 @@ class FlowerUseCase {
             }
         }
         const result = await this.flowerRepository.deleteFlower(id)
-        await this.rabbitService.publish('flowerExchange', 'deleteFlower', {
+        await this.rabbitService.publish('product_event', 'deleteFlower', {
             action: 'FLOWER_DELETED',
             flowerId: id,
             timestamp: new Date()
