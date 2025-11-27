@@ -48,8 +48,27 @@ namespace src.Services
             }
             if (dto.Users != null && dto.Users.Count > 0)
             {
-                _rabbitMqService.Publish("notification_events", "notification.email", dto);
+                foreach (var user in dto.Users)
+                {
+                    var message = new
+                    {
+                        NotificationId = notification.NotificationId,
+                        UserId = user.UserId,
+                        Email = user.Email,
+                        Name = user.Name,
+                        Title = notification.Title,
+                        Content = notification.Content
+                    };
+
+                    _rabbitMqService.Publish(
+                        exchangeName: "notification_events",
+                        routingKey: "notification.email",
+                        message: message 
+                    );
+                }
+
             }
+
             return new NotificationDto(notification);
             
         }

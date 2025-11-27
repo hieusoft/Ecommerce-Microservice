@@ -9,7 +9,7 @@ namespace src.Workers
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<NotificationWorker> _logger;
         private readonly IWorkerService _workerService;
-        // Danh sách queue mà worker sẽ lắng nghe
+      
         private readonly string[] _queues = new[]
         {
             "email.verification_requested_q",
@@ -18,8 +18,9 @@ namespace src.Workers
             "password.reset_completed_q",
             "notification.user_registered_q",
             "notification.user_banned_q",
-            "notification.user_unbanned_q"
-            // Có thể thêm queue khác ở đây (Push, InApp...)
+            "notification.user_unbanned_q",
+            "notification.email_q"
+            
         };
 
         public NotificationWorker(IServiceScopeFactory scopeFactory, ILogger<NotificationWorker> logger,IWorkerService workerService)

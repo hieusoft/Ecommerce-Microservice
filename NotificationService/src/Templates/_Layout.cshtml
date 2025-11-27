@@ -1,0 +1,107 @@
+﻿@* Layout email Razor *@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>@Model.Title</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #fdf6f0 0%, #f8e9e9 100%);
+            color: #333;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+        }
+
+        .header {
+            text-align: center;
+            padding: 30px 25px;
+            background: linear-gradient(135deg, #ff6b81 0%, #ff8fa3 100%);
+            color: white;
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: 0.8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .header::before {
+                content: '';
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+                animation: float 6s ease-in-out infinite;
+            }
+        
+
+        .content {
+            padding: 35px;
+            font-size: 16px;
+            line-height: 1.8;
+            color: #444;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, #ff6b81 0%, #ff8fa3 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 700;
+            margin-top: 25px;
+            box-shadow: 0 6px 20px rgba(255,107,129,0.4);
+            transition: all 0.4s ease;
+        }
+
+        .footer {
+            font-size: 13px;
+            color: #888;
+            text-align: center;
+            padding: 25px;
+            background: #f9f9f9;
+            border-top: 1px solid #eee;
+        }
+
+        .flower-img {
+            width: 100%;
+            max-height: 250px;
+            object-fit: cover;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">@Model.Title</div>
+        
+        <img src="https://sf-static.upanhlaylink.com/img/image_2025112731c39f643c61a9fa4c6ac5be7a4ab779.jpg" class="flower-img" alt="Banner" />
+       
+        <div class="content">
+            @RenderBody()
+        </div>
+        <div class="footer">
+            <p>© 2025 Snowell Electric. All rights reserved.</p>
+            <p>Đây là email tự động, vui lòng không trả lời trực tiếp.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -26,31 +26,24 @@ namespace src.Services.Messaging
             _httpClient.DefaultRequestHeaders.Add("api-key", apiKey);
         }
 
-        // Hàm mới trả về bool
-        public async Task<bool> SendEmailAsync(string to, string subject, string body)
+       
+        public async Task<bool> SendEmailAsync(string toEmail, string subject, string htmlBody)
         {
-            try
+            var payload = new
             {
-                var payload = new
-                {
-                    sender = new { name = _fromName, email = _fromEmail },
-                    to = new[] { new { email = to } },
-                    subject = subject,
-                    htmlContent = body
-                };
+                sender = new { email = _fromEmail, name = _fromName },
+                to = new[] { new { email = toEmail, name = toEmail } },
+                subject = subject,
+                htmlContent = htmlBody
+            };
 
-                var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
 
-                var response = await _httpClient.PostAsync("smtp/email", content);
-
-             
-                return response.IsSuccessStatusCode;
-            }
-            catch
-            {
-                // Gửi thất bại
-                return false;
-            }
+            var response = await _httpClient.PostAsync("https://api.brevo.com/v3/smtp/email", content);
+            string responseBody = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Status: {response.StatusCode}");
+            Console.WriteLine($"Response: {responseBody}");
+            return response.IsSuccessStatusCode;
         }
     }
 }

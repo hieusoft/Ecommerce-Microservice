@@ -21,10 +21,10 @@ builder.Services.AddScoped<INotificationDeliveryRepository, NotificationDelivery
 
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<IRabbitMqService, RabbitMqService>();
+builder.Services.AddSingleton<IRabbitMqService, RabbitMqService>();
+builder.Services.AddScoped<ITemplateService, TemplateService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IWorkerService, WorkerService>();
-
 
 builder.Services.AddScoped<NotificationWorker>();
 
@@ -59,10 +59,10 @@ app.UseAuthorization();
 app.MapControllers();
 
 
-using (var scope = app.Services.CreateScope())
-{
-    var worker = scope.ServiceProvider.GetRequiredService<NotificationWorker>();
-    worker.Start();
-}
+var scope1 = app.Services.CreateScope();
+
+var worker = scope1.ServiceProvider.GetRequiredService<NotificationWorker>();
+worker.Start();
+
 
 app.Run();
