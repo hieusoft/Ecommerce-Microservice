@@ -1,8 +1,8 @@
 ﻿using Application.Interfaces;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace Infrastructure.Services
@@ -10,7 +10,7 @@ namespace Infrastructure.Services
     public class RabbitMqService : IRabbitMqService, IDisposable
     {
         private readonly IConnection _connection;
-        private readonly Dictionary<string, IModel> _channels = new();
+        private IModel _channel;
 
         public RabbitMqService()
         {
@@ -32,29 +32,26 @@ namespace Infrastructure.Services
             }
         }
 
-        
-        private IModel GetOrCreateChannel(string key)
+        private IModel GetChannel()
         {
-            if (_channels.TryGetValue(key, out var ch))
-                return ch;
+            if (_channel != null)
+                return _channel;
 
-            var channel = _connection.CreateModel();
-            _channels[key] = channel;
-            return channel;
+            _channel = _connection.CreateModel();
+            return _channel;
         }
 
-     
+        
         public void DeclareExchange(string exchangeName, string exchangeType = ExchangeType.Direct)
         {
-            var channel = GetOrCreateChannel($"exchange:{exchangeName}");
+            var channel = GetChannel();
             channel.ExchangeDeclare(exchange: exchangeName, type: exchangeType, durable: true);
         }
 
-        public void DeclareQueueAndBind(string queueName, string exchangeName, IEnumerable<string> routingKeys)
+        public void DeclareQueueAndBind(string queueName, string exchangeName, string routingKey)
         {
-            var channel = GetOrCreateChannel($"queue:{queueName}");
+            var channel = GetChannel();
 
-          
             channel.QueueDeclare(
                 queue: queueName,
                 durable: true,
@@ -63,21 +60,41 @@ namespace Infrastructure.Services
                 arguments: null
             );
 
-         
-            foreach (var key in routingKeys)
-            {
-                channel.QueueBind(
-                    queue: queueName,
-                    exchange: exchangeName,
-                    routingKey: key
-                );
-            }
+            channel.QueueBind(
+                queue: queueName,
+                exchange: exchangeName,
+                routingKey: routingKey
+            );
         }
+        public void Subscribe(string queueName, Func<string, string, Task> onMessageAsync)
+        {
+            var consumer = new EventingBasicConsumer(_channel);
 
+            consumer.Received += async (model, ea) =>
+            {
+                var message = Encoding.UTF8.GetString(ea.Body.ToArray());
+                var routingKey = ea.RoutingKey;
+
+                try
+                {
+                    if (onMessageAsync != null)
+                        await onMessageAsync(message, routingKey);
+                    _channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
+                }
+                catch
+                {
+
+                    _channel.BasicNack(deliveryTag: ea.DeliveryTag, multiple: false, requeue: true);
+                }
+            };
+
+            _channel.BasicConsume(queue: queueName, autoAck: false, consumer: consumer);
+            Console.WriteLine($"Subscribed to queue {queueName}");
+        }
 
         public void Publish(string exchangeName, string routingKey, object message)
         {
-            var channel = GetOrCreateChannel($"exchange:{exchangeName}");
+            var channel = GetChannel();
 
             var json = JsonConvert.SerializeObject(message);
             var body = Encoding.UTF8.GetBytes(json);
@@ -93,19 +110,16 @@ namespace Infrastructure.Services
             );
         }
 
-
         public void Dispose()
         {
-            foreach (var channel in _channels.Values)
+            try
             {
-                channel?.Close();
-                channel?.Dispose();
+                _channel?.Close();
+                _channel?.Dispose();
+                _connection?.Close();
+                _connection?.Dispose();
             }
-
-            _connection?.Close();
-            _connection?.Dispose();
+            catch { }
         }
-
-      
     }
 }

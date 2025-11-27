@@ -132,42 +132,15 @@ using (var scope = app.Services.CreateScope())
  
     rabbitMqService.DeclareExchange("auth_events", RabbitMQ.Client.ExchangeType.Direct);
 
-    rabbitMqService.DeclareQueueAndBind(
-        queueName: "email_service_queue",
-        exchangeName: "auth_events",
-        routingKeys: new[]
-        {
-            "email.verification_requested",
-            "email.verified",
-            "password.reset_requested",
-            "password.reset_completed"
-        }
-    );
+    rabbitMqService.DeclareQueueAndBind("email.verification_requested_q", "auth_events", "email.verification_requested");
+    rabbitMqService.DeclareQueueAndBind("email.verified_q", "auth_events", "email.verified");
+    rabbitMqService.DeclareQueueAndBind("password.reset_requested_q", "auth_events", "password.reset_requested");
+    rabbitMqService.DeclareQueueAndBind("password.reset_completed_q", "auth_events", "password.reset_completed");
 
+    rabbitMqService.DeclareQueueAndBind("notification.user_registered_q", "auth_events", "user.registered");
+    rabbitMqService.DeclareQueueAndBind("notification.user_banned_q", "auth_events", "user.banned");
+    rabbitMqService.DeclareQueueAndBind("notification.user_unbanned_q", "auth_events", "user.unbanned");
 
-    rabbitMqService.DeclareQueueAndBind(
-        queueName: "notification_service_queue",
-        exchangeName: "auth_events",
-        routingKeys: new[]
-        {
-            "user.registered",
-            "user.banned",
-            "user.unbanned",
-        }
-    );
-
-
-    //rabbitMqService.DeclareQueueAndBind(
-    //    queueName: "user_history_queue",
-    //    exchangeName: "auth_events",
-    //    routingKeys: new[]
-    //    {
-    //        "user.registered",
-    //        "user.logged_in",
-    //        "user.banned",
-    //        "user.unbanned"
-    //    }
-    //);
 }
 
 

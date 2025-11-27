@@ -1,12 +1,28 @@
-﻿namespace src.DTOs
+﻿using src.Models;
+
+namespace src.DTOs
 {
     public class NotificationDto
     {
-        public int NotificationId { get; set; }
-        public string Title { get; set; } = null!;
-        public string Content { get; set; } = null!;
-        public DateTime CreatedAt { get; set; }
+      
+        public string Title { get; set; } = string.Empty;
+        public string Content { get; set; } = string.Empty;
         public int? CreatedBy { get; set; }
-        public bool IsSystem { get; set; }
+        public bool IsBroadcast { get; set; } = false;
+
+    
+        public List<UserDto> Users { get; set; } = new List<UserDto>();
+
+      
+        public NotificationDto(Notification n)
+        {
+        
+            Title = n.Title;
+            Content = n.Content;
+            CreatedBy = n.CreatedBy;
+            IsBroadcast = n.IsBroadcast;
+        }
+
+        public NotificationDto() { }
     }
 }

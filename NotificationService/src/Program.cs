@@ -3,47 +3,62 @@ using src.Data;
 using src.Interfaces;
 using src.Repositories;
 using src.Services;
+using src.Services.Messaging;
 using src.Workers;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
-// DbContextbuilder.Services.AddControllers();
+
 builder.Services.AddDbContext<NotificationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("NotificationDb")));
 
-// OpenAPI
-builder.Services.AddOpenApi();
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
-builder.Services.AddScoped<IUserNotificationRepository, UserNotificationRepository>();
+builder.Services.AddScoped<INotificationDeliveryRepository, NotificationDeliveryRepository>();
 
 builder.Services.AddScoped<INotificationService, NotificationService>();
-builder.Services.AddScoped<IUserNotificationService, UserNotificationService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IRabbitMqService, RabbitMqService>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IWorkerService, WorkerService>();
 
-// Worker
-builder.Services.AddSingleton<NotificationWorker>();
 
-// **Thêm authorization**
+builder.Services.AddScoped<NotificationWorker>();
+
+
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+using (var scope = app.Services.CreateScope())
+{
+    var rabbitMqService = scope.ServiceProvider.GetRequiredService<IRabbitMqService>();
 
-// OpenAPI
+
+    rabbitMqService.DeclareExchange("notification_events", RabbitMQ.Client.ExchangeType.Direct);
+
+    rabbitMqService.DeclareQueueAndBind("notification.email_q", "notification_events", "notification.email");
+
+
+}
+
+
+
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
 
-// Chỉ dùng Authorization khi đã AddAuthorization
 app.UseAuthorization();
 
 app.MapControllers();
 
-// Khởi động Worker
+
 using (var scope = app.Services.CreateScope())
 {
     var worker = scope.ServiceProvider.GetRequiredService<NotificationWorker>();

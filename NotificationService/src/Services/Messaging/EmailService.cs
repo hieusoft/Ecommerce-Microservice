@@ -4,7 +4,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace src.Services
+namespace src.Services.Messaging
 {
     public class EmailService : IEmailService
     {
@@ -26,22 +26,31 @@ namespace src.Services
             _httpClient.DefaultRequestHeaders.Add("api-key", apiKey);
         }
 
-        public async Task SendEmailAsync(string to, string subject, string body)
+        // Hàm mới trả về bool
+        public async Task<bool> SendEmailAsync(string to, string subject, string body)
         {
-            Console.WriteLine($"[Fake Email] To: {to}, Subject: {subject}");
+            try
+            {
+                var payload = new
+                {
+                    sender = new { name = _fromName, email = _fromEmail },
+                    to = new[] { new { email = to } },
+                    subject = subject,
+                    htmlContent = body
+                };
 
-            //var payload = new
-            //{
-            //    sender = new { name = _fromName, email = _fromEmail },
-            //    to = new[] { new { email = to } },
-            //    subject = subject,
-            //    htmlContent = body
-            //};
+                var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
 
-            //var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+                var response = await _httpClient.PostAsync("smtp/email", content);
 
-            //var response = await _httpClient.PostAsync("https://api.brevo.com/v3/smtp/email", content);
-            //response.EnsureSuccessStatusCode(); 
+             
+                return response.IsSuccessStatusCode;
+            }
+            catch
+            {
+                // Gửi thất bại
+                return false;
+            }
         }
     }
 }

@@ -10,21 +10,21 @@ namespace src.Data
 
         public DbSet<DeliveryMethod> DeliveryMethods { get; set; } = null!;
         public DbSet<Notification> Notifications { get; set; } = null!;
-        public DbSet<UserNotification> UserNotifications { get; set; } = null!;
+        public DbSet<NotificationDelivery> NotificationDelivery { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<UserNotification>()
+            modelBuilder.Entity<NotificationDelivery>()
                 .HasOne(un => un.Notification)
-                .WithMany(n => n.UserNotifications)
+                .WithMany(n => n.NotificationDeliveries)
                 .HasForeignKey(un => un.NotificationId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<UserNotification>()
+            modelBuilder.Entity<NotificationDelivery>()
                 .HasOne(un => un.DeliveryMethod)
-                .WithMany(dm => dm.UserNotifications)
+                .WithMany(dm => dm.NotificationDeliveries)
                 .HasForeignKey(un => un.DeliveryMethodId)
                 .OnDelete(DeleteBehavior.Restrict);
         }

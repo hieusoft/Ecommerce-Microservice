@@ -2,7 +2,7 @@
 using src.Interfaces;
 using System.Threading.Tasks;
 
-namespace src.Services
+namespace src.Services.Messaging
 {
     public class TemplateService : ITemplateService
     {

@@ -5,7 +5,7 @@
         void DeclareExchange(string exchangeName, string exchangeType);
 
 
-        void DeclareQueueAndBind(string queueName, string exchangeName, IEnumerable<string> routingKeys);
+        void DeclareQueueAndBind(string queueName, string exchangeName, string routingKeys);
 
         void Publish(string exchangeName, string routingKey, object message);
 

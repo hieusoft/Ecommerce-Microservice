@@ -8,5 +8,6 @@ namespace src.Interfaces
         Task<Notification?> GetByIdAsync(int notificationId);
         Task<List<Notification>> GetAllAsync();
         Task DeleteAsync(int notificationId);
+        Task<Notification> UpdateAsync(Notification notification);
     }
 }

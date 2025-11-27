@@ -1,11 +1,13 @@
-﻿using System.Threading.Tasks;
+﻿using Microsoft.EntityFrameworkCore.Storage;
+using System.Threading.Tasks;
 
 namespace src.Interfaces
 {
     public interface IUnitOfWork : IDisposable
     {
         INotificationRepository Notifications { get; }
-        IUserNotificationRepository UserNotifications { get; }
+        INotificationDeliveryRepository NotificationDelivery { get; }
+        Task<IDbContextTransaction> BeginTransactionAsync();
         Task<int> CommitAsync();
     }
 }

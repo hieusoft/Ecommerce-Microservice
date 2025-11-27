@@ -6,7 +6,7 @@
         public string Name { get; set; } = null!;
         public string? Description { get; set; }
 
-    
-        public ICollection<UserNotification> UserNotifications { get; set; } = new List<UserNotification>();
+      
+        public ICollection<NotificationDelivery> NotificationDeliveries { get; set; } = new List<NotificationDelivery>();
     }
 }

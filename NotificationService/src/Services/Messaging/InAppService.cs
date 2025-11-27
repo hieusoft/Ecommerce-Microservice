@@ -1,6 +1,6 @@
 ﻿using src.Interfaces;
 
-namespace src.Services
+namespace src.Services.Messaging
 {
     public class InAppService : IInAppService
     {

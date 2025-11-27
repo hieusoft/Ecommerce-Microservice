@@ -3,6 +3,7 @@ using src.Interfaces;
 using src.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace src.Repositories
@@ -16,15 +17,12 @@ namespace src.Repositories
             _context = context;
         }
 
-     
         public async Task<Notification> AddAsync(Notification notification)
         {
             _context.Notifications.Add(notification);
-            await _context.SaveChangesAsync(); 
-            return notification;
+            return notification; 
         }
 
-      
         public async Task<Notification?> GetByIdAsync(int notificationId)
         {
             return await _context.Notifications
@@ -38,7 +36,12 @@ namespace src.Repositories
                 .ToListAsync();
         }
 
-      
+        public async Task<Notification> UpdateAsync(Notification notification)
+        {
+            _context.Notifications.Update(notification);
+            return notification; 
+        }
+
         public async Task DeleteAsync(int notificationId)
         {
             var entity = await _context.Notifications
@@ -47,7 +50,7 @@ namespace src.Repositories
             if (entity != null)
             {
                 _context.Notifications.Remove(entity);
-                await _context.SaveChangesAsync();
+                
             }
         }
     }
