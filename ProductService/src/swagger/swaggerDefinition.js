@@ -3,7 +3,7 @@ module.exports = {
   info: {
     title: "Product Service API",
     version: "1.0.0",
-    description: "API documentation for Product Service (Node.js + MongoDB) with Base64 image upload",
+    description: "API documentation for Product Service (Node.js + MongoDB) with Base64 image upload and JWT Authorization",
   },
   servers: [
     { url: "http://localhost:5000", description: "Local server" }
@@ -15,6 +15,7 @@ module.exports = {
       get: {
         tags: ["Bouquet"],
         summary: "Search bouquets with multiple filters",
+        security: [{ bearerAuth: [] }], // login required
         parameters: [
           { name: "search_query", in: "query", schema: { type: "string" }, description: "Search term (name, flower name/color, occasion name)" },
           { name: "name", in: "query", schema: { type: "string" }, description: "Bouquet name" },
@@ -51,7 +52,9 @@ module.exports = {
                 }
               }
             }
-          }
+          },
+          401: { description: "Unauthorized - missing/invalid token" },
+          403: { description: "Forbidden - role not allowed" }
         }
       }
     },
@@ -59,19 +62,24 @@ module.exports = {
     "/api/bouquets": {
       get: {
         tags: ["Bouquet"],
-        summary: "Get all bouquets",
-        responses: { 200: { description: "List of bouquets", content: { "application/json": { schema: { type: "array", items: { $ref: "#/components/schemas/Bouquet" } } } } } }
+        summary: "Get all bouquets (public)",
+        responses: {
+          200: { description: "List of bouquets", content: { "application/json": { schema: { type: "array", items: { $ref: "#/components/schemas/Bouquet" } } } } }
+        }
       },
       post: {
         tags: ["Bouquet"],
-        summary: "Create a new bouquet",
+        summary: "Create a new bouquet (admin only)",
+        security: [{ bearerAuth: [] }],
         requestBody: {
           required: true,
-          content: {
-            "application/json": { schema: { $ref: "#/components/schemas/Bouquet" } }
-          }
+          content: { "application/json": { schema: { $ref: "#/components/schemas/Bouquet" } } }
         },
-        responses: { 201: { description: "Bouquet created", content: { "application/json": { schema: { $ref: "#/components/schemas/Bouquet" } } } } }
+        responses: {
+          201: { description: "Bouquet created", content: { "application/json": { schema: { $ref: "#/components/schemas/Bouquet" } } } },
+          401: { description: "Unauthorized" },
+          403: { description: "Forbidden - admin only" }
+        }
       }
     },
 
@@ -79,59 +87,93 @@ module.exports = {
       get: {
         tags: ["Bouquet"],
         summary: "Get bouquet by ID",
+        security: [{ bearerAuth: [] }],
         parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
-        responses: { 200: { description: "Bouquet object", content: { "application/json": { schema: { $ref: "#/components/schemas/Bouquet" } } } }, 404: { description: "Not found" } }
+        responses: {
+          200: { description: "Bouquet object", content: { "application/json": { schema: { $ref: "#/components/schemas/Bouquet" } } } },
+          401: { description: "Unauthorized" },
+          404: { description: "Not found" }
+        }
       },
       put: {
         tags: ["Bouquet"],
-        summary: "Update bouquet by ID",
+        summary: "Update bouquet by ID (admin only)",
+        security: [{ bearerAuth: [] }],
         parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
         requestBody: { required: true, content: { "application/json": { schema: { $ref: "#/components/schemas/Bouquet" } } } },
-        responses: { 200: { description: "Bouquet updated", content: { "application/json": { schema: { $ref: "#/components/schemas/Bouquet" } } } }, 404: { description: "Not found" } }
+        responses: {
+          200: { description: "Bouquet updated" },
+          401: { description: "Unauthorized" },
+          403: { description: "Forbidden - admin only" },
+          404: { description: "Not found" }
+        }
       },
       delete: {
         tags: ["Bouquet"],
-        summary: "Delete bouquet by ID",
+        summary: "Delete bouquet by ID (admin only)",
+        security: [{ bearerAuth: [] }],
         parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
-        responses: { 200: { description: "Bouquet deleted" }, 404: { description: "Not found" } }
+        responses: {
+          200: { description: "Bouquet deleted" },
+          401: { description: "Unauthorized" },
+          403: { description: "Forbidden - admin only" },
+          404: { description: "Not found" }
+        }
       }
     },
 
     /* -------------------- FLOWERS -------------------- */
     "/api/flowers": {
-      get: { tags: ["Flower"], summary: "Get all flowers", responses: { 200: { description: "List of flowers" } } },
-      post: { tags: ["Flower"], summary: "Create flower", requestBody: { required: true, content: { "application/json": { schema: { $ref: "#/components/schemas/Flower" } } } }, responses: { 201: { description: "Flower created" } } }
+      get: {
+        tags: ["Flower"],
+        summary: "Get all flowers (public)",
+        responses: { 200: { description: "List of flowers" } }
+      },
+      post: {
+        tags: ["Flower"],
+        summary: "Create flower (admin only)",
+        security: [{ bearerAuth: [] }],
+        requestBody: { required: true, content: { "application/json": { schema: { $ref: "#/components/schemas/Flower" } } } },
+        responses: { 201: { description: "Flower created" }, 401: { description: "Unauthorized" }, 403: { description: "Forbidden - admin only" } }
+      }
     },
     "/api/flowers/{id}": {
-      get: { tags: ["Flower"], summary: "Get flower by ID", parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], responses: { 200: { description: "Flower object" }, 404: { description: "Not found" } } },
-      put: { tags: ["Flower"], summary: "Update flower", parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], requestBody: { required: true, content: { "application/json": { schema: { $ref: "#/components/schemas/Flower" } } } }, responses: { 200: { description: "Flower updated" }, 404: { description: "Not found" } } },
-      delete: { tags: ["Flower"], summary: "Delete flower", parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], responses: { 200: { description: "Flower deleted" }, 404: { description: "Not found" } } }
+      get: { tags: ["Flower"], summary: "Get flower by ID", security: [{ bearerAuth: [] }], parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], responses: { 200: { description: "Flower object" }, 401: { description: "Unauthorized" }, 404: { description: "Not found" } } },
+      put: { tags: ["Flower"], summary: "Update flower (admin only)", security: [{ bearerAuth: [] }], parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], requestBody: { required: true, content: { "application/json": { schema: { $ref: "#/components/schemas/Flower" } } } }, responses: { 200: { description: "Flower updated" }, 401: { description: "Unauthorized" }, 403: { description: "Forbidden - admin only" }, 404: { description: "Not found" } } },
+      delete: { tags: ["Flower"], summary: "Delete flower (admin only)", security: [{ bearerAuth: [] }], parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], responses: { 200: { description: "Flower deleted" }, 401: { description: "Unauthorized" }, 403: { description: "Forbidden - admin only" }, 404: { description: "Not found" } } }
     },
 
     /* -------------------- OCCASIONS -------------------- */
     "/api/occasions": {
-      get: { tags: ["Occasion"], summary: "Get all occasions", responses: { 200: { description: "List of occasions" } } },
-      post: { tags: ["Occasion"], summary: "Create occasion", requestBody: { required: true, content: { "application/json": { schema: { $ref: "#/components/schemas/Occasion" } } } }, responses: { 201: { description: "Occasion created" } } }
+      get: { tags: ["Occasion"], summary: "Get all occasions (public)", responses: { 200: { description: "List of occasions" } } },
+      post: { tags: ["Occasion"], summary: "Create occasion (admin only)", security: [{ bearerAuth: [] }], requestBody: { required: true, content: { "application/json": { schema: { $ref: "#/components/schemas/Occasion" } } } }, responses: { 201: { description: "Occasion created" }, 401: { description: "Unauthorized" }, 403: { description: "Forbidden - admin only" } } }
     },
     "/api/occasions/{id}": {
-      get: { tags: ["Occasion"], summary: "Get occasion by ID", parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], responses: { 200: { description: "Occasion object" }, 404: { description: "Not found" } } },
-      put: { tags: ["Occasion"], summary: "Update occasion", parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], requestBody: { required: true, content: { "application/json": { schema: { $ref: "#/components/schemas/Occasion" } } } }, responses: { 200: { description: "Occasion updated" } } },
-      delete: { tags: ["Occasion"], summary: "Delete occasion", parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], responses: { 200: { description: "Occasion deleted" } } }
+      get: { tags: ["Occasion"], summary: "Get occasion by ID", security: [{ bearerAuth: [] }], parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], responses: { 200: { description: "Occasion object" }, 401: { description: "Unauthorized" }, 404: { description: "Not found" } } },
+      put: { tags: ["Occasion"], summary: "Update occasion (admin only)", security: [{ bearerAuth: [] }], parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], requestBody: { required: true, content: { "application/json": { schema: { $ref: "#/components/schemas/Occasion" } } } }, responses: { 200: { description: "Occasion updated" }, 401: { description: "Unauthorized" }, 403: { description: "Forbidden - admin only" } } },
+      delete: { tags: ["Occasion"], summary: "Delete occasion (admin only)", security: [{ bearerAuth: [] }], parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], responses: { 200: { description: "Occasion deleted" }, 401: { description: "Unauthorized" }, 403: { description: "Forbidden - admin only" } } }
     },
 
     /* -------------------- GREETINGS -------------------- */
     "/api/greetings": {
-      get: { tags: ["Greeting"], summary: "Get all greetings", responses: { 200: { description: "List of greetings" } } },
-      post: { tags: ["Greeting"], summary: "Create greeting", requestBody: { required: true, content: { "application/json": { schema: { $ref: "#/components/schemas/Greeting" } } } }, responses: { 201: { description: "Greeting created" } } }
+      get: { tags: ["Greeting"], summary: "Get all greetings (public)", responses: { 200: { description: "List of greetings" } } },
+      post: { tags: ["Greeting"], summary: "Create greeting (admin only)", security: [{ bearerAuth: [] }], requestBody: { required: true, content: { "application/json": { schema: { $ref: "#/components/schemas/Greeting" } } } }, responses: { 201: { description: "Greeting created" }, 401: { description: "Unauthorized" }, 403: { description: "Forbidden - admin only" } } }
     },
     "/api/greetings/{id}": {
-      get: { tags: ["Greeting"], summary: "Get greeting by ID", parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], responses: { 200: { description: "Greeting object" }, 404: { description: "Not found" } } },
-      put: { tags: ["Greeting"], summary: "Update greeting", parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], requestBody: { required: true, content: { "application/json": { schema: { $ref: "#/components/schemas/Greeting" } } } }, responses: { 200: { description: "Greeting updated" } } },
-      delete: { tags: ["Greeting"], summary: "Delete greeting", parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], responses: { 200: { description: "Greeting deleted" } } }
+      get: { tags: ["Greeting"], summary: "Get greeting by ID", security: [{ bearerAuth: [] }], parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], responses: { 200: { description: "Greeting object" }, 401: { description: "Unauthorized" }, 404: { description: "Not found" } } },
+      put: { tags: ["Greeting"], summary: "Update greeting (admin only)", security: [{ bearerAuth: [] }], parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], requestBody: { required: true, content: { "application/json": { schema: { $ref: "#/components/schemas/Greeting" } } } }, responses: { 200: { description: "Greeting updated" }, 401: { description: "Unauthorized" }, 403: { description: "Forbidden - admin only" } } },
+      delete: { tags: ["Greeting"], summary: "Delete greeting (admin only)", security: [{ bearerAuth: [] }], parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], responses: { 200: { description: "Greeting deleted" }, 401: { description: "Unauthorized" }, 403: { description: "Forbidden - admin only" } } }
     }
   },
 
   components: {
+    securitySchemes: {
+      bearerAuth: {
+        type: "http",
+        scheme: "bearer",
+        bearerFormat: "JWT"
+      }
+    },
     schemas: {
       FlowerRef: {
         type: "object",
@@ -163,7 +205,6 @@ module.exports = {
         },
         required: ["name", "price"]
       },
-
       Occasion: { type: "object", properties: { name: { type: "string" }, description: { type: "string" } } },
       Greeting: { type: "object", properties: { text: { type: "string" }, occasionId: { type: "string" } }, required: ["text"] }
     }

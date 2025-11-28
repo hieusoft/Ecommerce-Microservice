@@ -16,6 +16,7 @@ const app = express();
 app.use(express.json());
 
 app.use('/uploads/bouquets', express.static(path.join(__dirname, 'uploads', 'bouquets')));
+app.use('/uploads/flowers', express.static(path.join(__dirname, 'uploads', 'flowers')));
 
 app.use(cors({
     origin: '*',

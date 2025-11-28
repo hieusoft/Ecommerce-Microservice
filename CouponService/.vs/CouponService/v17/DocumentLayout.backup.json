@@ -7,16 +7,16 @@
       "RelativeMoniker": "D:0:0:{B35296A8-75DF-4A04-B77A-9EDFD4C9DFF6}|CouponService.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{B35296A8-75DF-4A04-B77A-9EDFD4C9DFF6}|CouponService.csproj|c:\\users\\jplaptop\\desktop\\project\\couponservice\\service\\rabbitmqservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B35296A8-75DF-4A04-B77A-9EDFD4C9DFF6}|CouponService.csproj|solutionrelative:service\\rabbitmqservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{B35296A8-75DF-4A04-B77A-9EDFD4C9DFF6}|CouponService.csproj|c:\\users\\jplaptop\\desktop\\project\\couponservice\\controllers\\couponcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{B35296A8-75DF-4A04-B77A-9EDFD4C9DFF6}|CouponService.csproj|solutionrelative:controllers\\couponcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{B35296A8-75DF-4A04-B77A-9EDFD4C9DFF6}|CouponService.csproj|c:\\users\\jplaptop\\desktop\\project\\couponservice\\models\\coupon.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{B35296A8-75DF-4A04-B77A-9EDFD4C9DFF6}|CouponService.csproj|solutionrelative:models\\coupon.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B35296A8-75DF-4A04-B77A-9EDFD4C9DFF6}|CouponService.csproj|c:\\users\\jplaptop\\desktop\\project\\couponservice\\service\\rabbitmqservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B35296A8-75DF-4A04-B77A-9EDFD4C9DFF6}|CouponService.csproj|solutionrelative:service\\rabbitmqservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{B35296A8-75DF-4A04-B77A-9EDFD4C9DFF6}|CouponService.csproj|c:\\users\\jplaptop\\desktop\\project\\couponservice\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
@@ -46,26 +46,26 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "RabbitMqService.cs",
               "DocumentMoniker": "C:\\Users\\JpLaptop\\Desktop\\project\\CouponService\\Service\\RabbitMqService.cs",
               "RelativeDocumentMoniker": "Service\\RabbitMqService.cs",
               "ToolTip": "C:\\Users\\JpLaptop\\Desktop\\project\\CouponService\\Service\\RabbitMqService.cs",
               "RelativeToolTip": "Service\\RabbitMqService.cs",
-              "ViewState": "AgIAADIAAAAAAAAAAAAwwEQAAABaAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAARAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-27T18:48:15.924Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 1,
               "Title": "CouponController.cs",
               "DocumentMoniker": "C:\\Users\\JpLaptop\\Desktop\\project\\CouponService\\Controllers\\CouponController.cs",
               "RelativeDocumentMoniker": "Controllers\\CouponController.cs",
               "ToolTip": "C:\\Users\\JpLaptop\\Desktop\\project\\CouponService\\Controllers\\CouponController.cs",
               "RelativeToolTip": "Controllers\\CouponController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAEgAAAAAAAAAAAAqwBMAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-27T18:32:53.091Z",
               "EditorCaption": ""
@@ -76,9 +76,9 @@
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\JpLaptop\\Desktop\\project\\CouponService\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
-              "ToolTip": "C:\\Users\\JpLaptop\\Desktop\\project\\CouponService\\Program.cs*",
-              "RelativeToolTip": "Program.cs*",
-              "ViewState": "AgIAABwAAAAAAAAAAAAawCEAAAAAAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\JpLaptop\\Desktop\\project\\CouponService\\Program.cs",
+              "RelativeToolTip": "Program.cs",
+              "ViewState": "AgIAABwAAAAAAAAAAAAgwBUAAAArAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-27T12:38:16.953Z",
               "EditorCaption": ""
@@ -93,18 +93,17 @@
               "RelativeToolTip": "appsettings.json",
               "ViewState": "AgIAAAYAAAAAAAAAAAAAAAgAAAB4AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-11-27T18:28:03.753Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-27T18:28:03.753Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 2,
               "Title": "Coupon.cs",
               "DocumentMoniker": "C:\\Users\\JpLaptop\\Desktop\\project\\CouponService\\Models\\Coupon.cs",
               "RelativeDocumentMoniker": "Models\\Coupon.cs",
               "ToolTip": "C:\\Users\\JpLaptop\\Desktop\\project\\CouponService\\Models\\Coupon.cs",
               "RelativeToolTip": "Models\\Coupon.cs",
-              "ViewState": "AgIAAAkAAAAAAAAAAAAAABoAAAAbAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABoAAAAbAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-27T18:26:24.551Z",
               "EditorCaption": ""
@@ -119,21 +118,19 @@
               "RelativeToolTip": "Data\\AppDbContext.cs",
               "ViewState": "AgIAAAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-27T18:26:23.829Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-27T18:26:23.829Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 6,
-              "Title": "CouponService",
+              "Title": "CouponService.csproj",
               "DocumentMoniker": "C:\\Users\\JpLaptop\\Desktop\\project\\CouponService\\CouponService.csproj",
               "RelativeDocumentMoniker": "CouponService.csproj",
               "ToolTip": "C:\\Users\\JpLaptop\\Desktop\\project\\CouponService\\CouponService.csproj",
               "RelativeToolTip": "CouponService.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-11-27T18:06:18.235Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-27T18:06:18.235Z"
             }
           ]
         },
