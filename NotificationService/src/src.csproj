@@ -8,11 +8,15 @@
 
   <ItemGroup>
     <Content Remove="Templates\email_promotion.cshtml" />
+    <Content Remove="Templates\email_reset_password.cshtml" />
+    <Content Remove="Templates\email_verify_email.cshtml" />
     <Content Remove="Templates\layout.cshtml" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="Templates\email_promotion.cshtml" />
+    <None Include="Templates\email_reset_password.cshtml" />
+    <None Include="Templates\email_verify_email.cshtml" />
     <None Include="Templates\layout.cshtml" />
   </ItemGroup>
 <PropertyGroup>

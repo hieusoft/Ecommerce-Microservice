@@ -24,7 +24,7 @@ namespace Api.Controllers
             try
             {
                 await _authUseCases.RegisterAsync(dto);
-                return Ok(new { message = "User registered successfully" });
+                return Ok(new { message = "Please verify your email!" });
             }
             catch (Exception ex)
             {

@@ -1,0 +1,44 @@
+﻿@model dynamic
+@{
+    Layout = "_Layout.cshtml";
+}
+
+<div class="content-box">
+
+    <div class="verification-box">
+
+
+        <p style="margin-bottom: 20px; font-size: 16px; color: #666;">
+            Hello <strong>@Model.Name</strong>,<br><br>
+            Congratulations! Your email address has been successfully verified. Your account is now fully active.
+        </p>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="@Model.Token" class="btn" style="font-size: 18px; padding: 18px 40px;">
+                Start Shopping
+            </a>
+        </div>
+    </div>
+
+    <div class="instructions">
+        <h3 style="color: #BA68C8; margin-bottom: 15px;">What's Next?</h3>
+        <p style="margin: 5px 0; color: #666;">
+            Now that you are a verified member, you can:
+        </p>
+
+        <ul style="margin: 10px 0; color: #666; padding-left: 20px; line-height: 1.6;">
+            <li>Complete your personal profile.</li>
+            <li>Track your orders easily.</li>
+            <li>Enjoy exclusive member offers.</li>
+        </ul>
+
+        <p style="margin-top: 20px; color: #666;">
+            If you have any questions, feel free to reply to this email or contact our support team.
+        </p>
+    </div>
+
+    <p style="margin-top: 30px;">
+        Happy Shopping,<br>
+        <strong>The Bloom & Blossom Team</strong>
+    </p>
+</div>

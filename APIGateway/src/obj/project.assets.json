@@ -205,6 +205,52 @@
           }
         }
       },
+      "Ocelot.Provider.Polly/24.0.0": {
+        "type": "package",
+        "dependencies": {
+          "Ocelot": "24.0.0",
+          "Polly": "8.5.2"
+        },
+        "compile": {
+          "lib/net9.0/Ocelot.Provider.Polly.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net9.0/Ocelot.Provider.Polly.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Polly/8.5.2": {
+        "type": "package",
+        "dependencies": {
+          "Polly.Core": "8.5.2"
+        },
+        "compile": {
+          "lib/net6.0/Polly.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0/Polly.dll": {
+            "related": ".pdb;.xml"
+          }
+        }
+      },
+      "Polly.Core/8.5.2": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/Polly.Core.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Polly.Core.dll": {
+            "related": ".pdb;.xml"
+          }
+        }
+      },
       "Swashbuckle.AspNetCore/10.0.1": {
         "type": "package",
         "dependencies": {
@@ -792,6 +838,76 @@
         "ocelot_icon.png"
       ]
     },
+    "Ocelot.Provider.Polly/24.0.0": {
+      "sha512": "+eiWOlTR/mqeILxcPpIEHiKkHtUxU3c8u42PxTfwSFur2ZfrVwzGdF1jyBiMNUdTvCPeAAlM6Kv1C5fNEMvvlg==",
+      "type": "package",
+      "path": "ocelot.provider.polly/24.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.md",
+        "lib/net8.0/Ocelot.Provider.Polly.dll",
+        "lib/net8.0/Ocelot.Provider.Polly.xml",
+        "lib/net9.0/Ocelot.Provider.Polly.dll",
+        "lib/net9.0/Ocelot.Provider.Polly.xml",
+        "ocelot.provider.polly.24.0.0.nupkg.sha512",
+        "ocelot.provider.polly.nuspec",
+        "ocelot_icon.png"
+      ]
+    },
+    "Polly/8.5.2": {
+      "sha512": "vbXsGgkG86nG+TOwY+SmtrGrRHmHH0DQaxtILx//d3Dz/ocJ8izSNYzdvU2gEtWa/LDD8zJLvD3HdjEkdlvkhg==",
+      "type": "package",
+      "path": "polly/8.5.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net462/Polly.dll",
+        "lib/net462/Polly.pdb",
+        "lib/net462/Polly.xml",
+        "lib/net472/Polly.dll",
+        "lib/net472/Polly.pdb",
+        "lib/net472/Polly.xml",
+        "lib/net6.0/Polly.dll",
+        "lib/net6.0/Polly.pdb",
+        "lib/net6.0/Polly.xml",
+        "lib/netstandard2.0/Polly.dll",
+        "lib/netstandard2.0/Polly.pdb",
+        "lib/netstandard2.0/Polly.xml",
+        "package-icon.png",
+        "package-readme.md",
+        "polly.8.5.2.nupkg.sha512",
+        "polly.nuspec"
+      ]
+    },
+    "Polly.Core/8.5.2": {
+      "sha512": "1MJKdxv4zwDmiWvYvVN24DsrWUfgQ4F83voH8bhbtLMdPuGy8CfTUzsgQhvyrl1a7hrM6f/ydwLVdVUI0xooUw==",
+      "type": "package",
+      "path": "polly.core/8.5.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net462/Polly.Core.dll",
+        "lib/net462/Polly.Core.pdb",
+        "lib/net462/Polly.Core.xml",
+        "lib/net472/Polly.Core.dll",
+        "lib/net472/Polly.Core.pdb",
+        "lib/net472/Polly.Core.xml",
+        "lib/net6.0/Polly.Core.dll",
+        "lib/net6.0/Polly.Core.pdb",
+        "lib/net6.0/Polly.Core.xml",
+        "lib/net8.0/Polly.Core.dll",
+        "lib/net8.0/Polly.Core.pdb",
+        "lib/net8.0/Polly.Core.xml",
+        "lib/netstandard2.0/Polly.Core.dll",
+        "lib/netstandard2.0/Polly.Core.pdb",
+        "lib/netstandard2.0/Polly.Core.xml",
+        "package-icon.png",
+        "package-readme.md",
+        "polly.core.8.5.2.nupkg.sha512",
+        "polly.core.nuspec"
+      ]
+    },
     "Swashbuckle.AspNetCore/10.0.1": {
       "sha512": "177+JNAV5TNvy8gLCdrcWBY9n2jdkxiHQDY4vhaExeqUpKrOqDatCcm/kW3kze60GqfnZ2NobD/IKiAPOL+CEw==",
       "type": "package",
@@ -875,27 +991,28 @@
       "Microsoft.AspNetCore.OpenApi >= 10.0.0",
       "Microsoft.Extensions.Configuration.Json >= 10.0.0",
       "Ocelot >= 24.0.1",
+      "Ocelot.Provider.Polly >= 24.0.0",
       "Swashbuckle.AspNetCore >= 10.0.1"
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Admin\\.nuget\\packages\\": {},
+    "C:\\Users\\Hieu\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "E:\\Ecommerce-Microservice\\APIGateway\\src\\src.csproj",
+      "projectUniqueName": "F:\\Ecommerce-Microservice\\APIGateway\\src\\src.csproj",
       "projectName": "src",
-      "projectPath": "E:\\Ecommerce-Microservice\\APIGateway\\src\\src.csproj",
-      "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
-      "outputPath": "E:\\Ecommerce-Microservice\\APIGateway\\src\\obj\\",
+      "projectPath": "F:\\Ecommerce-Microservice\\APIGateway\\src\\src.csproj",
+      "packagesPath": "C:\\Users\\Hieu\\.nuget\\packages\\",
+      "outputPath": "F:\\Ecommerce-Microservice\\APIGateway\\src\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Hieu\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -904,7 +1021,6 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -940,6 +1056,10 @@
           "Ocelot": {
             "target": "Package",
             "version": "[24.0.1, )"
+          },
+          "Ocelot.Provider.Polly": {
+            "target": "Package",
+            "version": "[24.0.0, )"
           },
           "Swashbuckle.AspNetCore": {
             "target": "Package",

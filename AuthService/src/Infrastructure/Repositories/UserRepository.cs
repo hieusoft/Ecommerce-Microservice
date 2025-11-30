@@ -30,13 +30,13 @@ namespace Infrastructure.Repositories
                 .FirstOrDefaultAsync(u => u.Email == email);
         }
 
-        //public async Task<User?> GetByVerificationTokenAsync(string token)
-        //{
-        //    return await _context.Users
-        //        .Include(u => u.UserRoles)
-        //            .ThenInclude(ur => ur.Role)
-        //        .FirstOrDefaultAsync(u => u.VerificationToken == token);
-        //}
+        public async Task<User?> GetByEmailOrUsernameAsync(string input)
+        {
+            return await _context.Users
+                .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync(u => u.Username == input || u.Email == input);
+        }
 
         public async Task<IEnumerable<User>> GetAllAsync()
         {

@@ -9,7 +9,9 @@ namespace Application.Interfaces
     {
     
         Task<User?> GetByIdAsync(int id);
-        Task<User?> GetByEmailAsync(string email);
+        Task<User?> GetByEmailOrUsernameAsync(string input);
+
+    
         Task<IEnumerable<User>> GetAllAsync();
         Task AddAsync(User user);
         Task UpdateAsync(User user);

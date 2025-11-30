@@ -232,6 +232,24 @@ namespace src.Services
             }
         }
 
+        public async Task<int> AddNotificationAsync(NotificationDto dto)
+        {
+            var notification = new Notification
+            {
+                Title = dto.Title,
+                Content = dto.Content,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                CreatedBy = dto.CreatedBy,
+                IsBroadcast = dto.IsBroadcast
+            };
 
+            await _unitOfWork.Notifications.AddAsync(notification);
+            await _unitOfWork.CommitAsync();
+
+
+
+            return notification.NotificationId;
+        }
     }
 }

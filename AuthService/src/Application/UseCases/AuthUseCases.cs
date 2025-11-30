@@ -2,6 +2,7 @@
 using Application.Interfaces;
 using Domain.Entities;
 using System.Data;
+using System.Xml;
 
 public class AuthUseCases
 {
@@ -40,11 +41,14 @@ public class AuthUseCases
 
     public async Task<(string accessToken, string refreshToken)> LoginAsync(LoginRequestDto dto)
     {
-        var user = await _userRepository.GetByEmailAsync(dto.Email);
+        var user = await _userRepository.GetByEmailOrUsernameAsync(dto.EmailOrUsername);
+        
         if (user == null || !_passwordHasher.VerifyPassword(user.PasswordHash, dto.Password))
             throw new Exception("Invalid credentials");
         if (user.IsBanned)
             throw new Exception("Your account has been banned");
+        if (user.EmailVerified == false)
+            throw new Exception("Email not verified. Please verify your email before logging in.");
         user.TokenVersion += 1;
         await _userRepository.UpdateAsync(user);
         var roles = user.UserRoles?.Select(ur => ur.Role.RoleName) ?? new List<string>();
@@ -72,11 +76,7 @@ public class AuthUseCases
 
             await _tokenRepository.UpdateRefreshTokenAsync(existingToken);
         }
-        _rabbitMqService.Publish("auth_events", "email.verification_requested", new
-        {
-            user.UserId,
-            user.Email
-        });
+      
       
 
         return (accessToken, refreshToken);
@@ -86,54 +86,116 @@ public class AuthUseCases
     public async Task RegisterAsync(RegisterRequestDto dto)
     {
 
-        var existingUser = await _userRepository.GetByEmailAsync(dto.Email);
-        if (existingUser != null)
-            throw new Exception("Email already exists");
+        var emailUser = await _userRepository.GetByEmailOrUsernameAsync(dto.Email);
+
+      
+        var usernameUser = await _userRepository.GetByEmailOrUsernameAsync(dto.UserName);
+
+       
+        if (usernameUser != null && usernameUser.Email != dto.Email)
+            throw new Exception("Username is already taken");
+
 
         var passwordHash = _passwordHasher.HashPassword(dto.Password);
-        var user = new User
-        {
-            Email = dto.Email,
-            PasswordHash = passwordHash,
-            EmailVerified = false
-
-        };
-        var role = await _roleRepository.GetByNameAsync("User");
-        if (role == null) throw new Exception("Role not found");
-
-        if (user.UserRoles == null)
-            user.UserRoles = new List<UserRole>();
-        user.UserRoles.Add(new UserRole { RoleId = role.RoleId, UserId = user.UserId });
-        await _userRepository.AddAsync(user);
-        _rabbitMqService.Publish("auth_events", "user.registered", new
-        {
-            user.UserId,
-            user.Email
-        });
-
         var verificationToken = _jwtService.GenerateRefreshToken();
 
+
+
+        if (emailUser != null)
+        {
+            if (emailUser.EmailVerified)
+                throw new Exception("Email is already registered");
+
+            // Kiểm tra token hiện tại còn hiệu lực
+            var existingToken = await _emailVerificationTokenRepository.GetEmailVerificationTokensByUserIdAsync(emailUser.UserId);
+            if (existingToken != null)
+            {
+                // Token còn hạn => không publish nữa
+                return;
+            }
+
+
+            emailUser.PasswordHash = passwordHash;
+            emailUser.FullName = dto.FullName;
+            emailUser.Username = dto.UserName;
+            emailUser.UpdatedAt = DateTime.UtcNow;
+
+            await _userRepository.UpdateAsync(emailUser);
+
+            await _emailVerificationTokenRepository.AddEmailVerificationTokenAsync(new EmailVerificationToken
+            {
+                Token = verificationToken,
+                UserId = emailUser.UserId,
+                ExpiresAt = DateTime.UtcNow.AddHours(24),
+                Verified = false
+            });
+
+            _rabbitMqService.Publish("auth_events", "email.verification_requested", new
+            {
+                Title = "Verify your email",
+                Content = "Please verify your email by clicking the link",
+                UserName = emailUser.Username,
+                emailUser.UserId,
+                emailUser.Email,
+                Token = verificationToken
+            });
+
+            return;
+        }
+
+        var newUser = new User
+        {
+            Email = dto.Email,
+            Username = dto.UserName,
+            FullName = dto.FullName,
+            PasswordHash = passwordHash,
+            EmailVerified = false,
+            CreatedAt = DateTime.UtcNow,
+            UserRoles = new List<UserRole>()   
+        };
+
+        await _userRepository.AddAsync(newUser);
+
+
+       
+        var role = await _roleRepository.GetByNameAsync("User");
+        if (role == null)
+            throw new Exception("Role 'User' not found");
+
+       
+        newUser.UserRoles.Add(new UserRole
+        {
+            RoleId = role.RoleId,
+            UserId = newUser.UserId
+        });
+
+        await _userRepository.UpdateAsync(newUser);
+
+
+    
         await _emailVerificationTokenRepository.AddEmailVerificationTokenAsync(new EmailVerificationToken
         {
             Token = verificationToken,
-            UserId = user.UserId,
+            UserId = newUser.UserId,
             ExpiresAt = DateTime.UtcNow.AddHours(24),
             Verified = false
         });
 
         _rabbitMqService.Publish("auth_events", "email.verification_requested", new
         {
-            user.UserId,
-            user.Email,
+            Title = "Verify your email",
+            Content = "Please verify your email by clicking the link",
+            UserName = newUser.Username,
+            newUser.UserId,
+            newUser.Email,
             Token = verificationToken
         });
-
-
     }
-    
+
+
     public async Task ForgotPasswordAsync(ForgotPasswordRequestDto dto)
     {
-        var user = await _userRepository.GetByEmailAsync(dto.Email);
+        var user = await _userRepository.GetByEmailOrUsernameAsync(dto.Email);
         if (user == null) return;
 
         var resetToken = _jwtService.GenerateRefreshToken();
@@ -146,6 +208,8 @@ public class AuthUseCases
         });
         _rabbitMqService.Publish("auth_events", "password.reset_requested", new
         {
+            Title = "Password Reset Request",
+            Content = "You can reset your password by clicking the link",
             user.UserId,
             user.Email,
             Token = resetToken
@@ -201,6 +265,8 @@ public class AuthUseCases
         }
         _rabbitMqService.Publish("auth_events", "password.reset_completed", new
         {
+            Title = "Your password has been reset",
+            Content = "You can now log in with your new password",
             user.UserId,
             user.Email,
             ResetAt = DateTime.UtcNow
@@ -221,8 +287,17 @@ public class AuthUseCases
 
         token.Verified = true;
         await _emailVerificationTokenRepository.UpdateEmailVerificationTokenAsync(token);
+        _rabbitMqService.Publish("auth_events", "user.registered", new
+        {
+            Title = "You have successfully registered",
+            Content = "Welcome to our platform!",
+            user.UserId,
+            user.Email
+        });
         _rabbitMqService.Publish("auth_events", "email.verified", new
         {
+            Title = "Your email has been verified",
+            Content = "Thank you for verifying your email",
             user.UserId,
             user.Email,
             VerifiedAt = DateTime.UtcNow
@@ -231,7 +306,7 @@ public class AuthUseCases
 
     public async Task ResendVerificationEmailAsync(ForgotPasswordRequestDto dto)
     {
-        var user = await _userRepository.GetByEmailAsync(dto.Email);
+        var user = await _userRepository.GetByEmailOrUsernameAsync(dto.Email);
         if (user == null)
             throw new Exception("User not found");
 
@@ -266,6 +341,8 @@ public class AuthUseCases
         }
         _rabbitMqService.Publish("auth_events", "email.verification_requested", new
         {
+            Title = "Verify your email",
+            Content = "Please verify your email by clicking the link",
             user.UserId,
             user.Email,
             Token = verificationToken

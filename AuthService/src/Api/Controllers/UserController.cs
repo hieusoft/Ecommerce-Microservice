@@ -19,7 +19,7 @@ namespace Api.Controllers
             _logger = logger;
         }
 
-        // --- User Methods ---
+   
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
@@ -67,6 +67,7 @@ namespace Api.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete]
         public async Task<IActionResult> DeleteUser([FromBody] DeleteUserRequestDto dto)
         {
@@ -81,7 +82,7 @@ namespace Api.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost("assign-role")]
         public async Task<IActionResult> AssignRole([FromBody] AssignRoleRequestDto dto)
         {
@@ -96,7 +97,7 @@ namespace Api.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost("remove-role")]
         public async Task<IActionResult> RemoveRole([FromBody] RemoveRoleRequestDto dto)
         {

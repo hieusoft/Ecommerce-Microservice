@@ -1,5 +1,4 @@
-﻿@* Layout email Razor *@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -13,7 +12,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #fdf6f0 0%, #f8e9e9 100%);
+            background: linear-gradient(135deg, #fdfbfb 0%, #f9f5f5 100%);
             color: #333;
             padding: 20px;
         }
@@ -25,13 +24,13 @@
             background: #fff;
             border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.08);
         }
 
         .header {
             text-align: center;
             padding: 30px 25px;
-            background: linear-gradient(135deg, #ff6b81 0%, #ff8fa3 100%);
+            background: linear-gradient(135deg, #BA68C8 0%, #F48FB1 100%);
             color: white;
             font-size: 28px;
             font-weight: 800;
@@ -47,38 +46,44 @@
                 left: -50%;
                 width: 200%;
                 height: 200%;
-                background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+                background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
                 animation: float 6s ease-in-out infinite;
             }
-        
+
+    
 
         .content {
             padding: 35px;
             font-size: 16px;
             line-height: 1.8;
-            color: #444;
+            color: #555;
         }
 
         .btn {
             display: inline-block;
             padding: 16px 32px;
-            background: linear-gradient(135deg, #ff6b81 0%, #ff8fa3 100%);
+            background: linear-gradient(135deg, #BA68C8 0%, #F48FB1 100%);
             color: white;
             text-decoration: none;
             border-radius: 10px;
             font-weight: 700;
             margin-top: 25px;
-            box-shadow: 0 6px 20px rgba(255,107,129,0.4);
+            box-shadow: 0 6px 20px rgba(186, 104, 200, 0.3);
             transition: all 0.4s ease;
         }
 
+            .btn:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(186, 104, 200, 0.4);
+            }
+
         .footer {
             font-size: 13px;
-            color: #888;
+            color: #999;
             text-align: center;
             padding: 25px;
-            background: #f9f9f9;
-            border-top: 1px solid #eee;
+            background: #fafafa;
+            border-top: 1px solid #f0f0f0;
         }
 
         .flower-img {
@@ -87,21 +92,26 @@
             object-fit: cover;
             display: block;
         }
+
+        .content-box {
+            margin: 20px 0;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">@Model.Title</div>
-        
-        <img src="https://sf-static.upanhlaylink.com/img/image_2025112731c39f643c61a9fa4c6ac5be7a4ab779.jpg" class="flower-img" alt="Banner" />
-       
+
+        <img src="https://sf-static.upanhlaylink.com/img/image_2025112731c39f643c61a9fa4c6ac5be7a4ab779.jpg" class="flower-img" alt="Flower" />
+
         <div class="content">
             @RenderBody()
         </div>
         <div class="footer">
-            <p>© 2025 Snowell Electric. All rights reserved.</p>
-            <p>Đây là email tự động, vui lòng không trả lời trực tiếp.</p>
-        </div>
+    <p>© 2025 Bloom & Blossom. All rights reserved.</p>
+    <p>This is an automated email, please do not reply directly.</p>
+</div>
+
     </div>
 </body>
 </html>

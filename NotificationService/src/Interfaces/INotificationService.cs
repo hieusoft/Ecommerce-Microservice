@@ -9,7 +9,7 @@ namespace src.Interfaces
      
         Task<NotificationDto> CreateNotificationAsync(NotificationDto dto);
 
-      
+        Task<int> AddNotificationAsync(NotificationDto dto);
         Task<NotificationDto?> GetByIdAsync(int notificationId);
 
        

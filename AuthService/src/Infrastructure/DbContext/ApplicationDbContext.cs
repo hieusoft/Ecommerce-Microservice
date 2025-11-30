@@ -26,6 +26,8 @@ namespace Infrastructure.DbContext
             {
                 entity.HasKey(e => e.UserId);
                 entity.Property(e => e.Email).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.FullName).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Username).IsRequired().HasMaxLength(50);
                 entity.Property(e => e.PasswordHash).IsRequired();
                 entity.Property(e => e.EmailVerified).HasDefaultValue(false);
                 entity.Property(e => e.TokenVersion)
