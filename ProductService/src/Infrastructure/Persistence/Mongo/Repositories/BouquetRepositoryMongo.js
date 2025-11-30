@@ -13,8 +13,17 @@ class BouquetRepositoryMongo extends IBouquetRepository {
         const doc = await BouquetModel.findById(bouquetId)
             .populate('flowers.flowerId')
             .populate('occasionId');
-        return doc ? new Bouquet(doc.toObject()) : null;
+
+        if (!doc) return null;
+
+        const bouquet = new Bouquet(doc.toObject());
+
+        bouquet.flowerNames = doc.flowers.map(f => f.flowerId.name);
+        bouquet.occasionName = doc.occasionId?.name || null;
+
+        return bouquet;
     }
+
 
     async getAllBouquets(filter = {}) {
         const docs = await BouquetModel.find(filter)
@@ -36,7 +45,7 @@ class BouquetRepositoryMongo extends IBouquetRepository {
 
     async searchBouquets(query) {
         const {
-            search_query,                    
+            search_query,
             minPrice,
             maxPrice,
             flowerMinPrice,

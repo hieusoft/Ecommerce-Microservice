@@ -25,7 +25,7 @@ class RabbitMqService extends IRabbitMqService {
         await channel.assertExchange(exchangeName, exchangeType, { durable: true });
     }
 
-    async declareQueueAndBind(queueName, exchangeName, routingKeys = []) {
+    async declareQueueAndBind(queueName, exchangeName, routingKey) {
         const channel = await this._getOrCreateChannel(`queue:${queueName}`);
 
         await channel.assertQueue(queueName, {
@@ -34,13 +34,13 @@ class RabbitMqService extends IRabbitMqService {
             autoDelete: false
         });
 
-        for (const key of routingKeys) {
-            await channel.bindQueue(queueName, exchangeName, key);
-        }
+        await channel.bindQueue(queueName, exchangeName, routingKey);
     }
 
     async publish(exchangeName, routingKey, message) {
         const channel = await this._getOrCreateChannel(`exchange:${exchangeName}`);
+
+        await channel.assertExchange(exchangeName, "direct", { durable: true });
 
         const body = Buffer.from(JSON.stringify(message));
 

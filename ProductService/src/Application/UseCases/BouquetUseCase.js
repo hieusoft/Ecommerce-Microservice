@@ -12,47 +12,41 @@ class BouquetUseCase {
 
     async createBouquet(dto) {
         BouquetValidator.validateCreate(dto);
-        
+
         if (dto.images && dto.images.length > 0) {
             dto.images = await this.imageService.saveBase64Images(dto.images);
         }
-        
+
         const bouquet = await this.bouquetRepository.createBouquet(dto);
-        
-       
+
+        const fullBouquet = await this.bouquetRepository.getBouquetById(bouquet.id);
+
         if (this.rabbitService) {
-            await this.rabbitService.publish('product_event', 'createBouquet', {
-                action: 'BOUQUET_CREATED',
-                bouquetId: bouquet._id,
-                name: bouquet.name,
-                price: bouquet.price,
-                images: bouquet.images,
+            await this.rabbitService.publish('product_events', 'bouquet.created', {
+                bouquetId: fullBouquet.id,
+                name: fullBouquet.name,
+                price: fullBouquet.price,
+                images: fullBouquet.images,
+                flowerNames: fullBouquet.flowerNames,
+                occasionName: fullBouquet.occasionName,
                 timestamp: new Date()
             });
         }
-        
-        return bouquet;
+
+        return fullBouquet;
     }
+
 
     async updateBouquet(id, dto) {
         BouquetValidator.validateCreate(dto);
-        
+
         if (dto.images && dto.images.length > 0) {
             dto.images = await this.imageService.saveBase64Images(dto.images);
         }
-        
-        const bouquet = await this.bouquetRepository.updateBouquet(id, dto);
-        
 
-        if (this.rabbitService) {
-            await this.rabbitService.publish('product_event', 'updateBouquet', {
-                action: 'BOUQUET_UPDATED',
-                bouquetId: id,
-                updates: dto,
-                timestamp: new Date()
-            });
-        }
-        
+        const bouquet = await this.bouquetRepository.updateBouquet(id, dto);
+
+
         return bouquet;
     }
 
@@ -66,7 +60,7 @@ class BouquetUseCase {
 
     async deleteBouquet(id) {
         const bouquet = await this.bouquetRepository.getBouquetById(id);
-        
+
         if (bouquet && bouquet.images) {
             for (const imgPath of bouquet.images) {
                 const fullPath = path.join(__dirname, '../../../', imgPath);
@@ -75,17 +69,9 @@ class BouquetUseCase {
                 }
             }
         }
-        
+
         const result = await this.bouquetRepository.deleteBouquet(id);
-        
-        if (this.rabbitService && result) {
-            await this.rabbitService.publish('product_event', 'deleteBouquet', {
-                action: 'BOUQUET_DELETED',
-                bouquetId: id,
-                timestamp: new Date()
-            });
-        }
-        
+
         return result;
     }
 

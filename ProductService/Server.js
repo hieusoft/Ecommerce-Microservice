@@ -39,33 +39,16 @@ async function startServer() {
             process.env.RABBITMQ_URL || 'amqp://guest:guest@localhost:5672'
         );
 
-        await rabbitService.declareExchange('product_event', 'direct');
-        await rabbitService.declareQueueAndBind('bouquetQueue', 'product_event', [
-            'createBouquet',
-            'updateBouquet',
-            'deleteBouquet'
-        ]);
+        await rabbitService.declareExchange('product_events', 'direct');
+ 
+        await rabbitService.declareQueueAndBind('bouquet.created_q', 'product_events', 'bouquet.created');
 
+        await rabbitService.declareQueueAndBind('flower.created_q', 'product_events', 'flower.created');
 
-        await rabbitService.declareQueueAndBind('flowerQueue', 'product_event', [
-            'createFlower',
-            'updateFlower',
-            'deleteFlower'
-        ]);
+        await rabbitService.declareQueueAndBind('occasion.created_q', 'product_events', 'occasion.created');
 
+        await rabbitService.declareQueueAndBind('greeting.created_q', 'product_events', 'greeting.created');
 
-        await rabbitService.declareQueueAndBind('occasionQueue', 'product_event', [
-            'createOccasion',
-            'updateOccasion',
-            'deleteOccasion'
-        ]);
-
-
-        await rabbitService.declareQueueAndBind('greetingQueue', 'product_event', [
-            'createGreeting',
-            'updateGreeting',
-            'deleteGreeting'
-        ]);
 
         console.log('✓ RabbitMQ configured');
 

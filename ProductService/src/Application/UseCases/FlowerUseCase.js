@@ -15,9 +15,7 @@ class FlowerUseCase {
             dto.images = await this.imageService.saveBase64Images(dto.images);
         }
         const flower = await this.flowerRepository.createFlower(dto)
-        await this.rabbitService.publish('product_event', 'createFlower', {
-            action: 'FLOWER_CREATED',
-            flowerId: flower._id,
+        await this.rabbitService.publish('product_events', 'flower.created', {
             name: flower.name,
             price: flower.price,
             images: flower.images,
@@ -39,14 +37,6 @@ class FlowerUseCase {
         if (dto.images && dto.images.length > 0) {
             dto.images = await this.imageService.saveBase64Images(dto.images);
         }
-
-        await this.rabbitService.publish('product_event', 'updateFlower', {
-            action: 'FLOWER_UPDATED',
-            flowerId: id,
-            updates: dto,
-            timestamp: new Date()
-        });
-
         const flower = await this.flowerRepository.updateFlower(id, dto);
         return flower;
     }
@@ -63,11 +53,6 @@ class FlowerUseCase {
             }
         }
         const result = await this.flowerRepository.deleteFlower(id)
-        await this.rabbitService.publish('product_event', 'deleteFlower', {
-            action: 'FLOWER_DELETED',
-            flowerId: id,
-            timestamp: new Date()
-        });
         return result;
     }
 }
