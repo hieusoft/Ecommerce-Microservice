@@ -7,7 +7,7 @@ class OxaPayProvider extends BasePaymentProvider {
     }
 
     async createPayment(order) {
-        // TODO: logic gọi API OxaPay
+       
         return {
             payUrl: "https://oxapay.com/pay?order=" + order.orderId
         };

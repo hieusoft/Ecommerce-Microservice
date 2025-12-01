@@ -1,14 +1,21 @@
 CREATE TABLE Payments (
     payment_id INT IDENTITY(1,1) PRIMARY KEY,
-    order_id NVARCHAR(50) NOT NULL,        -- ID của đơn hàng liên kết
-    provider NVARCHAR(50) NOT NULL,        -- momo, oxapay, bank, crypto...
-    amount DECIMAL(18,2) NOT NULL,         -- số tiền gốc
-    currency NVARCHAR(10) NOT NULL,        -- USD, VND, USDT...
-    converted_amount DECIMAL(18,2),        -- số tiền đã convert (nếu có)
-    converted_currency NVARCHAR(10),       -- VND, USDT, ...
-    status NVARCHAR(20) NOT NULL DEFAULT 'PENDING', -- PENDING, SUCCESS, FAILED
-    payment_url NVARCHAR(500),             -- url thanh toán (MoMo/OxaPay)
-    callback_data NVARCHAR(MAX),           -- lưu JSON callback từ provider
+
+    order_id INT NOT NULL UNIQUE,               -- Sửa: int + duy nhất
+
+    provider NVARCHAR(50) NOT NULL,
+    provider_order_id NVARCHAR(50) NOT NULL,
+
+    amount DECIMAL(18,2) NOT NULL,
+    currency NVARCHAR(10) NOT NULL,
+
+    converted_amount DECIMAL(18,2),
+
+    status NVARCHAR(20) NOT NULL DEFAULT 'PENDING',
+
+    payment_url NVARCHAR(500),
+    callback_data NVARCHAR(MAX),
+
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE()
 );
