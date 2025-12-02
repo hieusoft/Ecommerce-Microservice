@@ -18,6 +18,11 @@ class ImageService {
             const mime = matches[1];
             const data = matches[2];
             const ext = mime.split("/")[1];
+            const allowedExt = ["png", "jpg", "jpeg", "gif"];
+            if (!allowedExt.includes(ext)) {
+                console.warn(`File type ${ext} not allowed`);
+                continue; 
+            }
             const fileName = Date.now() + "-" + Math.random().toString(36).substring(2) + "." + ext;
             const filePath = path.join(this.baseDir, fileName);
 
