@@ -6,33 +6,27 @@ module.exports = {
     description: "API documentation for Product Service (Node.js + MongoDB) with Base64 image upload and JWT Authorization",
   },
   servers: [
-    { url: "http://localhost:5000", description: "Local server" }
+    { url: "http://localhost:8082", description: "Local server" }
   ],
 
   paths: {
-    /* -------------------- BOUQUETS -------------------- */
 
+    /* -------------------- BOUQUETS -------------------- */
     "/api/bouquets": {
       get: {
         tags: ["Bouquet"],
-        summary: "Get all bouquets or search with multiple filters",
+        summary: "Get all bouquets or search with filters",
         parameters: [
-          { name: "search_query", in: "query", schema: { type: "string" }, description: "Search term (name, flower name/color, occasion name)" },
+          { name: "search_query", in: "query", schema: { type: "string" }, description: "Search bouquet name or occasion name" },
           { name: "name", in: "query", schema: { type: "string" }, description: "Bouquet name" },
-          { name: "flowerName", in: "query", schema: { type: "string" }, description: "Flower name in bouquet" },
-          { name: "flowerColor", in: "query", schema: { type: "string" }, description: "Flower color" },
-          { name: "flowerMinPrice", in: "query", schema: { type: "number" }, description: "Minimum flower price" },
-          { name: "flowerMaxPrice", in: "query", schema: { type: "number" }, description: "Maximum flower price" },
           { name: "occasionName", in: "query", schema: { type: "string" }, description: "Occasion name" },
           { name: "minPrice", in: "query", schema: { type: "number" }, description: "Minimum bouquet price" },
           { name: "maxPrice", in: "query", schema: { type: "number" }, description: "Maximum bouquet price" },
-          { name: "minFlowerQuantity", in: "query", schema: { type: "number" }, description: "Minimum quantity of flower in bouquet" },
-          { name: "maxFlowerQuantity", in: "query", schema: { type: "number" }, description: "Maximum quantity of flower in bouquet" },
           { name: "startDate", in: "query", schema: { type: "string", format: "date" }, description: "Bouquet created after this date" },
           { name: "endDate", in: "query", schema: { type: "string", format: "date" }, description: "Bouquet created before this date" },
-          { name: "page", in: "query", schema: { type: "integer", default: 1 }, description: "Page number for pagination" },
-          { name: "limit", in: "query", schema: { type: "integer", default: 10 }, description: "Number of items per page" },
-          { name: "sortBy", in: "query", schema: { type: "string", default: "createdAt" }, description: "Field to sort by" },
+          { name: "page", in: "query", schema: { type: "integer", default: 1 }, description: "Page number" },
+          { name: "limit", in: "query", schema: { type: "integer", default: 10 }, description: "Items per page" },
+          { name: "sortBy", in: "query", schema: { type: "string", default: "createdAt" }, description: "Sort field" },
           { name: "order", in: "query", schema: { type: "string", enum: ["asc", "desc"], default: "desc" }, description: "Sort order" }
         ],
         responses: {
@@ -64,13 +58,12 @@ module.exports = {
           content: { "application/json": { schema: { $ref: "#/components/schemas/Bouquet" } } }
         },
         responses: {
-          201: { description: "Bouquet created", content: { "application/json": { schema: { $ref: "#/components/schemas/Bouquet" } } } },
+          201: { description: "Bouquet created" },
           401: { description: "Unauthorized" },
-          403: { description: "Forbidden - admin only" }
+          403: { description: "Forbidden" }
         }
       }
     },
-
 
     "/api/bouquets/{id}": {
       get: {
@@ -93,7 +86,7 @@ module.exports = {
         responses: {
           200: { description: "Bouquet updated" },
           401: { description: "Unauthorized" },
-          403: { description: "Forbidden - admin only" },
+          403: { description: "Forbidden" },
           404: { description: "Not found" }
         }
       },
@@ -105,53 +98,43 @@ module.exports = {
         responses: {
           200: { description: "Bouquet deleted" },
           401: { description: "Unauthorized" },
-          403: { description: "Forbidden - admin only" },
+          403: { description: "Forbidden" },
           404: { description: "Not found" }
         }
       }
     },
 
-    /* -------------------- FLOWERS -------------------- */
-    "/api/flowers": {
-      get: {
-        tags: ["Flower"],
-        summary: "Get all flowers (public)",
-        responses: { 200: { description: "List of flowers" } }
-      },
-      post: {
-        tags: ["Flower"],
-        summary: "Create flower (admin only)",
-        security: [{ bearerAuth: [] }],
-        requestBody: { required: true, content: { "application/json": { schema: { $ref: "#/components/schemas/Flower" } } } },
-        responses: { 201: { description: "Flower created" }, 401: { description: "Unauthorized" }, 403: { description: "Forbidden - admin only" } }
-      }
-    },
-    "/api/flowers/{id}": {
-      get: { tags: ["Flower"], summary: "Get flower by ID", security: [{ bearerAuth: [] }], parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], responses: { 200: { description: "Flower object" }, 401: { description: "Unauthorized" }, 404: { description: "Not found" } } },
-      put: { tags: ["Flower"], summary: "Update flower (admin only)", security: [{ bearerAuth: [] }], parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], requestBody: { required: true, content: { "application/json": { schema: { $ref: "#/components/schemas/Flower" } } } }, responses: { 200: { description: "Flower updated" }, 401: { description: "Unauthorized" }, 403: { description: "Forbidden - admin only" }, 404: { description: "Not found" } } },
-      delete: { tags: ["Flower"], summary: "Delete flower (admin only)", security: [{ bearerAuth: [] }], parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], responses: { 200: { description: "Flower deleted" }, 401: { description: "Unauthorized" }, 403: { description: "Forbidden - admin only" }, 404: { description: "Not found" } } }
-    },
-
     /* -------------------- OCCASIONS -------------------- */
     "/api/occasions": {
-      get: { tags: ["Occasion"], summary: "Get all occasions (public)", responses: { 200: { description: "List of occasions" } } },
-      post: { tags: ["Occasion"], summary: "Create occasion (admin only)", security: [{ bearerAuth: [] }], requestBody: { required: true, content: { "application/json": { schema: { $ref: "#/components/schemas/Occasion" } } } }, responses: { 201: { description: "Occasion created" }, 401: { description: "Unauthorized" }, 403: { description: "Forbidden - admin only" } } }
+      get: { tags: ["Occasion"], summary: "Get all occasions", responses: { 200: { description: "List" } } },
+      post: {
+        tags: ["Occasion"],
+        summary: "Create occasion",
+        security: [{ bearerAuth: [] }],
+        requestBody: { required: true, content: { "application/json": { schema: { $ref: "#/components/schemas/Occasion" } } } },
+        responses: { 201: { description: "Created" } }
+      }
     },
     "/api/occasions/{id}": {
-      get: { tags: ["Occasion"], summary: "Get occasion by ID", security: [{ bearerAuth: [] }], parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], responses: { 200: { description: "Occasion object" }, 401: { description: "Unauthorized" }, 404: { description: "Not found" } } },
-      put: { tags: ["Occasion"], summary: "Update occasion (admin only)", security: [{ bearerAuth: [] }], parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], requestBody: { required: true, content: { "application/json": { schema: { $ref: "#/components/schemas/Occasion" } } } }, responses: { 200: { description: "Occasion updated" }, 401: { description: "Unauthorized" }, 403: { description: "Forbidden - admin only" } } },
-      delete: { tags: ["Occasion"], summary: "Delete occasion (admin only)", security: [{ bearerAuth: [] }], parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], responses: { 200: { description: "Occasion deleted" }, 401: { description: "Unauthorized" }, 403: { description: "Forbidden - admin only" } } }
+      get: { tags: ["Occasion"], summary: "Get occasion by ID", parameters: [{ name: "id", in: "path", required: true }], responses: { 200: { description: "Object" } } },
+      put: { tags: ["Occasion"], summary: "Update occasion", parameters: [{ name: "id", in: "path", required: true }], requestBody: { required: true, content: { "application/json": { schema: { $ref: "#/components/schemas/Occasion" } } } } },
+      delete: { tags: ["Occasion"], summary: "Delete occasion", parameters: [{ name: "id", in: "path", required: true }] }
     },
 
     /* -------------------- GREETINGS -------------------- */
     "/api/greetings": {
-      get: { tags: ["Greeting"], summary: "Get all greetings (public)", responses: { 200: { description: "List of greetings" } } },
-      post: { tags: ["Greeting"], summary: "Create greeting (admin only)", security: [{ bearerAuth: [] }], requestBody: { required: true, content: { "application/json": { schema: { $ref: "#/components/schemas/Greeting" } } } }, responses: { 201: { description: "Greeting created" }, 401: { description: "Unauthorized" }, 403: { description: "Forbidden - admin only" } } }
+      get: { tags: ["Greeting"], summary: "Get all greetings", responses: { 200: { description: "List" } } },
+      post: {
+        tags: ["Greeting"],
+        summary: "Create greeting",
+        security: [{ bearerAuth: [] }],
+        requestBody: { required: true, content: { "application/json": { schema: { $ref: "#/components/schemas/Greeting" } } } }
+      }
     },
     "/api/greetings/{id}": {
-      get: { tags: ["Greeting"], summary: "Get greeting by ID", security: [{ bearerAuth: [] }], parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], responses: { 200: { description: "Greeting object" }, 401: { description: "Unauthorized" }, 404: { description: "Not found" } } },
-      put: { tags: ["Greeting"], summary: "Update greeting (admin only)", security: [{ bearerAuth: [] }], parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], requestBody: { required: true, content: { "application/json": { schema: { $ref: "#/components/schemas/Greeting" } } } }, responses: { 200: { description: "Greeting updated" }, 401: { description: "Unauthorized" }, 403: { description: "Forbidden - admin only" } } },
-      delete: { tags: ["Greeting"], summary: "Delete greeting (admin only)", security: [{ bearerAuth: [] }], parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], responses: { 200: { description: "Greeting deleted" }, 401: { description: "Unauthorized" }, 403: { description: "Forbidden - admin only" } } }
+      get: { tags: ["Greeting"], summary: "Get greeting by ID", parameters: [{ name: "id", in: "path", required: true }], responses: { 200: { description: "Object" } } },
+      put: { tags: ["Greeting"], summary: "Update greeting", parameters: [{ name: "id", in: "path", required: true }], requestBody: { required: true, content: { "application/json": { schema: { $ref: "#/components/schemas/Greeting" } } } } },
+      delete: { tags: ["Greeting"], summary: "Delete greeting", parameters: [{ name: "id", in: "path", required: true }] }
     }
   },
 
@@ -163,11 +146,8 @@ module.exports = {
         bearerFormat: "JWT"
       }
     },
+
     schemas: {
-      FlowerRef: {
-        type: "object",
-        properties: { flowerId: { type: "string" }, quantity: { type: "number" } }
-      },
       Bouquet: {
         type: "object",
         properties: {
@@ -175,27 +155,30 @@ module.exports = {
           description: { type: "string" },
           price: { type: "number" },
           occasionId: { type: "string" },
-          flowers: { type: "array", items: { $ref: "#/components/schemas/FlowerRef" } },
-          images: { type: "array", items: { type: "string", format: "byte" }, description: "List of images in Base64 format" }
-        },
-        required: ["name", "price"]
-      },
-      Flower: {
-        type: "object",
-        properties: {
-          name: { type: "string" },
-          color: { type: "string" },
-          price: { type: "number" },
           images: {
             type: "array",
-            items: { type: "string", format: "byte" },
-            description: "List of images for flower (Base64 format)"
+            items: { type: "string", format: "byte" }
           }
         },
         required: ["name", "price"]
       },
-      Occasion: { type: "object", properties: { name: { type: "string" }, description: { type: "string" } } },
-      Greeting: { type: "object", properties: { text: { type: "string" }, occasionId: { type: "string" } }, required: ["text"] }
+
+      Occasion: {
+        type: "object",
+        properties: {
+          name: { type: "string" },
+          description: { type: "string" }
+        }
+      },
+
+      Greeting: {
+        type: "object",
+        properties: {
+          text: { type: "string" },
+          occasionId: { type: "string" }
+        },
+        required: ["text"]
+      }
     }
   }
 };

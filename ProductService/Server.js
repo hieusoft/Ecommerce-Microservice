@@ -5,7 +5,6 @@ const cors = require('cors');
 const path = require('path');
 
 const BouquetRoutes = require('./src/Api/routes/BouquetRouters');
-const FlowerRoutes = require('./src/Api/routes/FlowerRouters');
 const OccasionRoutes = require('./src/Api/routes/OccasionRouters');
 const GreetingRoutes = require('./src/Api/routes/GreetingRouters');
 
@@ -13,10 +12,10 @@ const RabbitMqService = require('./src/Infrastructure/Service/RabbitMQService');
 const swaggerDocs = require('./src/swagger');
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
 app.use('/uploads/bouquets', express.static(path.join(__dirname, 'uploads', 'bouquets')));
-app.use('/uploads/flowers', express.static(path.join(__dirname, 'uploads', 'flowers')));
 
 app.use(cors({
     origin: '*',
@@ -43,8 +42,6 @@ async function startServer() {
  
         await rabbitService.declareQueueAndBind('bouquet.created_q', 'product_events', 'bouquet.created');
 
-        await rabbitService.declareQueueAndBind('flower.created_q', 'product_events', 'flower.created');
-
         await rabbitService.declareQueueAndBind('occasion.created_q', 'product_events', 'occasion.created');
 
         await rabbitService.declareQueueAndBind('greeting.created_q', 'product_events', 'greeting.created');
@@ -54,7 +51,6 @@ async function startServer() {
 
 
         app.use('/api/bouquets', BouquetRoutes(rabbitService));
-        app.use('/api/flowers', FlowerRoutes(rabbitService));
         app.use('/api/occasions', OccasionRoutes(rabbitService));
         app.use('/api/greetings', GreetingRoutes(rabbitService));
 

@@ -27,7 +27,6 @@ class BouquetUseCase {
                 name: fullBouquet.name,
                 price: fullBouquet.price,
                 images: fullBouquet.images,
-                flowerNames: fullBouquet.flowerNames,
                 occasionName: fullBouquet.occasionName,
                 timestamp: new Date()
             });

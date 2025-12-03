@@ -1,8 +1,8 @@
 const OccasionModel = require('../Models/OccasionModel');
-const IFlowerRepository = require('../../../../Application/Interfaces/IFlowerRepository');
+const IOccasionRepository = require('../../../../Application/Interfaces/IOccasionRepository')
 const Occasion = require('../../../../Domain/Entities/Occasion');
 
-class OccasionRepositoryMongo extends IFlowerRepository {
+class OccasionRepositoryMongo extends IOccasionRepository {
     async createOccasion (data) {
         const occasion = new OccasionModel(data);
         const savedOccasion = await occasion.save();

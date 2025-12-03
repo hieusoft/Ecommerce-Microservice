@@ -1,8 +1,8 @@
 const GreetingModel = require('../Models/GreetingModel');
-const IFlowerRepository = require('../../../../Application/Interfaces/IGreetingRepository');
+const IGreetingRepository = require('../../../../Application/Interfaces/IGreetingRepository');
 const Greeting = require('../../../../Domain/Entities/Greeting');
 
-class GreetingRepositoryMongo extends IFlowerRepository {
+class GreetingRepositoryMongo extends IGreetingRepository {
 
     async createGreeting(data) {
         const greeting = new GreetingModel(data);
