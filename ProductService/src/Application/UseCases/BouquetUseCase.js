@@ -39,14 +39,23 @@ class BouquetUseCase {
     async updateBouquet(id, dto) {
         BouquetValidator.validateCreate(dto);
 
+        const bouquet = await this.bouquetRepository.getBouquetById(id);
+
+        if (!bouquet) throw new Error("Bouquet not found");
+
+        if (bouquet.images && bouquet.images.length > 0) {
+            for (const imgPath of bouquet.images) {
+                const fullPath = path.join(__dirname, '../../../', imgPath);
+                if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
+            }
+        }
+
         if (dto.images && dto.images.length > 0) {
             dto.images = await this.imageService.saveBase64Images(dto.images);
         }
 
-        const bouquet = await this.bouquetRepository.updateBouquet(id, dto);
-
-
-        return bouquet;
+        const updatedBouquet = await this.bouquetRepository.updateBouquet(id, dto);
+        return updatedBouquet;
     }
 
     async getBouquetById(id) {
