@@ -1,7 +1,7 @@
 class GreetingDTO {
-  constructor({ text, occasionId }) {
+  constructor({ text, subOccasionId }) {
     this.text = text;
-    this.occasionId = occasionId;
+    this.subOccasionId = subOccasionId;
   }
 }
 

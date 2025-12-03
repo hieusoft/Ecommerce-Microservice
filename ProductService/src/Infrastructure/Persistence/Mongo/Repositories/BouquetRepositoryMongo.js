@@ -12,13 +12,13 @@ class BouquetRepositoryMongo extends IBouquetRepository {
 
     async getBouquetById(bouquetId) {
         const doc = await BouquetModel.findById(bouquetId)
-            .populate('occasionId');
+            .populate('subOccasionId');
         if (!doc) return null;
 
         const bouquet = new Bouquet(doc.toObject());
 
-    
-        bouquet.occasionName = doc.occasionId?.name || null;
+
+        bouquet.subOccasionName = doc.subOccasionId?.name || null;
 
         return bouquet;
     }
@@ -36,7 +36,9 @@ class BouquetRepositoryMongo extends IBouquetRepository {
 
     async getAllBouquets(query) {
         const {
-            search_query,
+            search_query,   // search tổng hợp: bouquet + sub occasion
+            name,           // filter riêng tên bouquet
+            subOccasionName,// filter riêng tên sub occasion
             minPrice,
             maxPrice,
             startDate,
@@ -65,25 +67,48 @@ class BouquetRepositoryMongo extends IBouquetRepository {
 
         const pipeline = [
             { $match: match },
-
             {
                 $lookup: {
-                    from: "occasions",
-                    localField: "occasionId",
+                    from: "suboccasions",
+                    localField: "subOccasionId",
                     foreignField: "_id",
-                    as: "occasionDetails"
+                    as: "subOccasionsDetails"
                 }
             },
-            { $unwind: "$occasionDetails" }
+            {
+                $unwind: {
+                    path: "$subOccasionsDetails",
+                    preserveNullAndEmptyArrays: true
+                }
+            }
         ];
 
+        // search_query: tìm cả tên bouquet + tên sub occasion
         if (search_query) {
             pipeline.push({
                 $match: {
                     $or: [
                         { name: { $regex: search_query, $options: "i" } },
-                        { "occasionDetails.name": { $regex: search_query, $options: "i" } }
+                        { "subOccasionsDetails.name": { $regex: search_query, $options: "i" } }
                     ]
+                }
+            });
+        }
+
+        
+        if (name) {
+            pipeline.push({
+                $match: {
+                    name: { $regex: name, $options: "i" }
+                }
+            });
+        }
+
+        
+        if (subOccasionName) {
+            pipeline.push({
+                $match: {
+                    "subOccasionsDetails.name": { $regex: subOccasionName, $options: "i" }
                 }
             });
         }
@@ -106,6 +131,7 @@ class BouquetRepositoryMongo extends IBouquetRepository {
             data
         };
     }
+
 }
 
 module.exports = BouquetRepositoryMongo;

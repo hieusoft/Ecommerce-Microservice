@@ -4,7 +4,7 @@ const BouquetSchema = new mongoose.Schema({
     name: { type: String, required: true },
     description: { type: String, required: true },
     price: { type: Number, required: true },
-    occasionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Occasion', required: true },
+    subOccasionId: { type: mongoose.Schema.Types.ObjectId, ref: 'SubOccasion', required: true },
     images: { type: [String], default: [] }
 }, { 
     timestamps: true,

@@ -1,8 +1,8 @@
 class Greeting {
-  constructor({ id, text, occasionId }) {
+  constructor({ id, text, subOccasionId }) {
     this.id = id;
     this.text = text;
-    this.occasionId = occasionId;
+    this.subOccasionId = subOccasionId;
   }
 }
 

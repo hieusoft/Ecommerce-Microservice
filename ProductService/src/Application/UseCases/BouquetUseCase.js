@@ -27,7 +27,7 @@ class BouquetUseCase {
                 name: fullBouquet.name,
                 price: fullBouquet.price,
                 images: fullBouquet.images,
-                occasionName: fullBouquet.occasionName,
+                subOccasionName: fullBouquet.subOccasionName,
                 timestamp: new Date()
             });
         }

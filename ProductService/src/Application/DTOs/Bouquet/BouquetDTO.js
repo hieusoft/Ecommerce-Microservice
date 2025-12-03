@@ -1,9 +1,9 @@
 class BouquetDTO {
-  constructor({ name, description, price, occasionId, images = [] }) {
+  constructor({ name, description, price, subOccasionId, images = [] }) {
     this.name = name;
     this.description = description;
     this.price = price;
-    this.occasionId = occasionId;
+    this.subOccasionId = subOccasionId;
     this.images = images || [];
   }
 }

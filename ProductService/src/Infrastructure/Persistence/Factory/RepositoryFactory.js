@@ -1,6 +1,7 @@
 const BouquetRepositoryMongo = require('../Mongo/Repositories/BouquetRepositoryMongo');
 const OccasionRepositoryMongo = require('../Mongo/Repositories/OccasionRepositoryMongo');
 const GreetingRepositoryMongo = require('../Mongo/Repositories/GreetingRepositoryMongo');
+const SubOccasionRepository = require('../Mongo/Repositories/SubOccasionRepository');
 class RepositoryFactory {
 
     static bouquet() {
@@ -9,6 +10,10 @@ class RepositoryFactory {
 
     static occasion() {
         return new OccasionRepositoryMongo();
+    }
+
+    static subOccasion() {
+        return new SubOccasionRepository();
     }
 
     static greeting() {

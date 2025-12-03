@@ -7,6 +7,7 @@ const path = require('path');
 const BouquetRoutes = require('./src/Api/routes/BouquetRouters');
 const OccasionRoutes = require('./src/Api/routes/OccasionRouters');
 const GreetingRoutes = require('./src/Api/routes/GreetingRouters');
+const SubOccasionRoutes = require('./src/Api/routes/SubOccasionsRouters');
 
 const RabbitMqService = require('./src/Infrastructure/Service/RabbitMQService');
 const swaggerDocs = require('./src/swagger');
@@ -46,6 +47,8 @@ async function startServer() {
 
         await rabbitService.declareQueueAndBind('greeting.created_q', 'product_events', 'greeting.created');
 
+        await rabbitService.declareQueueAndBind('suboccasion.created_q', 'product_events', 'suboccasion.created');
+
 
         console.log('✓ RabbitMQ configured');
 
@@ -53,6 +56,8 @@ async function startServer() {
         app.use('/api/bouquets', BouquetRoutes(rabbitService));
         app.use('/api/occasions', OccasionRoutes(rabbitService));
         app.use('/api/greetings', GreetingRoutes(rabbitService));
+        app.use('/api/suboccasions', SubOccasionRoutes(rabbitService));
+
 
         swaggerDocs(app);
 
