@@ -54,9 +54,9 @@ class BouquetUseCase {
         return await this.bouquetRepository.getBouquetById(id);
     }
 
-    async getAllBouquets() {
-        return await this.bouquetRepository.getAllBouquets();
-    }
+    // async getAllBouquets() {
+    //     return await this.bouquetRepository.getAllBouquets();
+    // }
 
     async deleteBouquet(id) {
         const bouquet = await this.bouquetRepository.getBouquetById(id);
@@ -75,8 +75,8 @@ class BouquetUseCase {
         return result;
     }
 
-    async searchBouquets(query) {
-        return await this.bouquetRepository.searchBouquets(query);
+    async getAllBouquets(query) {
+        return await this.bouquetRepository.getAllBouquets(query);
     }
 }
 

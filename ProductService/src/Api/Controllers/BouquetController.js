@@ -32,14 +32,14 @@ class BouquetController {
         }
     }
 
-    getAllBouquets = async (req, res) => {
-        try {
-            const bouquets = await this.bouquetUseCase.getAllBouquets();
-            res.json(bouquets);
-        } catch (error) {
-            res.status(400).json({ error: error.message });
-        }
-    }
+    // getAllBouquets = async (req, res) => {
+    //     try {
+    //         const bouquets = await this.bouquetUseCase.getAllBouquets();
+    //         res.json(bouquets);
+    //     } catch (error) {
+    //         res.status(400).json({ error: error.message });
+    //     }
+    // }
 
     updateBouquet = async (req, res) => {
         try {
@@ -65,10 +65,10 @@ class BouquetController {
         }
     }
 
-    searchBouquets = async (req, res) => {
+    getAllBouquets = async (req, res) => {
         try {
             const qr = req.query;
-            const result = await this.bouquetUseCase.searchBouquets(qr);
+            const result = await this.bouquetUseCase.getAllBouquets(qr);
             res.json(result);
         } catch (error) {
             res.status(400).json({ error: error.message });

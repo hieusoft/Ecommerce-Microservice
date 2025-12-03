@@ -11,11 +11,11 @@ module.exports = {
 
   paths: {
     /* -------------------- BOUQUETS -------------------- */
-    "/api/bouquets/results": {
+
+    "/api/bouquets": {
       get: {
         tags: ["Bouquet"],
-        summary: "Search bouquets with multiple filters",
-        security: [{ bearerAuth: [] }], // login required
+        summary: "Get all bouquets or search with multiple filters",
         parameters: [
           { name: "search_query", in: "query", schema: { type: "string" }, description: "Search term (name, flower name/color, occasion name)" },
           { name: "name", in: "query", schema: { type: "string" }, description: "Bouquet name" },
@@ -52,19 +52,7 @@ module.exports = {
                 }
               }
             }
-          },
-          401: { description: "Unauthorized - missing/invalid token" },
-          403: { description: "Forbidden - role not allowed" }
-        }
-      }
-    },
-
-    "/api/bouquets": {
-      get: {
-        tags: ["Bouquet"],
-        summary: "Get all bouquets (public)",
-        responses: {
-          200: { description: "List of bouquets", content: { "application/json": { schema: { type: "array", items: { $ref: "#/components/schemas/Bouquet" } } } } }
+          }
         }
       },
       post: {
@@ -82,6 +70,7 @@ module.exports = {
         }
       }
     },
+
 
     "/api/bouquets/{id}": {
       get: {

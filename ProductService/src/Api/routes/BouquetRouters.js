@@ -8,7 +8,7 @@ module.exports = (rabbitService) => {
 
     const bouquetController = new BouquetController(rabbitService);
 
-    router.get('/results', (req, res) => bouquetController.searchBouquets(req, res));
+    // router.get('/results', (req, res) => bouquetController.searchBouquets(req, res));
     router.post('/', (req, res) => bouquetController.createBouquet(req, res));
     router.get('/:id',  (req, res) => bouquetController.getBouquetById(req, res));
     router.get('/', (req, res) => bouquetController.getAllBouquets(req, res));

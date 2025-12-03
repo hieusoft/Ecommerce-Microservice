@@ -5,16 +5,16 @@ class IBouquetRepository {
     async getBouquetById(id) {
         throw new Error("Method not implemented");
     }
-    async getAllBouquets() {
-        throw new Error("Method not implemented");
-    }
+    // async getAllBouquets() {
+    //     throw new Error("Method not implemented");
+    // }
     async updateBouquet(id, dto) {
         throw new Error("Method not implemented");
     }
     async deleteBouquet(id) {
         throw new Error("Method not implemented");
     }
-    async searchBouquets(query) {
+    async getAllBouquets(query) {
         throw new Error("Method not implemented");
     }
 }
