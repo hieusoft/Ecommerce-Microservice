@@ -83,7 +83,7 @@ class BouquetRepositoryMongo extends IBouquetRepository {
             }
         ];
 
-        // search_query: tìm cả tên bouquet + tên sub occasion
+        
         if (search_query) {
             pipeline.push({
                 $match: {
