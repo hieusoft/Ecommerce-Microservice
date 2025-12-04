@@ -13,7 +13,7 @@ class PaymentModel {
 
     return pool
       .request()
-      .input("orderId", sql.NVarChar, data.orderId)
+      .input("orderId", sql.Int, data.orderId)
       .input("provider", sql.NVarChar, data.provider)
       .input("providerOrderId", sql.NVarChar, data.providerOrderId || null)
       .input("amount", sql.Decimal(18, 2), data.amount)

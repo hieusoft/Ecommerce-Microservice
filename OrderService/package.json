@@ -1,26 +1,21 @@
 {
-  "name": "paymentservice",
+  "name": "orderservices",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
     "dev": "nodemon index.js"
   },
-  "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "description": "",
   "dependencies": {
     "amqplib": "^0.10.9",
     "axios": "^1.13.2",
     "dotenv": "^17.2.3",
-    "express": "^5.1.0",
-    "moment": "^2.30.1",
+    "express": "^5.2.1",
     "mssql": "^12.1.1",
-    "vnpay": "^2.4.4"
-  },
-  "devDependencies": {
     "nodemon": "^3.1.11"
   }
 }

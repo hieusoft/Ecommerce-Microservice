@@ -12,6 +12,12 @@ class PaymentController {
             res.status(500).json({ error: err.message });
         }
     }
+    async handleVnPayCallback(req, res) {
+        
+           const data = JSON.parse(JSON.stringify(req.query));
+            const result = await PaymentService.handleCallback("vnpay", data);
+            res.json(result);
+        }
 
     async handleMomoCallback(req, res) {
         const data = req.body;

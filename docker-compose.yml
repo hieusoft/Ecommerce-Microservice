@@ -84,6 +84,23 @@ services:
     networks:
       - micro-net
 
+  paymentservice:
+    build:
+      context: ./PaymentService
+      dockerfile: Dockerfile
+    container_name: paymentservice
+    depends_on:
+      - rabbitmq
+    environment:
+      PORT: 8084
+      # RABBITMQ_URL: "amqp://guest:guest@rabbitmq:5672"
+      # Nếu cần DB (SQL hoặc Mongo), thêm biến môi trường tương ứng
+      # MONGO_URI: "mongodb://mongodb:27017/paymentdb"
+      # SQL_CONNECTION: "Server=sqlserver,1433;Database=paymentdb;User Id=sa;Password=yourStrong(!)Password;TrustServerCertificate=True"
+    ports:
+      - "8084:8084"
+    networks:
+      - micro-net
 
 
 networks:

@@ -1,0 +1,26 @@
+CREATE TABLE Orders (
+    order_id INT IDENTITY(1,1) PRIMARY KEY, 
+    order_code NVARCHAR(50) UNIQUE,    
+    user_id INT,
+    total_price DECIMAL(10,2),
+    status NVARCHAR(30) DEFAULT 'Pending' 
+        CHECK (status IN ('Pending','Paid','Cancelled','Shipping','Completed')),
+    description NVARCHAR(MAX),  
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE()
+);
+
+
+CREATE TABLE OrderItems (
+    order_item_id INT IDENTITY(1,1) PRIMARY KEY, 
+    order_id INT NOT NULL,       -- BẮT BUỘC
+    bouquet_id INT,
+    quantity INT DEFAULT 1,
+    price DECIMAL(10,2),
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE(),
+
+    FOREIGN KEY (order_id) REFERENCES Orders(order_id)
+        ON DELETE CASCADE         
+        ON UPDATE CASCADE
+);

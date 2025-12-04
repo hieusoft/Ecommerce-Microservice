@@ -13,7 +13,7 @@ CREATE TABLE Payments (
 
     status NVARCHAR(20) NOT NULL DEFAULT 'PENDING',
 
-    payment_url NVARCHAR(500),
+    payment_url NVARCHAR(2048),
     callback_data NVARCHAR(MAX),
 
     created_at DATETIME DEFAULT GETDATE(),

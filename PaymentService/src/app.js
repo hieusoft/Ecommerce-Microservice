@@ -8,14 +8,6 @@ app.use(express.json());
 app.use("/api/payments", paymentRoutes);
 (async () => {
   await rabbit.setupRabbit();
-
-  await rabbit.consume("payment.success_q", async (msg) => {
-    console.log("Handle payment success:", msg);
-  });
-
-  await rabbit.consume("payment.fail_q", async (msg) => {
-    console.log("Handle payment fail:", msg);
-  });
 })();
 
 

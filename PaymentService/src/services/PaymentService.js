@@ -4,11 +4,13 @@ const rabbit  = require("../events/rabbitmq");
 class PaymentService {
   async createPayment(order) {
     try {
+     
       const provider = ProviderFactory.getProvider(order.provider);
 
       const paymentResult = await provider.createPayment(order);
-
+    
       await PaymentModel.create({
+        
         orderId: order.orderId,
         providerOrderId: paymentResult.providerOrderId,
         provider: provider.getProviderName(),
@@ -81,9 +83,10 @@ class PaymentService {
 
   async handleCallback(method, data) {
   try {
-    console.log("📥 Callback received:", data);
+    
     const providerOrderId =
       data.providerOrderId || 
+      data.vnp_TxnRef || 
       data.orderId ||         
       data.invoice_id;    
     
@@ -109,7 +112,7 @@ class PaymentService {
     });
 
     if (paymentResult.status === "SUCCESS") {
-       rabbit.publish("payment_events", "payment.success", {
+       rabbit.publish("payment_events", "payment.succeed", {
       orderId: paymentRecord.order_id,
       status: paymentResult.status,
     });

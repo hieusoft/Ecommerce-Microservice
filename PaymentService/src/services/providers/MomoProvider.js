@@ -128,4 +128,4 @@ class MomoProvider extends BasePaymentProvider {
   }
 }
 
-module.exports = new MomoProvider();
+module.exports = MomoProvider;
