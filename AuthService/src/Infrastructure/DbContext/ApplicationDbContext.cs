@@ -13,7 +13,7 @@ namespace Infrastructure.DbContext
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
-        public DbSet<UserContacts> UserContacts { get; set; }
+        public DbSet<RecipientInfo> RecipientInfo { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<EmailVerificationToken> EmailVerificationTokens { get; set; }
         public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
@@ -58,10 +58,12 @@ namespace Infrastructure.DbContext
                     .HasForeignKey(e => e.RoleId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
-            modelBuilder.Entity<UserContacts>(entity =>
+            modelBuilder.Entity<RecipientInfo>(entity =>
             {
-                entity.HasKey(e => e.ContactId);
-
+                entity.HasKey(e => e.RecipientId);
+                entity.Property(e => e.FullName)
+                      .IsRequired()
+                      .HasMaxLength(100);
                 entity.Property(e => e.AddressLine)
                       .IsRequired()
                       .HasMaxLength(255);

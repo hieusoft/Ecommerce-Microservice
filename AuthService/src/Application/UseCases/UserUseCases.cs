@@ -142,103 +142,106 @@ namespace Application.UseCases
                 user.Email
             });
         }
-        public async Task<IEnumerable<UserContactResponseDto>> GetContactsByUserIdAsync(int userId)
+        public async Task<IEnumerable<RecipientRequestDto>> GetRecipientsByUserIdAsync(int userId)
         {
-            var contacts = await _userRepository.GetContactsByUserIdAsync(userId);
-            return contacts.Select(c => new UserContactResponseDto
+            var recipients = await _userRepository.GetRecipientsByUserIdAsync(userId);
+            return recipients.Select(r => new RecipientRequestDto
             {
-                ContactId = c.ContactId,
-                UserId = c.UserId,
-                AddressLine = c.AddressLine,
-                City = c.City,
-                PhoneNumber = c.PhoneNumber,
-                IsDefault = c.IsDefault
+                RecipientId = r.RecipientId,
+                UserId = r.UserId,
+                FullName = r.FullName,
+                AddressLine = r.AddressLine,
+                City = r.City,
+                PhoneNumber = r.PhoneNumber,
+                IsDefault = r.IsDefault
             });
         }
 
-        public async Task<UserContactResponseDto?> GetContactByIdAsync(int contactId)
+        public async Task<RecipientRequestDto?> GetRecipientById(int recipientId)
         {
-            var contact = await _userRepository.GetContactByIdAsync(contactId);
-            if (contact == null) return null;
+            var recipient = await _userRepository.GetRecipientByIdAsync(recipientId);
+            if (recipient == null) return null;
 
-            return new UserContactResponseDto
+            return new RecipientRequestDto
             {
-                ContactId = contact.ContactId,
-                UserId = contact.UserId,
-                AddressLine = contact.AddressLine,
-                City = contact.City,
-                PhoneNumber = contact.PhoneNumber,
-                IsDefault = contact.IsDefault
+                RecipientId = recipient.RecipientId,
+                FullName = recipient.FullName,
+                UserId = recipient.UserId,
+                AddressLine = recipient.AddressLine,
+                City = recipient.City,
+                PhoneNumber = recipient.PhoneNumber,
+                IsDefault = recipient.IsDefault
             };
         }
 
-        public async Task AddContactAsync(AddUserContactRequestDto dto)
+        public async Task AddRecipientAsync(RecipientRequestDto dto)
         {
             var user = await _userRepository.GetByIdAsync(dto.UserId);
             if (user == null) throw new Exception("User not found");
-            var contact = new UserContacts
+            var recipient = new RecipientInfo
             {
                 UserId = dto.UserId,
+                FullName = dto.FullName,
                 AddressLine = dto.AddressLine,
                 City = dto.City,
                 PhoneNumber = dto.PhoneNumber,
                 IsDefault = dto.IsDefault
             };
 
-            if (contact.IsDefault)
+            if (recipient.IsDefault)
             {
               
-                var existingContacts = await _userRepository.GetContactsByUserIdAsync(dto.UserId);
-                foreach (var c in existingContacts)
+                var existingRecipient = await _userRepository.GetRecipientsByUserIdAsync(dto.UserId);
+                foreach (var c in existingRecipient)
                 {
                     if (c.IsDefault)
                     {
                         c.IsDefault = false;
-                        await _userRepository.UpdateContactAsync(c);
+                        await _userRepository.UpdateRecipientAsync(c);
                     }
                 }
             }
 
-            await _userRepository.AddContactAsync(contact);
+            await _userRepository.AddRecipientAsync(recipient);
         }
 
-        public async Task UpdateContactAsync(UpdateUserContactRequestDto dto)
+        public async Task UpdateRecipientAsync(UpdateRecipientInfoRequestDto dto)
         {
-            var contact = await _userRepository.GetContactByIdAsync(dto.ContactId);
-            if (contact == null) throw new Exception("Contact not found");
+            var recipient = await _userRepository.GetRecipientByIdAsync(dto.RecipientId);
+            if (recipient == null) throw new Exception("Recipient not found");
 
-            contact.AddressLine = dto.AddressLine;
-            contact.City = dto.City;
-            contact.PhoneNumber = dto.PhoneNumber;
+            recipient.AddressLine = dto.AddressLine;
+            recipient.City = dto.City;
+            recipient.PhoneNumber = dto.PhoneNumber;
 
-            if (dto.IsDefault && !contact.IsDefault)
+            if (dto.IsDefault && !recipient.IsDefault)
             {
-                // Nếu đánh dấu default, reset các contact khác
-                var existingContacts = await _userRepository.GetContactsByUserIdAsync(contact.UserId);
-                foreach (var c in existingContacts)
+               
+                var existingRecipient = await _userRepository.GetRecipientsByUserIdAsync(recipient.UserId);
+                foreach (var r in existingRecipient)
                 {
-                    if (c.IsDefault)
+                    if (r.IsDefault)
                     {
-                        c.IsDefault = false;
-                        await _userRepository.UpdateContactAsync(c);
+                        r.IsDefault = false;
+                        await _userRepository.UpdateRecipientAsync(r);
                     }
                 }
-                contact.IsDefault = true;
+                recipient.IsDefault = true;
             }
             else if (!dto.IsDefault)
             {
-                contact.IsDefault = false;
+                recipient.IsDefault = false;
             }
 
-            await _userRepository.UpdateContactAsync(contact);
+            await _userRepository.UpdateRecipientAsync(recipient);
         }
 
-        public async Task DeleteContactAsync(int contactId)
+        public async Task DeleteRecipientAsync(int recipientId)
         {
-            var contact = await _userRepository.GetContactByIdAsync(contactId);
-            if (contact == null) throw new Exception("Contact not found");
+            var contact = await _userRepository.GetRecipientByIdAsync(recipientId);
+            if (contact == null) throw new Exception("Recipient not found");
 
-            await _userRepository.DeleteContactAsync(contact);
+            await _userRepository.DeleteRecipientAsync(contact);
         }
 
     }

@@ -87,33 +87,35 @@ namespace Infrastructure.Repositories
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
         }
-        public async Task<UserContacts?> GetContactByIdAsync(int contactId)
+
+        public async Task<RecipientInfo?> GetRecipientByIdAsync(int recipientId)
         {
-            return await _context.UserContacts
-                .FirstOrDefaultAsync(c => c.ContactId == contactId);
+            return await _context.RecipientInfo
+               .FirstOrDefaultAsync(r => r.RecipientId == recipientId);
         }
-        public async Task<IEnumerable<UserContacts>> GetContactsByUserIdAsync(int userId)
+
+        public async Task<IEnumerable<RecipientInfo>> GetRecipientsByUserIdAsync(int userId)
         {
-            return await _context.UserContacts
-                .Where(c => c.UserId == userId)
+            return await _context.RecipientInfo
+                .Where(r => r.UserId == userId)
                 .ToListAsync();
         }
 
-        public async Task AddContactAsync(UserContacts contact)
+        public async  Task AddRecipientAsync(RecipientInfo recipientInfo)
         {
-            await _context.UserContacts.AddAsync(contact);
+            await _context.RecipientInfo.AddAsync(recipientInfo);
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateContactAsync(UserContacts contact)
+        public async Task UpdateRecipientAsync(RecipientInfo recipientInfo)
         {
-            _context.UserContacts.Update(contact);
+            _context.RecipientInfo.Update(recipientInfo);
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteContactAsync(UserContacts contact)
+        public async Task DeleteRecipientAsync(RecipientInfo RecipientInfo)
         {
-            _context.UserContacts.Remove(contact);
+            _context.RecipientInfo.Remove(RecipientInfo);
             await _context.SaveChangesAsync();
         }
     }

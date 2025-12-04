@@ -1,0 +1,23 @@
+CREATE TABLE Coupons (
+    id INT PRIMARY KEY IDENTITY(1,1),      
+    code VARCHAR(20) NOT NULL UNIQUE,              
+    discount_type VARCHAR(10) NOT NULL CHECK (discount_type IN ('percent', 'amount')),
+    discount_value DECIMAL(10,2) NOT NULL,      
+    max_uses INT NULL,                             
+    expiry_date DATETIME NULL,                     
+    occasion VARCHAR(50) NULL,                   
+    min_price DECIMAL(10,2) NULL,
+	created_at DATETIME NOT NULL DEFAULT GETDATE(),
+    updated_at DATETIME NOT NULL DEFAULT GETDATE(),
+);
+
+GO
+
+CREATE TABLE OrderCoupons (
+    order_id INT NOT NULL,
+    coupon_id INT NOT NULL,
+	user_id INT NOT NULL,
+	created_at DATETIME NOT NULL DEFAULT GETDATE(),
+    PRIMARY KEY (order_id, coupon_id, user_id),
+    FOREIGN KEY (coupon_id) REFERENCES Coupons(id)
+);

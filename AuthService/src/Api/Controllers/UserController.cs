@@ -145,80 +145,83 @@ namespace Api.Controllers
             }
         }
 
-        [HttpGet("{userId}/contacts")]
-        public async Task<IActionResult> GetContactsByUser(int userId)
+
+        [HttpGet("{userId}/recipients")]
+        public async Task<IActionResult> GetRecipientsByUser(int userId)
         {
-            
             try
             {
-                var contacts = await _userUseCases.GetContactsByUserIdAsync(userId);
-                return Ok(contacts);
+                var recipients = await _userUseCases.GetRecipientsByUserIdAsync(userId);
+                return Ok(recipients);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting contacts");
+                _logger.LogError(ex, "Error getting recipients");
                 return StatusCode(500, new { message = ex.Message });
             }
         }
 
-        [HttpGet("contacts/{contactId}")]
-        public async Task<IActionResult> GetContactById(int contactId)
+        [HttpGet("recipients/{recipientId}")]
+        public async Task<IActionResult> GetRecipientById(int recipientId)
         {
             try
             {
-                var contact = await _userUseCases.GetContactByIdAsync(contactId);
-                if (contact == null)
-                    return NotFound(new { message = "Contact not found" });
-                return Ok(contact);
+                var recipient = await _userUseCases.GetRecipientById(recipientId);
+                if (recipient == null)
+                    return NotFound(new { message = "Recipient not found" });
+                return Ok(recipient);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting contact");
+                _logger.LogError(ex, "Error getting recipient");
                 return StatusCode(500, new { message = ex.Message });
             }
         }
 
-        [HttpPost("contacts")]
-        public async Task<IActionResult> AddContact([FromBody] AddUserContactRequestDto dto)
+        // Thêm ng??i nh?n
+        [HttpPost("recipients")]
+        public async Task<IActionResult> AddRecipient([FromBody] RecipientRequestDto dto)
         {
             try
             {
-                await _userUseCases.AddContactAsync(dto);
-                return Ok(new { message = "Contact added successfully" });
+                await _userUseCases.AddRecipientAsync(dto);
+                return Ok(new { message = "Recipient added successfully" });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error adding contact");
+                _logger.LogError(ex, "Error adding recipient");
                 return BadRequest(new { message = ex.Message });
             }
         }
 
-        [HttpPut("contacts")]
-        public async Task<IActionResult> UpdateContact([FromBody] UpdateUserContactRequestDto dto)
+        // C?p nh?t ng??i nh?n
+        [HttpPut("recipients")]
+        public async Task<IActionResult> UpdateRecipient([FromBody] UpdateRecipientInfoRequestDto dto)
         {
             try
             {
-                await _userUseCases.UpdateContactAsync(dto);
-                return Ok(new { message = "Contact updated successfully" });
+                await _userUseCases.UpdateRecipientAsync(dto);
+                return Ok(new { message = "Recipient updated successfully" });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating contact");
+                _logger.LogError(ex, "Error updating recipient");
                 return BadRequest(new { message = ex.Message });
             }
         }
 
-        [HttpDelete("contacts/{contactId}")]
-        public async Task<IActionResult> DeleteContact(int contactId)
+        // Xóa ng??i nh?n
+        [HttpDelete("recipients/{recipientId}")]
+        public async Task<IActionResult> DeleteRecipient(int recipientId)
         {
             try
             {
-                await _userUseCases.DeleteContactAsync(contactId);
-                return Ok(new { message = "Contact deleted successfully" });
+                await _userUseCases.DeleteRecipientAsync(recipientId);
+                return Ok(new { message = "Recipient deleted successfully" });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting contact");
+                _logger.LogError(ex, "Error deleting recipient");
                 return BadRequest(new { message = ex.Message });
             }
         }

@@ -17,11 +17,10 @@ namespace Application.Interfaces
         Task UpdateAsync(User user);
         Task DeleteAsync(User user);
 
-       
-        Task<UserContacts?> GetContactByIdAsync(int contactId);
-        Task<IEnumerable<UserContacts>> GetContactsByUserIdAsync(int userId);
-        Task AddContactAsync(UserContacts contact);
-        Task UpdateContactAsync(UserContacts contact);
-        Task DeleteContactAsync(UserContacts contact);
+        Task<RecipientInfo?> GetRecipientByIdAsync(int recipientId);
+        Task<IEnumerable<RecipientInfo>> GetRecipientsByUserIdAsync(int userId);
+        Task AddRecipientAsync(RecipientInfo recipientInfo);
+        Task UpdateRecipientAsync(RecipientInfo recipientInfo);
+        Task DeleteRecipientAsync(RecipientInfo recipientInfo);
     }
 }

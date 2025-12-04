@@ -9,10 +9,36 @@ services:
       RABBITMQ_DEFAULT_PASS: guest
     ports:
       - "5672:5672"
-      - "15672:15672"  # UI web
+      - "15672:15672"
+    networks:
+      - micro-net
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "yourStrong(!)Password"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
     networks:
       - micro-net
 
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpass
+      MONGO_INITDB_DATABASE: productservice
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - micro-net
   authservice:
     build: 
       context: ./AuthService
@@ -20,17 +46,50 @@ services:
     container_name: authservice
     depends_on:
       - rabbitmq
+      - sqlserver
     environment:
       ASPNETCORE_ENVIRONMENT: "Production"
-      RabbitMQ__Host: rabbitmq  # ĐIỂM QUAN TRỌNG
+
+      # RabbitMQ
+      RabbitMQ__Host: rabbitmq
       RabbitMQ__Port: 5672
       RabbitMQ__User: guest
       RabbitMQ__Pass: guest
+
+      # SQL SERVER  ⚡  (DÙNG ĐÚNG CHO AUTH)
+      ConnectionStrings__Default: "Server=sqlserver,1433;Database=authdb;User Id=sa;Password=yourStrong(!)Password;TrustServerCertificate=True"
+
+      # Nếu dùng Mongo thì bật dòng sau, còn không thì để tắt ❌
+      # ConnectionStrings__Mongo: "mongodb://mongodb:27017/authdb"
     ports:
-      - "5001:5001"
+      - "8081:8081"
     networks:
       - micro-net
+
+  productservice:
+    build:
+      context: ./ProductService
+      dockerfile: Dockerfile
+    container_name: productservice
+    depends_on:
+      - mongodb
+      - rabbitmq
+    environment:
+      DB_PROVIDER: mongo
+      # MONGO_URI: "mongodb://mongodb:27017/productservice"
+      PORT: 8082
+      RABBITMQ_URL: "amqp://guest:guest@rabbitmq:5672"
+    ports:
+      - "8082:8082"
+    networks:
+      - micro-net
+
+
 
 networks:
   micro-net:
     driver: bridge
+
+volumes:
+  sql_data:
+  mongo_data:

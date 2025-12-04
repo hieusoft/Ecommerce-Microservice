@@ -23,7 +23,7 @@ namespace Domain.Entities
         
 
         public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
-        public ICollection<UserContacts> UserContacts { get; set; } = new List<UserContacts>();
+        public ICollection<RecipientInfo> UserContacts { get; set; } = new List<RecipientInfo>();
         public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
         public ICollection<EmailVerificationToken> EmailVerificationTokens { get; set; } = new List<EmailVerificationToken>();
         public ICollection<PasswordResetToken> PasswordResetTokens { get; set; } = new List<PasswordResetToken>();

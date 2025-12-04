@@ -2,10 +2,12 @@
 
 namespace Domain.Entities
 {
-    public class UserContacts
+    public class RecipientInfo
     {
-        public int ContactId { get; set; }
+        public int RecipientId { get; set; }
         public int UserId { get; set; }
+        public string FullName { get; set; } = string.Empty;
+
         public string AddressLine { get; set; } = string.Empty;
         public string? City { get; set; }
         public string PhoneNumber { get; set; } = string.Empty;
