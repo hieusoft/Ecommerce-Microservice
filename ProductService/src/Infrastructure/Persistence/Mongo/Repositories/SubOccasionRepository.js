@@ -1,9 +1,25 @@
-const ISubOccasionRepository = require("../../../../Application/Interfaces/iSubOccasionRepository");
+const ISubOccasionRepository = require("../../../../Application/Interfaces/ISubOccasionRepository");
 const SubOccasionModel = require("../Models/SubOccasion");
 const SubOccasion = require("../../../../Domain/Entities/SubOccasion");
-
-class SubOccasionRepository  extends ISubOccasionRepository {
+const OccasionModel = require("../Models/OccasionModel");
+class SubOccasionRepository extends ISubOccasionRepository {
     async createSubOccasion(data) {
+        if (data.occasionId) {
+            try {
+                const occasion = await OccasionModel.findById(data.occasionId);
+                if (!occasion) {
+                    const error = new Error("Occasion not found");
+                    error.statusCode = 404;
+                    throw error;
+                }
+            } catch (err) {
+                const error = new Error("Occasion not found");
+                error.statusCode = 404;
+                throw error;
+            }
+        }
+
+
         const subOccasion = new SubOccasionModel(data);
         const savedSubOccasion = await subOccasion.save();
         return new SubOccasion(savedSubOccasion.toObject());
@@ -17,11 +33,26 @@ class SubOccasionRepository  extends ISubOccasionRepository {
         return docs.map(d => new SubOccasion(d.toObject()));
     }
     async updateSubOccasion(id, data) {
-        const updated = await SubOccasionModel.findByIdAndUpdate(id, data, { new: true });      
+        if (data.occasionId) {
+            try {
+                const occasion = await OccasionModel.findById(data.occasionId);
+                if (!occasion) {
+                    const error = new Error("Occasion not found");
+                    error.statusCode = 404;
+                    throw error;
+                }
+            } catch (err) {
+                const error = new Error("Occasion not found");
+                error.statusCode = 404;
+                throw error;
+            }
+        }
+
+        const updated = await SubOccasionModel.findByIdAndUpdate(id, data, { new: true });
         return updated ? new SubOccasion(updated.toObject()) : null;
     }
     async deleteSubOccasion(id) {
         return await SubOccasionModel.findByIdAndDelete(id);
     }
-} 
+}
 module.exports = SubOccasionRepository;

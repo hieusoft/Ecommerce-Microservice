@@ -6,7 +6,7 @@ const bouquetRepo = RepositoryFactory.bouquet();
 
 class BouquetController {
     constructor(rabbitService) {
-       
+
         this.bouquetUseCase = new BouquetUseCase(bouquetRepo, rabbitService);
     }
 
@@ -15,8 +15,14 @@ class BouquetController {
             const dto = new BouquetDTO(req.body);
             const bouquet = await this.bouquetUseCase.createBouquet(dto);
             res.status(201).json(bouquet);
+
         } catch (error) {
-            res.status(400).json({ error: error.message });
+            // res.status(400).json({ error: error.message });
+            if (error.statusCode === 404) {
+                return res.status(404).json({ error: error.message });
+            } else {
+                res.status(400).json({ error: error.message });
+            }
         }
     }
 
@@ -49,7 +55,11 @@ class BouquetController {
             }
             res.json(updatedBouquet);
         } catch (error) {
-            res.status(400).json({ error: error.message });
+            if (error.statusCode === 404) {
+                return res.status(404).json({ error: error.message });
+            } else {
+                res.status(400).json({ error: error.message });
+            }
         }
     }
 

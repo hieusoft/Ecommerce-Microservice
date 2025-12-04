@@ -13,7 +13,11 @@ class SubOccasionController {
             res.status(201).json(subOccasion);
         }
         catch (error) {
-            res.status(400).json({ error: error.message });
+            if (error.statusCode === 404) {
+                return res.status(404).json({ error: error.message });
+            } else {
+                res.status(400).json({ error: error.message });
+            }
         }
     }
 
@@ -44,7 +48,11 @@ class SubOccasionController {
             }
             res.json(updatedSubOccasion);
         } catch (error) {
-            res.status(400).json({ error: error.message });
+            if (error.statusCode === 404) {
+                return res.status(404).json({ error: error.message });
+            } else {
+                res.status(400).json({ error: error.message });
+            }
         }
     }
 

@@ -37,26 +37,38 @@ class BouquetUseCase {
 
 
     async updateBouquet(id, dto) {
-        BouquetValidator.validateCreate(dto);
-
         const bouquet = await this.bouquetRepository.getBouquetById(id);
-
         if (!bouquet) throw new Error("Bouquet not found");
+        
+        BouquetValidator.validateUpdate(dto);
+        let oldImages = bouquet.images || [];
 
-        if (bouquet.images && bouquet.images.length > 0) {
-            for (const imgPath of bouquet.images) {
-                const fullPath = path.join(__dirname, '../../../', imgPath);
-                if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
+        if (dto.images && dto.images.length > 0) {
+            const newImages = [];
+            for (let i = 0; i < dto.images.length; i++) {
+                const imgItem = dto.images[i];
+                if (imgItem.keep) {
+                    if (bouquet.images[i]) newImages.push(bouquet.images[i]);
+                } else if (imgItem.base64) {
+                    const savedPath = await this.imageService.saveBase64Images([imgItem.base64]);
+                    newImages.push(savedPath[0]);
+                }
+            }
+            dto.images = newImages;
+        }
+        const updatedBouquet = await this.bouquetRepository.updateBouquet(id, dto);
+        if (oldImages.length > 0 && updatedBouquet.images) {
+            for (const imgPath of oldImages) {
+                if (!updatedBouquet.images.includes(imgPath)) {
+                    const fullPath = path.join(__dirname, '../../../', imgPath);
+                    if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
+                }
             }
         }
 
-        if (dto.images && dto.images.length > 0) {
-            dto.images = await this.imageService.saveBase64Images(dto.images);
-        }
-
-        const updatedBouquet = await this.bouquetRepository.updateBouquet(id, dto);
         return updatedBouquet;
     }
+
 
     async getBouquetById(id) {
         return await this.bouquetRepository.getBouquetById(id);

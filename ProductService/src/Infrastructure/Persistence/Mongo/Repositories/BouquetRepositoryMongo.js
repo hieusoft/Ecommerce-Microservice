@@ -1,10 +1,23 @@
 const BouquetModel = require('../Models/BouquetModel');
 const Bouquet = require('../../../../Domain/Entities/Bouquet');
 const IBouquetRepository = require('../../../../Application/Interfaces/IBouquetRepository ');
+const SubOccasionModel = require('../Models/SubOccasion')
 
 class BouquetRepositoryMongo extends IBouquetRepository {
 
     async createBouquet(bouquetData) {
+        if (bouquetData.subOccasionId) {
+
+            const subOccasion = await SubOccasionModel.findById(bouquetData.subOccasionId);
+
+            if (!subOccasion) {
+                const error = new Error("Suboccasion not found");
+                error.statusCode = 404;
+                throw error;
+            }
+        }
+
+
         const bouquet = new BouquetModel(bouquetData);
         const savedBouquet = await bouquet.save();
         return new Bouquet(savedBouquet.toObject());
@@ -24,6 +37,16 @@ class BouquetRepositoryMongo extends IBouquetRepository {
     }
 
     async updateBouquet(id, data) {
+        if (data.subOccasionId) {
+
+            const subOccasion = await SubOccasionModel.findById(data.subOccasionId);
+
+            if (!subOccasion) {
+                const error = new Error("Suboccasion not found");
+                error.statusCode = 404;
+                throw error;
+            }
+        }
         const updated = await BouquetModel.findByIdAndUpdate(id, data, { new: true })
             .populate('subOccasionId');
 
@@ -83,7 +106,7 @@ class BouquetRepositoryMongo extends IBouquetRepository {
             }
         ];
 
-        
+
         if (search_query) {
             pipeline.push({
                 $match: {
@@ -95,7 +118,7 @@ class BouquetRepositoryMongo extends IBouquetRepository {
             });
         }
 
-        
+
         if (name) {
             pipeline.push({
                 $match: {
@@ -104,7 +127,7 @@ class BouquetRepositoryMongo extends IBouquetRepository {
             });
         }
 
-        
+
         if (subOccasionName) {
             pipeline.push({
                 $match: {
