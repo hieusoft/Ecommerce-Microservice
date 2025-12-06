@@ -2,6 +2,7 @@ using Application.DTOs.User;
 using Application.UseCases;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Api.Controllers
 {
@@ -19,7 +20,40 @@ namespace Api.Controllers
             _logger = logger;
         }
 
-   
+        [HttpGet("profile")]
+      
+        public async Task<IActionResult> GetProfile()
+        {
+            try
+            {
+
+                var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+                if (userIdClaim == null)
+                    return Unauthorized(new { message = "Invalid token" });
+
+                var userId = int.Parse(userIdClaim.Value);
+             
+
+                
+
+                
+                var userProfile = await _userUseCases.GetUserByIdAsync(userId);
+
+                return Ok(new
+                {
+                    userProfile.FullName,
+                    userProfile.UserName,
+                    userProfile.Email,
+                    userProfile.Roles,
+                    userProfile.EmailVerified
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching user profile");
+                return BadRequest(new { message = ex.Message });
+            }
+        }
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {

@@ -6,6 +6,7 @@ using System.Data;
 using System.Security.Claims;
 using System.Xml;
 
+
 public class AuthUseCases
 {
     private readonly IUserRepository _userRepository;
@@ -100,7 +101,7 @@ public class AuthUseCases
 
             await _tokenRepository.UpdateRefreshTokenAsync(existingToken);
         }
-
+       
         return (accessToken, refreshToken);
     }
 
@@ -238,6 +239,23 @@ public class AuthUseCases
 
 
     }
+    public async Task ChangePasswordAsync(ChangePasswordDto dto, int userId)
+    {
+        var user = await _userRepository.GetByIdAsync(userId);
+
+        if (user == null)
+            throw new Exception("User not found");
+
+        if (!_passwordHasher.VerifyPassword(user.PasswordHash, dto.OldPassword))
+            throw new Exception("Old password is incorrect");
+        if (dto.OldPassword == dto.NewPassword)
+            throw new Exception("The new password cannot be the same as the old password!");
+        
+        user.PasswordHash = _passwordHasher.HashPassword(dto.NewPassword);
+        user.TokenVersion += 1;
+        await _userRepository.UpdateAsync(user);
+    }
+
     public async Task<(string accessToken, string refreshToken)> ResetPasswordAsync(ResetPasswordRequestDto dto)
     {
         var resetToken = await _passwordResetTokenRepository.GetPasswordResetTokenAsync(dto.Token);
@@ -330,7 +348,7 @@ public class AuthUseCases
         });
     }
 
-    public async Task ResendVerificationEmailAsync(ForgotPasswordRequestDto dto)
+    public async Task ResendVerificationEmailAsync(ResendVerificationRequestDto dto)
     {
         var user = await _userRepository.GetByEmailOrUsernameAsync(dto.Email);
         if (user == null)

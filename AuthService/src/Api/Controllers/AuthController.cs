@@ -1,7 +1,9 @@
 using Application.DTOs.Auth;
 using Application.UseCases;
 using Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Api.Controllers
 {
@@ -39,6 +41,13 @@ namespace Api.Controllers
             try
             {
                 var (accessToken, refreshToken) = await _authUseCases.LoginAsync(dto);
+                Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Expires = DateTimeOffset.UtcNow.AddDays(7)
+                });
                 return Ok(new
                 {
                     accessToken,
@@ -58,6 +67,13 @@ namespace Api.Controllers
             try
             {
                 var (newAccessToken, newRefreshToken) = await _authUseCases.RefreshTokenAsync(dto);
+                Response.Cookies.Append("refreshToken", newRefreshToken, new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Expires = DateTimeOffset.UtcNow.AddDays(7)
+                });
                 return Ok(new
                 {
                     newAccessToken,
@@ -80,7 +96,7 @@ namespace Api.Controllers
             try
             {
                 await _authUseCases.ForgotPasswordAsync(dto);
-                // Always return success to prevent email enumeration
+                
                 return Ok(new { message = "If the email exists, a password reset link has been sent." });
             }
             catch (Exception ex)
@@ -96,7 +112,13 @@ namespace Api.Controllers
             try
             {
                 var (accessToken, refreshToken) = await _authUseCases.ResetPasswordAsync(dto);
-               
+                Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Expires = DateTimeOffset.UtcNow.AddDays(7)
+                });
                 return Ok(new
                 {
                     message = "Password has been reset successfully",
@@ -126,9 +148,36 @@ namespace Api.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+        [Authorize]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+        {
+          
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+                return Unauthorized(new { message = "Invalid token" });
+
+            if (!int.TryParse(userIdClaim.Value, out var userId))
+                return Unauthorized(new { message = "Invalid token" });
+
+            try
+            {
+       
+               await _authUseCases.ChangePasswordAsync(dto, userId);
+
+               
+
+                return Ok(new { message = "Password changed successfully" });
+            }
+            catch (Exception ex)
+            {
+                
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
 
         [HttpPost("resend-verification")]
-        public async Task<IActionResult> ResendVerificationEmail([FromBody] ForgotPasswordRequestDto dto)
+        public async Task<IActionResult> ResendVerificationEmail([FromBody] ResendVerificationRequestDto dto)
         {
             try
             {
