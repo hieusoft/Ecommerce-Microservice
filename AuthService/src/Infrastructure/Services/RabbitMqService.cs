@@ -1,8 +1,8 @@
 ﻿using Application.Interfaces;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using System;
 using System.Text;
 
 namespace Infrastructure.Services
@@ -12,14 +12,16 @@ namespace Infrastructure.Services
         private readonly IConnection _connection;
         private IModel _channel;
 
-        public RabbitMqService()
+        public RabbitMqService(IConfiguration configuration)
         {
-            var factory = new ConnectionFactory()
+            var connectionString = configuration.GetSection("RabbitMq:ConnectionString").Value;
+
+            if (string.IsNullOrWhiteSpace(connectionString))
+                throw new Exception("RabbitMQ connection string is missing");
+
+            var factory = new ConnectionFactory
             {
-                HostName = "rabbitmq",
-                Port = 5672,
-                UserName = "guest",
-                Password = "guest"
+                Uri = new Uri(connectionString)
             };
 
             try
@@ -41,7 +43,6 @@ namespace Infrastructure.Services
             return _channel;
         }
 
-        
         public void DeclareExchange(string exchangeName, string exchangeType = ExchangeType.Direct)
         {
             var channel = GetChannel();
@@ -52,23 +53,14 @@ namespace Infrastructure.Services
         {
             var channel = GetChannel();
 
-            channel.QueueDeclare(
-                queue: queueName,
-                durable: true,
-                exclusive: false,
-                autoDelete: false,
-                arguments: null
-            );
-
-            channel.QueueBind(
-                queue: queueName,
-                exchange: exchangeName,
-                routingKey: routingKey
-            );
+            channel.QueueDeclare(queue: queueName, durable: true, exclusive: false, autoDelete: false);
+            channel.QueueBind(queue: queueName, exchange: exchangeName, routingKey: routingKey);
         }
+
         public void Subscribe(string queueName, Func<string, string, Task> onMessageAsync)
         {
-            var consumer = new EventingBasicConsumer(_channel);
+            var channel = GetChannel();
+            var consumer = new EventingBasicConsumer(channel);
 
             consumer.Received += async (model, ea) =>
             {
@@ -79,17 +71,16 @@ namespace Infrastructure.Services
                 {
                     if (onMessageAsync != null)
                         await onMessageAsync(message, routingKey);
-                    _channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
+
+                    channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
                 }
                 catch
                 {
-
-                    _channel.BasicNack(deliveryTag: ea.DeliveryTag, multiple: false, requeue: true);
+                    channel.BasicNack(deliveryTag: ea.DeliveryTag, multiple: false, requeue: true);
                 }
             };
 
-            _channel.BasicConsume(queue: queueName, autoAck: false, consumer: consumer);
-            Console.WriteLine($"Subscribed to queue {queueName}");
+            channel.BasicConsume(queue: queueName, autoAck: false, consumer: consumer);
         }
 
         public void Publish(string exchangeName, string routingKey, object message)
@@ -102,12 +93,7 @@ namespace Infrastructure.Services
             var props = channel.CreateBasicProperties();
             props.Persistent = true;
 
-            channel.BasicPublish(
-                exchange: exchangeName,
-                routingKey: routingKey,
-                basicProperties: props,
-                body: body
-            );
+            channel.BasicPublish(exchange: exchangeName, routingKey: routingKey, basicProperties: props, body: body);
         }
 
         public void Dispose()

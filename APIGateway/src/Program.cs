@@ -1,28 +1,51 @@
-﻿using Ocelot.DependencyInjection;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 using Ocelot.Provider.Polly;
+using src.Middleware;
+using src.Security;
+using StackExchange.Redis;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.AddJsonFile("ocelot.json");
 
-builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
+// Redis
+builder.Services.AddSingleton<IConnectionMultiplexer>(
+    ConnectionMultiplexer.Connect("redis:6379"));
 
+builder.Services.AddTransient<RedisTokenValidator>();
 
-builder.Services.AddOcelot(builder.Configuration)
-                .AddPolly();
+// ---- JWT ----
+var key = Encoding.UTF8.GetBytes("YourSuperSecretKeyThatShouldBeAtLeast32CharactersLong!");
 
-builder.Services.AddAuthentication("Bearer")
-    .AddJwtBearer("Bearer", options =>
+builder.Services.AddAuthentication()
+    .AddJwtBearer("GatewayKey", options =>
     {
-        options.Authority = "http://127.0.0.1:5236"; 
-        options.RequireHttpsMetadata = false;
-        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateAudience = false
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = "AuthService",
+            ValidAudience = "AuthServiceUsers",
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ClockSkew = TimeSpan.Zero
+        };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = ctx =>
+            {
+                Console.WriteLine("Auth failed: " + ctx.Exception.Message);
+                return Task.CompletedTask;
+            }
         };
     });
 
-
+// ---- CORS ----
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -33,10 +56,17 @@ builder.Services.AddCors(options =>
     });
 });
 
+// ---- OCELOT ----
+builder.Services.AddOcelot(builder.Configuration).AddPolly();
+
 var app = builder.Build();
 
-
 app.UseCors();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.UseMiddleware<RoleCheckMiddleware>();
 
 app.MapGet("/", () => "API Gateway is running");
 

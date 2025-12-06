@@ -45,7 +45,13 @@ async function getAllOrders() {
         .query(`SELECT * FROM Orders ORDER BY created_at DESC`);
     return result.recordset;
 }
-
+async function getOrdersByUserId(user_id) {
+     await poolConnect;
+    const result = await pool.request()
+        .input('user_id', user_id)
+        .query(`SELECT * FROM Orders WHERE user_id = @user_id`);
+    return result.recordset[0];
+}
 async function getOrderById(order_id) {
     await poolConnect;
     const result = await pool.request()
@@ -111,6 +117,7 @@ module.exports = {
     createOrder,
     updateOrderCode,
     getAllOrders,
+    getOrdersByUserId,
     updateOrderTotal,
     getOrderById,
     updateOrder,

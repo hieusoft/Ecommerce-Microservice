@@ -1,7 +1,9 @@
 ﻿using Application.DTOs.Auth;
 using Application.Interfaces;
 using Domain.Entities;
+using System;
 using System.Data;
+using System.Security.Claims;
 using System.Xml;
 
 public class AuthUseCases
@@ -15,6 +17,7 @@ public class AuthUseCases
     private readonly IEmailVerificationTokenRepository _emailVerificationTokenRepository;
     private readonly IPasswordResetTokenRepository _passwordResetTokenRepository;
     private readonly IRabbitMqService _rabbitMqService;
+    private readonly IRedisService _redisService;
     public AuthUseCases(
         IUserRepository userRepository,
         IPasswordHasher passwordHasher,
@@ -24,7 +27,8 @@ public class AuthUseCases
         IEmailVerificationTokenRepository emailVerificationTokenRepository,
         IPasswordResetTokenRepository passwordResetTokenRepository,
         IRoleRepository roleRepository,
-        IRabbitMqService rabbitMqService
+        IRabbitMqService rabbitMqService,
+        IRedisService redisService
         )
     {
         _userRepository = userRepository;
@@ -36,30 +40,52 @@ public class AuthUseCases
         _passwordResetTokenRepository = passwordResetTokenRepository;
         _roleRepository = roleRepository;
         _rabbitMqService = rabbitMqService;
+        _redisService = redisService;
 
     }
 
     public async Task<(string accessToken, string refreshToken)> LoginAsync(LoginRequestDto dto)
     {
         var user = await _userRepository.GetByEmailOrUsernameAsync(dto.EmailOrUsername);
-        
+
         if (user == null || !_passwordHasher.VerifyPassword(user.PasswordHash, dto.Password))
             throw new Exception("Invalid credentials");
+
         if (user.IsBanned)
             throw new Exception("Your account has been banned");
-        if (user.EmailVerified == false)
-            throw new Exception("Email not verified. Please verify your email before logging in.");
+
+        if (!user.EmailVerified)
+            throw new Exception("Email not verified");
+
         user.TokenVersion += 1;
+
+      
+        await _redisService.SetStringAsync(
+            $"user:{user.UserId}:tokenVersion",
+            user.TokenVersion.ToString(),
+            TimeSpan.FromDays(7)
+        );
+
+     
         await _userRepository.UpdateAsync(user);
+
+      
         var roles = user.UserRoles?.Select(ur => ur.Role.RoleName) ?? new List<string>();
-        var accessToken = _jwtService.GenerateAccessToken(user.UserId, user.Email, roles,user.TokenVersion);
+
+        var accessToken = _jwtService.GenerateAccessToken(
+            user.UserId,
+            user.Email,
+            roles,
+            user.TokenVersion
+        );
+
         var refreshToken = _jwtService.GenerateRefreshToken();
 
+        
         var existingToken = await _tokenRepository.GetRefreshTokenByUserIdAsync(user.UserId);
-     
+
         if (existingToken == null)
         {
-          
             await _tokenRepository.AddRefreshTokenAsync(new RefreshToken
             {
                 Token = refreshToken,
@@ -69,19 +95,14 @@ public class AuthUseCases
         }
         else
         {
-           
             existingToken.Token = refreshToken;
             existingToken.ExpiresAt = DateTime.UtcNow.AddDays(7);
-         
 
             await _tokenRepository.UpdateRefreshTokenAsync(existingToken);
         }
-      
-      
 
         return (accessToken, refreshToken);
     }
-
 
     public async Task RegisterAsync(RegisterRequestDto dto)
     {
@@ -106,11 +127,11 @@ public class AuthUseCases
             if (emailUser.EmailVerified)
                 throw new Exception("Email is already registered");
 
-            // Kiểm tra token hiện tại còn hiệu lực
+            
             var existingToken = await _emailVerificationTokenRepository.GetEmailVerificationTokensByUserIdAsync(emailUser.UserId);
             if (existingToken != null)
             {
-                // Token còn hạn => không publish nữa
+               
                 return;
             }
 
@@ -192,7 +213,7 @@ public class AuthUseCases
         });
     }
 
-
+  
     public async Task ForgotPasswordAsync(ForgotPasswordRequestDto dto)
     {
         var user = await _userRepository.GetByEmailOrUsernameAsync(dto.Email);
@@ -234,6 +255,11 @@ public class AuthUseCases
 
         user.PasswordHash = _passwordHasher.HashPassword(dto.NewPassword);
         user.TokenVersion += 1;
+        await _redisService.SetStringAsync(
+           $"user:{user.UserId}:tokenVersion",
+           user.TokenVersion.ToString(),
+           TimeSpan.FromDays(7)
+       );
         await _userRepository.UpdateAsync(user);
 
         resetToken.Used = true;
@@ -361,6 +387,11 @@ public class AuthUseCases
         if (user == null)
             throw new Exception("User not found");
         user.TokenVersion += 1;
+        await _redisService.SetStringAsync(
+           $"user:{user.UserId}:tokenVersion",
+           user.TokenVersion.ToString(),
+           TimeSpan.FromDays(7)
+       );
         await _userRepository.UpdateAsync(user);
         var roles = user.UserRoles?.Select(ur => ur.Role.RoleName) ?? new List<string>();
         var newAccessToken = _jwtService.GenerateAccessToken(user.UserId, user.Email, roles,user.TokenVersion);

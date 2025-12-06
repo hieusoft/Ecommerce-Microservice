@@ -1,12 +1,12 @@
 {
   "Routes": [
     {
-      "DownstreamPathTemplate": "/api/auth/{everything}",
+      "DownstreamPathTemplate": "/api/Auth/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "127.0.0.1",
-          "Port": 5236
+          "Host": "authservice",
+          "Port": 8081
         }
       ],
       "UpstreamPathTemplate": "/auth/{everything}",
@@ -14,21 +14,150 @@
       "Priority": 1
     },
     {
-      "DownstreamPathTemplate": "/api/notification/{everything}",
+      "DownstreamPathTemplate": "/api/bouquets/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "127.0.0.1",
-          "Port": 5270
+          "Host": "productservice",
+          "Port": 8082
         }
       ],
-      "UpstreamPathTemplate": "/notification/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "UpstreamPathTemplate": "/bouquets/{everything}",
+      "UpstreamHttpMethod": [ "GET" ],
       "Priority": 2
+    },
+    {
+      "DownstreamPathTemplate": "/api/bouquets/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "productservice",
+          "Port": 8082
+        }
+      ],
+      "UpstreamPathTemplate": "/bouquets/{everything}",
+      "UpstreamHttpMethod": [ "POST", "PUT", "DELETE" ],
+      "Priority": 3,
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "GatewayKey",
+        "AllowedScopes": []
+      },
+      "DelegatingHandlers": [ "RedisTokenValidator" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/occasions/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "orderservice",
+          "Port": 8083
+        }
+      ],
+      "UpstreamPathTemplate": "/occasions/{everything}",
+      "UpstreamHttpMethod": [ "GET" ],
+      "Priority": 4
+    },
+    {
+      "DownstreamPathTemplate": "/api/occasions/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "orderservice",
+          "Port": 8083
+        }
+      ],
+      "UpstreamPathTemplate": "/occasions/{everything}",
+      "UpstreamHttpMethod": [ "POST", "PUT", "DELETE" ],
+      "Priority": 5,
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "GatewayKey",
+        "AllowedScopes": []
+      },
+      "DelegatingHandlers": [ "RedisTokenValidator" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/suboccasions/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "productservice",
+          "Port": 8082
+        }
+      ],
+      "UpstreamPathTemplate": "/suboccasions/{everything}",
+      "UpstreamHttpMethod": [ "GET" ],
+      "Priority": 6
+    },
+    {
+      "DownstreamPathTemplate": "/api/suboccasions/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "productservice",
+          "Port": 8082
+        }
+      ],
+      "UpstreamPathTemplate": "/suboccasions/{everything}",
+      "UpstreamHttpMethod": [ "POST", "PUT", "DELETE" ],
+      "Priority": 7,
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "GatewayKey",
+        "AllowedScopes": []
+      },
+      "DelegatingHandlers": [ "RedisTokenValidator" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/greetings/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "productservice",
+          "Port": 8082
+        }
+      ],
+      "UpstreamPathTemplate": "/greetings/{everything}",
+      "UpstreamHttpMethod": [ "GET" ],
+      "Priority": 8
+    },
+    {
+      "DownstreamPathTemplate": "/api/greetings/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "productservice",
+          "Port": 8082
+        }
+      ],
+      "UpstreamPathTemplate": "/greetings/{everything}",
+      "UpstreamHttpMethod": [ "POST", "PUT", "DELETE" ],
+      "Priority": 9,
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "GatewayKey",
+        "AllowedScopes": []
+      },
+      "DelegatingHandlers": [ "RedisTokenValidator" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/User/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "authservice",
+          "Port": 8081
+        }
+      ],
+      "UpstreamPathTemplate": "/User/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "Priority": 10,
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "GatewayKey",
+        "AllowedScopes": []
+      },
+      "DelegatingHandlers": [ "RedisTokenValidator" ]
     }
   ],
   "GlobalConfiguration": {
-    "BaseUrl": "http://127.0.0.1:5000",
+    "BaseUrl": "http://localhost:8080",
     "RequestIdKey": "OcRequestId",
     "DownstreamScheme": "http",
     "LoadBalancer": "RoundRobin"

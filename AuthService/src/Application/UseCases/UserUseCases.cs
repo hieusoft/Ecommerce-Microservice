@@ -14,12 +14,14 @@ namespace Application.UseCases
         private readonly IUserRepository _userRepository;
         private readonly IRoleRepository _roleRepository;
         private readonly IRabbitMqService _rabbitMqService;
+        private readonly IRedisService _redisService;
 
-        public UserUseCases(IUserRepository userRepository, IRoleRepository roleRepository, IRabbitMqService rabbitMqService)
+        public UserUseCases(IUserRepository userRepository, IRoleRepository roleRepository, IRabbitMqService rabbitMqService, IRedisService redisService)
         {
             _userRepository = userRepository;
             _roleRepository = roleRepository;
             _rabbitMqService = rabbitMqService;
+            _redisService = redisService;
         }
         public async Task<IEnumerable<UserResponseDto>> GetAllUsersAsync()
         {
@@ -72,7 +74,7 @@ namespace Application.UseCases
 
         public async Task AssignRoleAsync(AssignRoleRequestDto dto)
         {
-            var user = await _userRepository.GetByIdAsync(dto.UserId);
+            var user = await _userRepository.GetByEmailOrUsernameAsync(dto.EmailOrUsername);
             if (user == null) throw new Exception("User not found");
 
             var role = await _roleRepository.GetByNameAsync(dto.RoleName);
@@ -91,13 +93,17 @@ namespace Application.UseCases
 
            
             user.TokenVersion += 1;
-
+            await _redisService.SetStringAsync(
+               $"user:{user.UserId}:tokenVersion",
+               user.TokenVersion.ToString(),
+               TimeSpan.FromDays(7)
+           );
             await _userRepository.UpdateAsync(user);
         }
 
         public async Task RemoveRoleAsync(RemoveRoleRequestDto dto)
         {
-            var user = await _userRepository.GetByIdAsync(dto.UserId);
+            var user = await _userRepository.GetByEmailOrUsernameAsync(dto.EmailOrUsername);
             if (user == null) throw new Exception("User not found");
 
             var role = await _roleRepository.GetByNameAsync(dto.RoleName);
@@ -109,12 +115,16 @@ namespace Application.UseCases
             var userRole = user.UserRoles.First(ur => ur.RoleId == role.RoleId);
             user.UserRoles.Remove(userRole);
             user.TokenVersion += 1;
-
+            await _redisService.SetStringAsync(
+           $"user:{user.UserId}:tokenVersion",
+           user.TokenVersion.ToString(),
+           TimeSpan.FromDays(7)
+        );
             await _userRepository.UpdateAsync(user);
         }
-        public async Task BanUserAsync(int userId)
+        public async Task BanUserAsync(string emailOrUsername)
         {
-            var user = await _userRepository.GetByIdAsync(userId);
+            var user = await _userRepository.GetByEmailOrUsernameAsync(emailOrUsername);
             if (user == null) throw new Exception("User not found");
             if (user.IsBanned) throw new Exception("User is already banned");
             user.IsBanned = true;
@@ -126,9 +136,9 @@ namespace Application.UseCases
             });
         }
 
-        public async Task UnbanUserAsync(int userId)
+        public async Task UnbanUserAsync(string emailOrUsername)
         {
-            var user = await _userRepository.GetByIdAsync(userId);
+            var user = await _userRepository.GetByEmailOrUsernameAsync(emailOrUsername);
             if (user == null) throw new Exception("User not found");
 
             if (!user.IsBanned) throw new Exception("User is not banned");
@@ -142,6 +152,7 @@ namespace Application.UseCases
                 user.Email
             });
         }
+
         public async Task<IEnumerable<RecipientRequestDto>> GetRecipientsByUserIdAsync(int userId)
         {
             var recipients = await _userRepository.GetRecipientsByUserIdAsync(userId);

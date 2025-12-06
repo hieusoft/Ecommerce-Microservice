@@ -8,7 +8,7 @@ namespace Application.DTOs.User
 {
     public class AssignRoleRequestDto
     {
-        public int UserId { get; set; } 
+        public string EmailOrUsername { get; set; } = string.Empty;
         public string RoleName { get; set; } = string.Empty;
     }
 }

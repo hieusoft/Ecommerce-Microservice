@@ -119,7 +119,7 @@ namespace Api.Controllers
         {
             try
             {
-                await _userUseCases.BanUserAsync(dto.UserId);
+                await _userUseCases.BanUserAsync(dto.EmailOrUsername);
                 return Ok(new { message = "User has been banned successfully" });
             }
             catch (Exception ex)
@@ -135,7 +135,7 @@ namespace Api.Controllers
         {
             try
             {
-                await _userUseCases.UnbanUserAsync(dto.UserId);
+                await _userUseCases.UnbanUserAsync(dto.EmailOrUsername);
                 return Ok(new { message = "User has been unbanned successfully" });
             }
             catch (Exception ex)
@@ -178,7 +178,6 @@ namespace Api.Controllers
             }
         }
 
-        // Thêm ng??i nh?n
         [HttpPost("recipients")]
         public async Task<IActionResult> AddRecipient([FromBody] RecipientRequestDto dto)
         {
@@ -194,7 +193,6 @@ namespace Api.Controllers
             }
         }
 
-        // C?p nh?t ng??i nh?n
         [HttpPut("recipients")]
         public async Task<IActionResult> UpdateRecipient([FromBody] UpdateRecipientInfoRequestDto dto)
         {

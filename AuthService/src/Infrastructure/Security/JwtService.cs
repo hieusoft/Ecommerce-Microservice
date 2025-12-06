@@ -21,7 +21,7 @@ namespace Infrastructure.Security
             _secretKey = configuration["Jwt:SecretKey"] ?? "YourSuperSecretKeyThatShouldBeAtLeast32CharactersLong!";
             _issuer = configuration["Jwt:Issuer"] ?? "AuthService";
             _audience = configuration["Jwt:Audience"] ?? "AuthServiceUsers";
-            _accessTokenExpirationMinutes = int.Parse(configuration["Jwt:AccessTokenExpirationMinutes"] ?? "60");
+            _accessTokenExpirationMinutes = int.Parse(configuration["Jwt:AccessTokenExpirationMinutes"] ?? "3");
             _refreshTokenLength = int.Parse(configuration["Jwt:RefreshTokenLength"] ?? "64");
         }
 

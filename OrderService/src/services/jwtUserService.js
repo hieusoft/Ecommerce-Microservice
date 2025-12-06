@@ -1,42 +1,19 @@
 const jwt = require("jsonwebtoken");
 
-function getUserIdFromToken(req) {
+function getUserFromToken(req) {
     const authHeader = req.headers['authorization'];
-    console.log("Authorization Header:", authHeader);
     if (!authHeader) throw new Error("No token provided");
 
     const token = authHeader.split(" ")[1];
-    console.log("Extracted Token:", token);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET, {
+        algorithms: ['HS256'],
+        audience: process.env.JWT_AUDIENCE
+    });
 
-    try {
-        // Verify token bằng secret key và audience từ .NET
-        const decoded = jwt.verify(token, process.env.JWT_SECRET, {
-            algorithms: ['HS256'],
-            audience: process.env.JWT_AUDIENCE  // <--- thêm audience
-        });
-        
-        console.log("Decoded JWT Payload:", decoded);
+    const userId = decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'];
+    const roles = decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || [];
 
-        // Lấy userId từ claim của .NET
-        const userId = decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'];
-
-        if (!userId) throw new Error("User ID not found in token");
-
-        return userId;
-    } catch (err) {
-        console.error("JWT Error:", err.name, err.message);
-        if (err.name === "TokenExpiredError") {
-            throw new Error("Token expired");
-        } else if (err.name === "JsonWebTokenError") {
-            throw new Error("Invalid token");
-        } else if (err.name === "NotBeforeError") {
-            throw new Error("Token not active yet");
-        } else {
-            throw err;
-        }
-    }
+    return { userId, roles: Array.isArray(roles) ? roles : [roles] };
 }
 
-module.exports = {
-    getUserIdFromToken
-};
+module.exports = { getUserFromToken };

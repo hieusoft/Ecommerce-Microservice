@@ -12,6 +12,7 @@ services:
       - "15672:15672"
     networks:
       - micro-net
+
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: sqlserver
@@ -39,6 +40,15 @@ services:
       - mongo_data:/data/db
     networks:
       - micro-net
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - micro-net
+
   authservice:
     build: 
       context: ./AuthService
@@ -47,20 +57,17 @@ services:
     depends_on:
       - rabbitmq
       - sqlserver
+      - redis
     environment:
       ASPNETCORE_ENVIRONMENT: "Production"
 
-      # RabbitMQ
       RabbitMQ__Host: rabbitmq
       RabbitMQ__Port: 5672
       RabbitMQ__User: guest
       RabbitMQ__Pass: guest
 
-      # SQL SERVER  ⚡  (DÙNG ĐÚNG CHO AUTH)
-      ConnectionStrings__Default: "Server=sqlserver,1433;Database=authdb;User Id=sa;Password=yourStrong(!)Password;TrustServerCertificate=True"
-
-      # Nếu dùng Mongo thì bật dòng sau, còn không thì để tắt ❌
-      # ConnectionStrings__Mongo: "mongodb://mongodb:27017/authdb"
+      Redis__Host: redis
+      Redis__Port: 6379
     ports:
       - "8081:8081"
     networks:
@@ -76,11 +83,27 @@ services:
       - rabbitmq
     environment:
       DB_PROVIDER: mongo
-      # MONGO_URI: "mongodb://mongodb:27017/productservice"
+      MONGO_URI: "mongodb://root:rootpass@mongodb:27017/productservice?authSource=admin"
       PORT: 8082
       RABBITMQ_URL: "amqp://guest:guest@rabbitmq:5672"
     ports:
       - "8082:8082"
+    networks:
+      - micro-net
+
+  orderservice:
+    build:
+      context: ./OrderService
+      dockerfile: Dockerfile
+    container_name: orderservice
+    depends_on:
+      - mongodb
+      - rabbitmq
+    environment:
+      PORT: 8083
+      RABBITMQ_URL: "amqp://guest:guest@rabbitmq:5672"
+    ports:
+      - "8083:8083"
     networks:
       - micro-net
 
@@ -93,15 +116,33 @@ services:
       - rabbitmq
     environment:
       PORT: 8084
-      # RABBITMQ_URL: "amqp://guest:guest@rabbitmq:5672"
-      # Nếu cần DB (SQL hoặc Mongo), thêm biến môi trường tương ứng
-      # MONGO_URI: "mongodb://mongodb:27017/paymentdb"
-      # SQL_CONNECTION: "Server=sqlserver,1433;Database=paymentdb;User Id=sa;Password=yourStrong(!)Password;TrustServerCertificate=True"
     ports:
       - "8084:8084"
     networks:
       - micro-net
 
+  # ====================================
+  # 🟦 API GATEWAY SERVICE
+  # ====================================
+  apigateway:
+    build:
+      context: ./APIGateway
+      dockerfile: Dockerfile
+    container_name: apigateway
+    depends_on:
+      - authservice
+      - productservice
+      - orderservice
+      - paymentservice
+    ports:
+      - "8080:8080"
+    networks:
+      - micro-net
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Production"
+    volumes:
+      - ./ApiGateway/src/ocelot.json:/app/ocelot.json  # Mount config file
+  # ====================================
 
 networks:
   micro-net:

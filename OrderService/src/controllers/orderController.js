@@ -1,15 +1,14 @@
 const orderService = require('../services/orderService');
-const jwtUserService = require('../services/jwtUserService');
+const { getUserFromToken } = require('../services/jwtUserService');
 async function createOrder(req, res) {
     try {
-        // Lấy user_id từ token
-        const user_id = jwtUserService.getUserIdFromToken(req);
-        console.log('User ID from token:', user_id);
+        const { userId, roles } = getUserFromToken(req);
 
-        // Gán user_id vào body trước khi tạo order
+        
+      
         const orderData = {
             ...req.body,
-            user_id
+            userId
         };
 
         const order = await orderService.createOrder(orderData);
@@ -23,11 +22,21 @@ async function createOrder(req, res) {
 
 async function getAllOrders(req, res) {
     try {
-        const orders = await orderService.getAllOrders();
+        const { userId, roles } = getUserFromToken(req);
+        console.log("+++++++++++++++")
+        console.log(userId)
+        
+
+        let orders;
+        if (roles.includes('Admin')) {
+            orders = await orderService.getAllOrders();
+        } else {
+            orders = await orderService.getOrdersByUserId(userId);
+        }
+
         res.json(orders);
     } catch (err) {
-        console.error(err);
-         res.status(500).json({ message: err.message || 'Failed to delete order' });
+        res.status(401).json({ message: err.message });
     }
 }
 
@@ -97,15 +106,26 @@ async function updateOrderItem(req, res) {
 }
 
 async function deleteOrderItem(req, res) {
-    try {
-        await orderService.deleteOrderItem(req.params.orderId, req.params.orderItemId);
-       
-        res.json({ message: 'Order item deleted' });
-    } catch (err) {
-        console.error(err);
-         res.status(500).json({ message: err.message || 'Failed to delete order' });
-    }
+  try {
+    const result = await orderService.deleteOrderItem(
+      req.params.orderId,
+      req.params.orderItemId
+    );
+
+
+    return res.json({
+      message: result.message,
+      total_price: result.total_price
+    });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      message: err.message || "Failed to delete order"
+    });
+  }
 }
+
 
 module.exports = {
     createOrder,

@@ -74,9 +74,7 @@ async function consume(queue, handler) {
 
 async function setupRabbit() {
 
-  await assertExchangeQueue("order_events", "order.created_coupon_q", "order.created_coupon");
-  await assertExchangeQueue("order_events", "order.created_payment_q", "order.created_payment");
-
+  await assertExchangeQueue("order_events", "order.created_q", "order.created");
   console.log("✅ RabbitMQ setup completed");
 }
 
