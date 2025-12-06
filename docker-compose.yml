@@ -141,7 +141,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: "Production"
     volumes:
-      - ./ApiGateway/src/ocelot.json:/app/ocelot.json  # Mount config file
+      - ./APÍGateway/src/ocelot.json:/app/ocelot.json  # Mount config file
   # ====================================
 
 networks:
