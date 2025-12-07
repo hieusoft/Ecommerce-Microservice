@@ -62,11 +62,19 @@ namespace Api.Controllers
         }
 
         [HttpPost("refresh")]
-        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDto dto)
+        public async Task<IActionResult> RefreshToken()
         {
             try
             {
-                var (newAccessToken, newRefreshToken) = await _authUseCases.RefreshTokenAsync(dto);
+                var refreshToken = Request.Cookies["refreshToken"];
+            
+                if (string.IsNullOrEmpty(refreshToken))
+                {
+                    return Unauthorized(new { message = "Refresh token not found in cookies." });
+                }
+               
+
+                var (newAccessToken, newRefreshToken) = await _authUseCases.RefreshTokenAsync(refreshToken);
                 Response.Cookies.Append("refreshToken", newRefreshToken, new CookieOptions
                 {
                     HttpOnly = true,

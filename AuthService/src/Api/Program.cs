@@ -15,10 +15,10 @@ using StackExchange.Redis;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.WebHost.ConfigureKestrel(options =>
-{
-    options.ListenAnyIP(8081);
-});
+//builder.WebHost.ConfigureKestrel(options =>
+//{
+//    options.ListenAnyIP(8081);
+//});
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
     ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("Redis")));
 

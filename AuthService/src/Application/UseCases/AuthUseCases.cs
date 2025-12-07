@@ -393,10 +393,11 @@ public class AuthUseCases
         });
     }
 
-    public async Task<(string accessToken, string refreshToken)> RefreshTokenAsync(RefreshTokenRequestDto dto)
+    public async Task<(string accessToken, string refreshToken)> RefreshTokenAsync(string refreshToken)
     {
       
-        var oldToken = await _tokenRepository.GetRefreshTokenAsync(dto.RefreshToken);
+        var oldToken = await _tokenRepository.GetRefreshTokenAsync(refreshToken);
+        
         if (oldToken == null || oldToken.ExpiresAt < DateTime.UtcNow)
             throw new Exception("Invalid or expired refresh token");
 
