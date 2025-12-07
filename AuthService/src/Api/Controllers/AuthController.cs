@@ -70,7 +70,7 @@ namespace Api.Controllers
                 Response.Cookies.Append("refreshToken", newRefreshToken, new CookieOptions
                 {
                     HttpOnly = true,
-                    Secure = true,
+                    Secure = false,
                     SameSite = SameSiteMode.None,
                     Expires = DateTimeOffset.UtcNow.AddDays(7)
                 });

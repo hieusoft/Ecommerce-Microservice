@@ -50,12 +50,12 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins("http://localhost:3000") // frontend của bạn
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials(); // cực kỳ quan trọng để gửi cookie
     });
 });
-
 // ---- OCELOT ----
 builder.Services.AddOcelot(builder.Configuration).AddPolly();
 
