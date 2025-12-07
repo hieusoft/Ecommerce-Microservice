@@ -121,9 +121,6 @@ services:
     networks:
       - micro-net
 
-  # ====================================
-  # 🟦 API GATEWAY SERVICE
-  # ====================================
   apigateway:
     build:
       context: ./APIGateway

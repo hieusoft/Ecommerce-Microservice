@@ -4,9 +4,10 @@ const path = require('path');
 const fs = require('fs');
 
 class BouquetUseCase {
-    constructor(bouquetRepository, rabbitService) {
+    constructor(bouquetRepository, rabbitService, redisService ) {
         this.bouquetRepository = bouquetRepository;
         this.rabbitService = rabbitService;
+        this.redisService = redisService;
         this.imageService = new getImageService('bouquets');
     }
 
@@ -18,9 +19,9 @@ class BouquetUseCase {
         }
 
         const bouquet = await this.bouquetRepository.createBouquet(dto);
-
         const fullBouquet = await this.bouquetRepository.getBouquetById(bouquet.id);
 
+       
         if (this.rabbitService) {
             await this.rabbitService.publish('product_events', 'bouquet.created', {
                 bouquetId: fullBouquet.id,
@@ -32,16 +33,19 @@ class BouquetUseCase {
             });
         }
 
+        // Lưu vào Redis
+        if (this.redisService) {
+            await this.redisService.setObjectAsync(`bouquet:${fullBouquet.id}`, fullBouquet, 3600); // TTL 1h
+            // Xóa cache danh sách bouquets (nếu có)
+            await this.invalidateBouquetListCache();
+        }
+
         return fullBouquet;
     }
-
 
     async updateBouquet(id, dto) {
         const bouquet = await this.bouquetRepository.getBouquetById(id);
         if (!bouquet) throw new Error("Bouquet not found");
-
-        const path = require('path');
-        const fs = require('fs');
 
         let oldImages = bouquet.images || [];
 
@@ -58,7 +62,10 @@ class BouquetUseCase {
             }
             dto.images = newImages;
         }
+
         const updatedBouquet = await this.bouquetRepository.updateBouquet(id, dto);
+
+        // Xóa ảnh cũ nếu không còn sử dụng
         if (oldImages.length > 0 && updatedBouquet.images) {
             for (const imgPath of oldImages) {
                 if (!updatedBouquet.images.includes(imgPath)) {
@@ -68,17 +75,29 @@ class BouquetUseCase {
             }
         }
 
+        // Cập nhật cache Redis
+        if (this.redisService) {
+            await this.redisService.setObjectAsync(`bouquet:${id}`, updatedBouquet, 3600);
+            await this.invalidateBouquetListCache();
+        }
+
         return updatedBouquet;
     }
 
-
     async getBouquetById(id) {
-        return await this.bouquetRepository.getBouquetById(id);
-    }
+        if (this.redisService) {
+            const cached = await this.redisService.getObjectAsync(`bouquet:${id}`);
+            if (cached) return cached;
+        }
 
-    // async getAllBouquets() {
-    //     return await this.bouquetRepository.getAllBouquets();
-    // }
+        const bouquet = await this.bouquetRepository.getBouquetById(id);
+
+        if (bouquet && this.redisService) {
+            await this.redisService.setObjectAsync(`bouquet:${id}`, bouquet, 3600);
+        }
+
+        return bouquet;
+    }
 
     async deleteBouquet(id) {
         const bouquet = await this.bouquetRepository.getBouquetById(id);
@@ -86,19 +105,53 @@ class BouquetUseCase {
         if (bouquet && bouquet.images) {
             for (const imgPath of bouquet.images) {
                 const fullPath = path.join(__dirname, '../../../', imgPath);
-                if (fs.existsSync(fullPath)) {
-                    fs.unlinkSync(fullPath);
-                }
+                if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
             }
         }
 
         const result = await this.bouquetRepository.deleteBouquet(id);
 
+        // Xóa cache Redis
+        if (this.redisService) {
+            await this.redisService.deleteAsync(`bouquet:${id}`);
+            await this.invalidateBouquetListCache();
+        }
+
         return result;
     }
 
     async getAllBouquets(query) {
-        return await this.bouquetRepository.getAllBouquets(query);
+    console.log("Fetching bouquets with query:", query);
+    if (this.redisService) {
+        const page = query.page || 1;
+        const limit = query.limit || 10;
+        const key = `bouquets:list:page${page}:limit${limit}`;
+
+        const cached = await this.redisService.getObjectAsync(key);
+        if (cached) {
+            
+            return cached;
+        }
+
+       
+        const bouquets = await this.bouquetRepository.getAllBouquets(query);
+        await this.redisService.setObjectAsync(key, bouquets, 1800); // TTL 30 phút
+        return bouquets;
+    }
+
+    return await this.bouquetRepository.getAllBouquets(query);
+}
+
+
+    /** =========================
+     * Helper: invalidate all bouquets list cache
+     * ========================= */
+    async invalidateBouquetListCache() {
+        if (!this.redisService) return;
+        const keys = await this.redisService.searchKeysAsync("bouquets:list:*");
+        for (const key of keys) {
+            await this.redisService.deleteAsync(key);
+        }
     }
 }
 

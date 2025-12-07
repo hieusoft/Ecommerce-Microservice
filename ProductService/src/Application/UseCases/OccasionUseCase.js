@@ -14,6 +14,7 @@ class OccasionUseCase {
         return occasion;;
     }
     async getOccasionById(id) {
+       
         return await this.occasionRepository.getOccasionById(id);
     }
     async getAllOccasions() {

@@ -10,6 +10,8 @@ const GreetingRoutes = require('./src/Api/routes/GreetingRouters');
 const SubOccasionRoutes = require('./src/Api/routes/SubOccasionsRouters');
 
 const RabbitMqService = require('./src/Infrastructure/Service/RabbitMQService');
+
+const RedisService = require('./src/Infrastructure/Service/RedisService');
 const swaggerDocs = require('./src/swagger');
 
 const app = express();
@@ -26,6 +28,7 @@ app.use(cors({
 
 const PORT = process.env.PORT || 5000;
 
+
 async function startServer() {
     try {
         await mongoose.connect(process.env.MONGO_URI, {
@@ -38,6 +41,11 @@ async function startServer() {
         const rabbitService = new RabbitMqService(
             process.env.RABBITMQ_URL || 'amqp://guest:guest@localhost:5672'
         );
+        const redisService = new RedisService(
+            process.env.REDIS_URL || 'redis://localhost:6379'
+        );
+        console.log('✓ Redis connected');
+        
 
         await rabbitService.declareExchange('product_events', 'direct');
  
@@ -53,10 +61,10 @@ async function startServer() {
         console.log('✓ RabbitMQ configured');
 
 
-        app.use('/api/bouquets', BouquetRoutes(rabbitService));
-        app.use('/api/occasions', OccasionRoutes(rabbitService));
-        app.use('/api/greetings', GreetingRoutes(rabbitService));
-        app.use('/api/suboccasions', SubOccasionRoutes(rabbitService));
+        app.use('/api/bouquets', BouquetRoutes(rabbitService,redisService));
+        app.use('/api/occasions', OccasionRoutes(rabbitService,redisService));
+        app.use('/api/greetings', GreetingRoutes(rabbitService,redisService));
+        app.use('/api/suboccasions', SubOccasionRoutes(rabbitService,redisService));
 
 
         swaggerDocs(app);

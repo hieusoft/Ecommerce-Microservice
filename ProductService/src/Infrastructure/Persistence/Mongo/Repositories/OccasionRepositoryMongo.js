@@ -1,6 +1,7 @@
 const OccasionModel = require("../Models/OccasionModel");
 const IOccasionRepository = require("../../../../Application/Interfaces/IOccasionRepository");
 const Occasion = require("../../../../Domain/Entities/Occasion");
+const mongoose = require("mongoose");
 
 class OccasionRepositoryMongo extends IOccasionRepository {
   async createOccasion(data) {
@@ -32,6 +33,7 @@ class OccasionRepositoryMongo extends IOccasionRepository {
   }
 
   async getOccasionById(id) {
+     
     const docs = await OccasionModel.aggregate([
       { $match: { _id: new mongoose.Types.ObjectId(id) } },
       {
@@ -45,7 +47,7 @@ class OccasionRepositoryMongo extends IOccasionRepository {
     ]);
 
     const doc = docs[0];
-
+console.log('Fetching occasion by eID:', id);
     return doc
       ? new Occasion({
           id: doc._id,
