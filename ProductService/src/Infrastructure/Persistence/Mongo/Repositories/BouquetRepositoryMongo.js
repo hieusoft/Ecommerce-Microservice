@@ -1,23 +1,10 @@
 const BouquetModel = require('../Models/BouquetModel');
 const Bouquet = require('../../../../Domain/Entities/Bouquet');
 const IBouquetRepository = require('../../../../Application/Interfaces/IBouquetRepository ');
-const SubOccasionModel = require('../Models/SubOccasion')
 
 class BouquetRepositoryMongo extends IBouquetRepository {
 
     async createBouquet(bouquetData) {
-        if (bouquetData.subOccasionId) {
-
-            const subOccasion = await SubOccasionModel.findById(bouquetData.subOccasionId);
-
-            if (!subOccasion) {
-                const error = new Error("Suboccasion not found");
-                error.statusCode = 404;
-                throw error;
-            }
-        }
-
-
         const bouquet = new BouquetModel(bouquetData);
         const savedBouquet = await bouquet.save();
         return new Bouquet(savedBouquet.toObject());
@@ -30,23 +17,12 @@ class BouquetRepositoryMongo extends IBouquetRepository {
 
         const bouquet = new Bouquet(doc.toObject());
 
-
         bouquet.subOccasionName = doc.subOccasionId?.name || null;
 
         return bouquet;
     }
 
     async updateBouquet(id, data) {
-        if (data.subOccasionId) {
-
-            const subOccasion = await SubOccasionModel.findById(data.subOccasionId);
-
-            if (!subOccasion) {
-                const error = new Error("Suboccasion not found");
-                error.statusCode = 404;
-                throw error;
-            }
-        }
         const updated = await BouquetModel.findByIdAndUpdate(id, data, { new: true })
             .populate('subOccasionId');
 
@@ -90,10 +66,24 @@ class BouquetRepositoryMongo extends IBouquetRepository {
 
         const pipeline = [
             { $match: match },
+
+            {
+                $addFields: {
+                    subOccasionIdObj: {
+                        $cond: {
+                            if: { $eq: [{ $type: "$subOccasionId" }, "string"] },
+                            then: { $toObjectId: "$subOccasionId" },
+                            else: "$subOccasionId"
+                        }
+                    }
+                }
+            },
+
+            // Lookup với ObjectId chuẩn
             {
                 $lookup: {
                     from: "suboccasions",
-                    localField: "subOccasionId",
+                    localField: "subOccasionIdObj",
                     foreignField: "_id",
                     as: "subOccasionsDetails"
                 }
@@ -105,6 +95,7 @@ class BouquetRepositoryMongo extends IBouquetRepository {
                 }
             }
         ];
+
 
 
         if (search_query) {

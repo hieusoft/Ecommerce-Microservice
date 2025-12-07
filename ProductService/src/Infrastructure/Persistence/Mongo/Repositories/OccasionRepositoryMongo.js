@@ -17,7 +17,7 @@ class OccasionRepositoryMongo extends IOccasionRepository {
         return doc ? new Occasion(doc.toObject()) : null;
     }
     async updateOccasion (id, data) {
-        const updated = await OccasionModel.findByIdAndUpdate   (id, data, { new: true });      
+        const updated = await OccasionModel.findByIdAndUpdate(id, data, { new: true });      
         return updated ? new Occasion(updated.toObject()) : null;
     }
     async deleteOccasion (id) {

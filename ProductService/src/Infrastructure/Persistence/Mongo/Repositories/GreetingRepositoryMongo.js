@@ -10,16 +10,16 @@ class GreetingRepositoryMongo extends IGreetingRepository {
         return new Greeting(savedGreeting.toObject());
     }
     async getAllGreetings() {
-        const docs = await GreetingModel.find();
+        const docs = await GreetingModel.find().populate('subOccasionId');
         return docs.map(d => new Greeting(d.toObject()));
     }
     async getGreetingById(id) {
-        const doc = await GreetingModel.findById(id);
+        const doc = await GreetingModel.findById(id).populate('subOccasionId');
         return doc ? new Greeting(doc.toObject()) : null;
     }
     async updateGreeting(id, data) {
         const updated = await GreetingModel.findByIdAndUpdate
-            (id, data, { new: true });
+            (id, data, { new: true }).populate('subOccasionId');
         return updated ? new Greeting(updated.toObject()) : null;
     }
     async deleteGreeting(id) {
