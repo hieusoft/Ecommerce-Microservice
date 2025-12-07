@@ -214,7 +214,22 @@ public class AuthUseCases
         });
     }
 
-  
+ 
+    public async Task LogoutAsync(int userId)
+    {
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user == null)
+            throw new Exception("User not found");
+        user.TokenVersion += 1;
+
+        await _userRepository.UpdateAsync(user);
+
+        await _redisService.SetStringAsync(
+             $"user:{user.UserId}:tokenVersion",
+             user.TokenVersion.ToString(),
+             TimeSpan.FromDays(7)
+         );
+    }
     public async Task ForgotPasswordAsync(ForgotPasswordRequestDto dto)
     {
         var user = await _userRepository.GetByEmailOrUsernameAsync(dto.Email);

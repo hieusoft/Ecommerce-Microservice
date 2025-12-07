@@ -47,6 +47,9 @@ namespace Application.UseCases
 
             return new UserResponseDto
             {
+                FullName = user.FullName,
+                UserName = user.Username,
+                EmailVerified = user.EmailVerified,
                 UserId = user.UserId,
                 Email = user.Email,
                 Roles = user.UserRoles?.Select(ur => ur.Role.RoleName).ToList() ?? new List<string>()

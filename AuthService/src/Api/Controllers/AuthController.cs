@@ -98,6 +98,43 @@ namespace Api.Controllers
         }
 
 
+        [Authorize]
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            try
+            {
+                var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+                if (userIdClaim == null)
+                    return Unauthorized(new { message = "Invalid token" });
+
+                if (!int.TryParse(userIdClaim.Value, out var userId))
+                    return Unauthorized(new { message = "Invalid token" });
+
+                await _authUseCases.LogoutAsync(userId);
+
+               
+                if (Request.Cookies.ContainsKey("refreshToken"))
+                {
+                    Response.Cookies.Append("refreshToken", "", new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = true,
+                        Path = "/",
+                        SameSite = SameSiteMode.None,
+                        Expires = DateTimeOffset.UtcNow.AddDays(-1)
+                    });
+                }
+
+                return Ok(new { message = "Logged out successfully" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during logout");
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
 
 
         [HttpPost("forgot-password")]
