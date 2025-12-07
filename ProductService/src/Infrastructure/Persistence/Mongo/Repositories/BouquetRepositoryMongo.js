@@ -35,9 +35,9 @@ class BouquetRepositoryMongo extends IBouquetRepository {
 
     async getAllBouquets(query) {
         const {
-            search_query,   // search tổng hợp: bouquet + sub occasion
-            name,           // filter riêng tên bouquet
-            subOccasionName,// filter riêng tên sub occasion
+            search_query,
+            name,
+            subOccasionId,
             minPrice,
             maxPrice,
             startDate,
@@ -79,7 +79,6 @@ class BouquetRepositoryMongo extends IBouquetRepository {
                 }
             },
 
-            // Lookup với ObjectId chuẩn
             {
                 $lookup: {
                     from: "suboccasions",
@@ -119,13 +118,16 @@ class BouquetRepositoryMongo extends IBouquetRepository {
         }
 
 
-        if (subOccasionName) {
+        if (subOccasionId) {
             pipeline.push({
                 $match: {
-                    "subOccasionsDetails.name": { $regex: subOccasionName, $options: "i" }
+                    $expr: {
+                        $eq: ["$subOccasionsDetails._id", { $toObjectId: subOccasionId }]
+                    }
                 }
             });
         }
+
 
         const countPipeline = [...pipeline, { $count: "total" }];
         const count = await BouquetModel.aggregate(countPipeline);

@@ -21,7 +21,15 @@ module.exports = {
         parameters: [
           { name: "search_query", in: "query", schema: { type: "string" } },
           { name: "name", in: "query", schema: { type: "string" } },
-          { name: "subOccasionName", in: "query", schema: { type: "string" } },
+
+          // 🔥 Fixed: use subOccasionId instead of subOccasionName
+          { 
+            name: "subOccasionId", 
+            in: "query", 
+            schema: { type: "string" },
+            description: "Filter by Sub Occasion ID"
+          },
+
           { name: "minPrice", in: "query", schema: { type: "number" } },
           { name: "maxPrice", in: "query", schema: { type: "number" } },
           { name: "startDate", in: "query", schema: { type: "string", format: "date" } },
@@ -113,7 +121,12 @@ module.exports = {
       get: {
         tags: ["Occasion"],
         summary: "Get all occasions",
-        responses: { 200: { description: "List of occasions", content: { "application/json": { schema: { type: "array", items: { $ref: "#/components/schemas/Occasion" } } } } } }
+        responses: { 
+          200: { 
+            description: "List of occasions", 
+            content: { "application/json": { schema: { type: "array", items: { $ref: "#/components/schemas/Occasion" } } } } 
+          } 
+        }
       },
       post: {
         tags: ["Occasion"],
@@ -132,7 +145,10 @@ module.exports = {
         tags: ["Occasion"],
         summary: "Get occasion by ID",
         parameters: [{ name: "id", in: "path", required: true }],
-        responses: { 200: { description: "Occasion object", content: { "application/json": { schema: { $ref: "#/components/schemas/Occasion" } } } }, 404: { description: "Not found" } }
+        responses: { 
+          200: { description: "Occasion object", content: { "application/json": { schema: { $ref: "#/components/schemas/Occasion" } } } }, 
+          404: { description: "Not found" } 
+        }
       },
       put: {
         tags: ["Occasion"],
@@ -159,7 +175,12 @@ module.exports = {
       get: {
         tags: ["SubOccasion"],
         summary: "Get all sub occasions",
-        responses: { 200: { description: "List of sub-occasions", content: { "application/json": { schema: { type: "array", items: { $ref: "#/components/schemas/SubOccasion" } } } } } }
+        responses: { 
+          200: { 
+            description: "List of sub-occasions", 
+            content: { "application/json": { schema: { type: "array", items: { $ref: "#/components/schemas/SubOccasion" } } } } 
+          } 
+        }
       },
       post: {
         tags: ["SubOccasion"],
@@ -175,7 +196,10 @@ module.exports = {
         tags: ["SubOccasion"],
         summary: "Get sub occasion by ID",
         parameters: [{ name: "id", in: "path", required: true }],
-        responses: { 200: { description: "Sub occasion object", content: { "application/json": { schema: { $ref: "#/components/schemas/SubOccasion" } } } }, 404: { description: "Not found" } }
+        responses: { 
+          200: { description: "Sub occasion object", content: { "application/json": { schema: { $ref: "#/components/schemas/SubOccasion" } } } }, 
+          404: { description: "Not found" } 
+        }
       },
       put: {
         tags: ["SubOccasion"],
@@ -202,7 +226,12 @@ module.exports = {
       get: {
         tags: ["Greeting"],
         summary: "Get all greetings",
-        responses: { 200: { description: "List of greetings", content: { "application/json": { schema: { type: "array", items: { $ref: "#/components/schemas/Greeting" } } } } } }
+        responses: { 
+          200: { 
+            description: "List of greetings", 
+            content: { "application/json": { schema: { type: "array", items: { $ref: "#/components/schemas/Greeting" } } } } 
+          } 
+        }
       },
       post: {
         tags: ["Greeting"],
@@ -218,7 +247,10 @@ module.exports = {
         tags: ["Greeting"],
         summary: "Get greeting by ID",
         parameters: [{ name: "id", in: "path", required: true }],
-        responses: { 200: { description: "Greeting object", content: { "application/json": { schema: { $ref: "#/components/schemas/Greeting" } } } }, 404: { description: "Not found" } }
+        responses: { 
+          200: { description: "Greeting object", content: { "application/json": { schema: { $ref: "#/components/schemas/Greeting" } } } }, 
+          404: { description: "Not found" } 
+        }
       },
       put: {
         tags: ["Greeting"],
