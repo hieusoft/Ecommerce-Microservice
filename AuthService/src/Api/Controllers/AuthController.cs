@@ -44,7 +44,8 @@ namespace Api.Controllers
                 Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
                 {
                     HttpOnly = true,
-                    Secure = false,
+                    Secure = true,
+                    Path = "/",
                     SameSite = SameSiteMode.None,
                     Expires = DateTimeOffset.UtcNow.AddDays(7)
                 });
@@ -78,7 +79,8 @@ namespace Api.Controllers
                 Response.Cookies.Append("refreshToken", newRefreshToken, new CookieOptions
                 {
                     HttpOnly = true,
-                    Secure = false,
+                    Secure = true,
+                    Path = "/",
                     SameSite = SameSiteMode.None,
                     Expires = DateTimeOffset.UtcNow.AddDays(7)
                 });
