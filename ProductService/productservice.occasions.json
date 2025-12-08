@@ -1,0 +1,70 @@
+[{
+  "_id": {
+    "$oid": "69359195d0a77c6aa3a9d188"
+  },
+  "name": "Love & Romance",
+  "description": "Celebrate love and heartfelt moments with flowers and gifts that express your affection and romance.",
+  "createdAt": {
+    "$date": "2025-12-07T14:39:17.537Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-07T14:39:17.537Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69359209d0a77c6aa3a9d18a"
+  },
+  "name": "Celebrations",
+  "description": "Make every special occasion memorable with thoughtful gifts, flowers, and treats to celebrate birthdays, achievements, and milestones.",
+  "createdAt": {
+    "$date": "2025-12-07T14:41:13.997Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-07T14:41:13.997Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69359216d0a77c6aa3a9d18c"
+  },
+  "name": "Flowers",
+  "description": "Brighten up any moment with our exquisite selection of flowers, bouquets, and plants for every taste and style.",
+  "createdAt": {
+    "$date": "2025-12-07T14:41:26.497Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-07T14:41:26.497Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69359226d0a77c6aa3a9d18e"
+  },
+  "name": "Sympathy & Condolence",
+  "description": "Express your care and support with heartfelt floral arrangements and messages during difficult times.",
+  "createdAt": {
+    "$date": "2025-12-07T14:41:42.219Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-07T14:41:42.219Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69359234d0a77c6aa3a9d190"
+  },
+  "name": "Christmas",
+  "description": "Spread joy and festive cheer with our specially curated holiday bouquets, gift sets, and Christmas specials.",
+  "createdAt": {
+    "$date": "2025-12-07T14:41:56.056Z"
+  },
+  "updatedAt": {
+    "$date": "2025-12-07T14:41:56.056Z"
+  },
+  "__v": 0
+}]

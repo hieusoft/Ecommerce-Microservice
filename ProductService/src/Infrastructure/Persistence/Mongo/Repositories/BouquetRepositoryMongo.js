@@ -17,7 +17,6 @@ class BouquetRepositoryMongo extends IBouquetRepository {
 
         const bouquet = new Bouquet(doc.toObject());
 
-
         bouquet.subOccasionName = doc.subOccasionId?.name || null;
 
         return bouquet;
@@ -36,9 +35,9 @@ class BouquetRepositoryMongo extends IBouquetRepository {
 
     async getAllBouquets(query) {
         const {
-            search_query,   // search tổng hợp: bouquet + sub occasion
-            name,           // filter riêng tên bouquet
-            subOccasionName,// filter riêng tên sub occasion
+            search_query,
+            name,
+            subOccasionId,
             minPrice,
             maxPrice,
             startDate,
@@ -67,10 +66,23 @@ class BouquetRepositoryMongo extends IBouquetRepository {
 
         const pipeline = [
             { $match: match },
+
+            {
+                $addFields: {
+                    subOccasionIdObj: {
+                        $cond: {
+                            if: { $eq: [{ $type: "$subOccasionId" }, "string"] },
+                            then: { $toObjectId: "$subOccasionId" },
+                            else: "$subOccasionId"
+                        }
+                    }
+                }
+            },
+
             {
                 $lookup: {
                     from: "suboccasions",
-                    localField: "subOccasionId",
+                    localField: "subOccasionIdObj",
                     foreignField: "_id",
                     as: "subOccasionsDetails"
                 }
@@ -83,7 +95,8 @@ class BouquetRepositoryMongo extends IBouquetRepository {
             }
         ];
 
-        
+
+
         if (search_query) {
             pipeline.push({
                 $match: {
@@ -95,7 +108,7 @@ class BouquetRepositoryMongo extends IBouquetRepository {
             });
         }
 
-        
+
         if (name) {
             pipeline.push({
                 $match: {
@@ -104,14 +117,17 @@ class BouquetRepositoryMongo extends IBouquetRepository {
             });
         }
 
-        
-        if (subOccasionName) {
+
+        if (subOccasionId) {
             pipeline.push({
                 $match: {
-                    "subOccasionsDetails.name": { $regex: subOccasionName, $options: "i" }
+                    $expr: {
+                        $eq: ["$subOccasionsDetails._id", { $toObjectId: subOccasionId }]
+                    }
                 }
             });
         }
+
 
         const countPipeline = [...pipeline, { $count: "total" }];
         const count = await BouquetModel.aggregate(countPipeline);
