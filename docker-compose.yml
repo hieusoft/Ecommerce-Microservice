@@ -93,10 +93,7 @@ services:
       - micro-net
     volumes:
       - ./uploads/bouquets:/app/uploads/bouquets
-      - ./productservice.bouquets.json:/app/productservice.bouquets.json
-      - ./productservice.greetings.json:/app/productservice.greetings.json
-      - ./productservice.occasions.json:/app/productservice.occasions.json
-      - ./productservice.suboccasions.json:/app/productservice.suboccasions.json
+      - ./data:/app/data   
 
   orderservice:
     build:
