@@ -33,10 +33,10 @@ class BouquetUseCase {
             });
         }
 
-        // Lưu vào Redis
+        
         if (this.redisService) {
-            await this.redisService.setObjectAsync(`bouquet:${fullBouquet.id}`, fullBouquet, 3600); // TTL 1h
-            // Xóa cache danh sách bouquets (nếu có)
+            await this.redisService.setObjectAsync(`bouquet:${fullBouquet.id}`, fullBouquet, 3600); 
+           
             await this.invalidateBouquetListCache();
         }
 
@@ -65,7 +65,7 @@ class BouquetUseCase {
 
         const updatedBouquet = await this.bouquetRepository.updateBouquet(id, dto);
 
-        // Xóa ảnh cũ nếu không còn sử dụng
+     
         if (oldImages.length > 0 && updatedBouquet.images) {
             for (const imgPath of oldImages) {
                 if (!updatedBouquet.images.includes(imgPath)) {
@@ -75,7 +75,7 @@ class BouquetUseCase {
             }
         }
 
-        // Cập nhật cache Redis
+      
         if (this.redisService) {
             await this.redisService.setObjectAsync(`bouquet:${id}`, updatedBouquet, 3600);
             await this.invalidateBouquetListCache();
@@ -111,7 +111,7 @@ class BouquetUseCase {
 
         const result = await this.bouquetRepository.deleteBouquet(id);
 
-        // Xóa cache Redis
+       
         if (this.redisService) {
             await this.redisService.deleteAsync(`bouquet:${id}`);
             await this.invalidateBouquetListCache();
@@ -122,22 +122,22 @@ class BouquetUseCase {
 
     async getAllBouquets(query) {
     console.log("Fetching bouquets with query:", query);
-    if (this.redisService) {
-        const page = query.page || 1;
-        const limit = query.limit || 10;
-        const key = `bouquets:list:page${page}:limit${limit}`;
+    // if (this.redisService) {
+    //     const page = query.page || 1;
+    //     const limit = query.limit || 10;
+    //     const key = `bouquets:list:page${page}:limit${limit}`;
 
-        const cached = await this.redisService.getObjectAsync(key);
-        if (cached) {
+    //     const cached = await this.redisService.getObjectAsync(key);
+    //     if (cached) {
             
-            return cached;
-        }
+    //         return cached;
+    //     }
 
        
-        const bouquets = await this.bouquetRepository.getAllBouquets(query);
-        await this.redisService.setObjectAsync(key, bouquets, 1800); // TTL 30 phút
-        return bouquets;
-    }
+    //     const bouquets = await this.bouquetRepository.getAllBouquets(query);
+    //     await this.redisService.setObjectAsync(key, bouquets, 1800); 
+    //     return bouquets;
+    // }
 
     return await this.bouquetRepository.getAllBouquets(query);
 }

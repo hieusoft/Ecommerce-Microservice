@@ -1,0 +1,210 @@
+[{
+  "_id": {
+    "$oid": "6935c4bec6b6b0fc2c4e6200"
+  },
+  "name": "Romance",
+  "description": "Celebrate the magic of love with romantic gestures and gifts that warm the heart.",
+  "occasionId": {
+    "$oid": "69359195d0a77c6aa3a9d188"
+  }
+},
+{
+  "_id": {
+    "$oid": "6935c4bec6b6b0fc2c4e6201"
+  },
+  "name": "Anniversary",
+  "description": "Celebrate lasting love and cherished moments with thoughtful gifts and flowers.",
+  "occasionId": {
+    "$oid": "69359195d0a77c6aa3a9d188"
+  }
+},
+{
+  "_id": {
+    "$oid": "6935c4bec6b6b0fc2c4e6202"
+  },
+  "name": "Red Roses",
+  "description": "Express passion and deep affection with classic red roses, the symbol of love.",
+  "occasionId": {
+    "$oid": "69359195d0a77c6aa3a9d188"
+  }
+},
+{
+  "_id": {
+    "$oid": "6935c4bec6b6b0fc2c4e6203"
+  },
+  "name": "Roses",
+  "description": "Brighten someone's day with beautiful roses in a variety of colors and arrangements.",
+  "occasionId": {
+    "$oid": "69359195d0a77c6aa3a9d188"
+  }
+},
+{
+  "_id": {
+    "$oid": "6935c4eac6b6b0fc2c4e6205"
+  },
+  "name": "Birthday",
+  "description": "Celebrate birthdays with joyful gifts and flowers that make their day special.",
+  "occasionId": {
+    "$oid": "69359209d0a77c6aa3a9d18a"
+  }
+},
+{
+  "_id": {
+    "$oid": "6935c4eac6b6b0fc2c4e6206"
+  },
+  "name": "For Her",
+  "description": "Thoughtful gifts and flowers specially chosen to delight her on any occasion.",
+  "occasionId": {
+    "$oid": "69359209d0a77c6aa3a9d18a"
+  }
+},
+{
+  "_id": {
+    "$oid": "6935c4eac6b6b0fc2c4e6207"
+  },
+  "name": "For Him",
+  "description": "Gifts and flowers designed to surprise and delight him for every celebration.",
+  "occasionId": {
+    "$oid": "69359209d0a77c6aa3a9d18a"
+  }
+},
+{
+  "_id": {
+    "$oid": "6935c4eac6b6b0fc2c4e6208"
+  },
+  "name": "Best Seller",
+  "description": "Our most popular gifts and flowers, loved by customers for every occasion.",
+  "occasionId": {
+    "$oid": "69359209d0a77c6aa3a9d18a"
+  }
+},
+{
+  "_id": {
+    "$oid": "6935c4eac6b6b0fc2c4e6209"
+  },
+  "name": "Congratulations",
+  "description": "Celebrate achievements and milestones with flowers and gifts that convey your pride.",
+  "occasionId": {
+    "$oid": "69359209d0a77c6aa3a9d18a"
+  }
+},
+{
+  "_id": {
+    "$oid": "6935c556c6b6b0fc2c4e620b"
+  },
+  "name": "Hand Bouquets",
+  "description": "Beautiful hand-tied bouquets perfect for any occasion or gesture of love.",
+  "occasionId": {
+    "$oid": "69359216d0a77c6aa3a9d18c"
+  }
+},
+{
+  "_id": {
+    "$oid": "6935c556c6b6b0fc2c4e620c"
+  },
+  "name": "Mixed Flowers",
+  "description": "Vibrant arrangements of mixed flowers to brighten up any space or event.",
+  "occasionId": {
+    "$oid": "69359216d0a77c6aa3a9d18c"
+  }
+},
+{
+  "_id": {
+    "$oid": "6935c556c6b6b0fc2c4e620d"
+  },
+  "name": "Roses",
+  "description": "Classic and elegant roses in various colors to express love and care.",
+  "occasionId": {
+    "$oid": "69359216d0a77c6aa3a9d18c"
+  }
+},
+{
+  "_id": {
+    "$oid": "6935c556c6b6b0fc2c4e620e"
+  },
+  "name": "Lilies",
+  "description": "Fragrant and graceful lilies to bring elegance and charm to any occasion.",
+  "occasionId": {
+    "$oid": "69359216d0a77c6aa3a9d18c"
+  }
+},
+{
+  "_id": {
+    "$oid": "6935c556c6b6b0fc2c4e620f"
+  },
+  "name": "Sunflowers",
+  "description": "Bright and cheerful sunflowers to lift spirits and add joy.",
+  "occasionId": {
+    "$oid": "69359216d0a77c6aa3a9d18c"
+  }
+},
+{
+  "_id": {
+    "$oid": "6935c58ac6b6b0fc2c4e6211"
+  },
+  "name": "Get Well Soon",
+  "description": "Send warm wishes and flowers to brighten someone's recovery and lift their spirits.",
+  "occasionId": {
+    "$oid": "69359226d0a77c6aa3a9d18e"
+  }
+},
+{
+  "_id": {
+    "$oid": "6935c58ac6b6b0fc2c4e6212"
+  },
+  "name": "I Am Sorry",
+  "description": "Express heartfelt apologies with thoughtful flowers and gestures.",
+  "occasionId": {
+    "$oid": "69359226d0a77c6aa3a9d18e"
+  }
+},
+{
+  "_id": {
+    "$oid": "6935c58ac6b6b0fc2c4e6213"
+  },
+  "name": "Sympathy",
+  "description": "Send condolences and support with gentle floral arrangements to show you care.",
+  "occasionId": {
+    "$oid": "69359226d0a77c6aa3a9d18e"
+  }
+},
+{
+  "_id": {
+    "$oid": "6935c58ac6b6b0fc2c4e6214"
+  },
+  "name": "Condolence",
+  "description": "Offer sympathy and comfort with thoughtful flowers and messages.",
+  "occasionId": {
+    "$oid": "69359226d0a77c6aa3a9d18e"
+  }
+},
+{
+  "_id": {
+    "$oid": "6935c5b9c6b6b0fc2c4e6216"
+  },
+  "name": "Christmas Specials",
+  "description": "Celebrate the festive season with unique Christmas specials crafted to spread joy.",
+  "occasionId": {
+    "$oid": "69359234d0a77c6aa3a9d190"
+  }
+},
+{
+  "_id": {
+    "$oid": "6935c5b9c6b6b0fc2c4e6217"
+  },
+  "name": "Holiday Bouquets",
+  "description": "Brighten the holidays with beautiful bouquets perfect for Christmas celebrations.",
+  "occasionId": {
+    "$oid": "69359234d0a77c6aa3a9d190"
+  }
+},
+{
+  "_id": {
+    "$oid": "6935c5b9c6b6b0fc2c4e6218"
+  },
+  "name": "Gift Sets",
+  "description": "Thoughtful gift sets designed to delight loved ones during the festive season.",
+  "occasionId": {
+    "$oid": "69359234d0a77c6aa3a9d190"
+  }
+}]
