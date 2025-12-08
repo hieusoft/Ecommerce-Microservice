@@ -3,8 +3,8 @@ const SubOccasionUseCase = require('../../Application/UseCases/SubOccasionsUseCa
 const SubOccasionRepository = require('../../Infrastructure/Persistence/Factory/RepositoryFactory');
 const subOccasionRepo = SubOccasionRepository.subOccasion();
 class SubOccasionController {
-    constructor(rabbitService) {
-        this.subOccasionUseCase = new SubOccasionUseCase(subOccasionRepo, rabbitService);
+    constructor(rabbitService,redisService) {
+        this.subOccasionUseCase = new SubOccasionUseCase(subOccasionRepo, rabbitService,redisService);
     }
     createSubOccasion = async (req, res) => {
         try {

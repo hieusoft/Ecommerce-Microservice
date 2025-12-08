@@ -1,9 +1,9 @@
 const express = require('express');
 const GreetingController = require('../Controllers/GreetingController');
 
-module.exports = (rabbitService) => {
+module.exports = (rabbitService,redisService) => {
     const router = express.Router();
-    const greetingController = new GreetingController(rabbitService);
+    const greetingController = new GreetingController(rabbitService,redisService);
 
     router.post('/', (req, res) => greetingController.createGreeting(req, res));
     router.get('/:id', (req, res) => greetingController.getGreetingById(req, res));

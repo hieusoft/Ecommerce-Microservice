@@ -38,10 +38,6 @@
       "UpstreamPathTemplate": "/bouquets/{everything}",
       "UpstreamHttpMethod": [ "POST", "PUT", "DELETE" ],
       "Priority": 3,
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "GatewayKey",
-        "AllowedScopes": []
-      },
       "DelegatingHandlers": [ "RedisTokenValidator" ]
     },
     {
@@ -69,10 +65,6 @@
       "UpstreamPathTemplate": "/occasions/{everything}",
       "UpstreamHttpMethod": [ "POST", "PUT", "DELETE" ],
       "Priority": 5,
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "GatewayKey",
-        "AllowedScopes": []
-      },
       "DelegatingHandlers": [ "RedisTokenValidator" ]
     },
     {
@@ -100,10 +92,6 @@
       "UpstreamPathTemplate": "/suboccasions/{everything}",
       "UpstreamHttpMethod": [ "POST", "PUT", "DELETE" ],
       "Priority": 7,
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "GatewayKey",
-        "AllowedScopes": []
-      },
       "DelegatingHandlers": [ "RedisTokenValidator" ]
     },
     {
@@ -131,11 +119,20 @@
       "UpstreamPathTemplate": "/greetings/{everything}",
       "UpstreamHttpMethod": [ "POST", "PUT", "DELETE" ],
       "Priority": 9,
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "GatewayKey",
-        "AllowedScopes": []
-      },
       "DelegatingHandlers": [ "RedisTokenValidator" ]
+    },
+    {
+      "DownstreamPathTemplate": "/uploads/bouquets/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "productservice",
+          "Port": 8082
+        }
+      ],
+      "UpstreamPathTemplate": "/uploads/bouquets/{everything}",
+      "UpstreamHttpMethod": [ "GET" ],
+      "Priority": 10
     },
     {
       "DownstreamPathTemplate": "/api/User/{everything}",
@@ -147,12 +144,21 @@
         }
       ],
       "UpstreamPathTemplate": "/User/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
-      "Priority": 10,
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "GatewayKey",
-        "AllowedScopes": []
-      },
+      "UpstreamHttpMethod": [ "GET" ],
+      "Priority": 11
+    },
+    {
+      "DownstreamPathTemplate": "/api/User/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "authservice",
+          "Port": 8081
+        }
+      ],
+      "UpstreamPathTemplate": "/User/{everything}",
+      "UpstreamHttpMethod": [ "POST", "PUT", "DELETE" ],
+      "Priority": 12,
       "DelegatingHandlers": [ "RedisTokenValidator" ]
     }
   ],

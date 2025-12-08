@@ -2,6 +2,7 @@ const { getImageService } = require('../../Infrastructure/Service/ImageService')
 const BouquetValidator = require('../Validators/BouquetValidator');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 
 class BouquetUseCase {
     constructor(bouquetRepository, rabbitService, redisService ) {
@@ -121,31 +122,30 @@ class BouquetUseCase {
     }
 
     async getAllBouquets(query) {
-    console.log("Fetching bouquets with query:", query);
-    // if (this.redisService) {
-    //     const page = query.page || 1;
-    //     const limit = query.limit || 10;
-    //     const key = `bouquets:list:page${page}:limit${limit}`;
+        console.log("Fetching bouquets with query:", query);
 
-    //     const cached = await this.redisService.getObjectAsync(key);
-    //     if (cached) {
+        if (this.redisService) {
             
-    //         return cached;
-    //     }
+            const key = `bouquets:list:${crypto.createHash('md5').update(JSON.stringify(query)).digest('hex')}`;
 
-       
-    //     const bouquets = await this.bouquetRepository.getAllBouquets(query);
-    //     await this.redisService.setObjectAsync(key, bouquets, 1800); 
-    //     return bouquets;
-    // }
+            const cached = await this.redisService.getObjectAsync(key);
+            if (cached) {
+                return cached;
+            }
 
-    return await this.bouquetRepository.getAllBouquets(query);
-}
+            const bouquets = await this.bouquetRepository.getAllBouquets(query);
+
+            // Lưu cache 30 phút
+            await this.redisService.setObjectAsync(key, bouquets, 1800);
+
+            return bouquets;
+        }
+
+        return await this.bouquetRepository.getAllBouquets(query);
+    }
 
 
-    /** =========================
-     * Helper: invalidate all bouquets list cache
-     * ========================= */
+  
     async invalidateBouquetListCache() {
         if (!this.redisService) return;
         const keys = await this.redisService.searchKeysAsync("bouquets:list:*");
