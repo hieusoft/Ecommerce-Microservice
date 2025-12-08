@@ -49,8 +49,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "orderservice",
-          "Port": 8083
+          "Host": "productservice",
+          "Port": 8082
         }
       ],
       "UpstreamPathTemplate": "/occasions/{everything}",
@@ -62,7 +62,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "orderservice",
+          "Host": "productservice",
           "Port": 8082
         }
       ],
