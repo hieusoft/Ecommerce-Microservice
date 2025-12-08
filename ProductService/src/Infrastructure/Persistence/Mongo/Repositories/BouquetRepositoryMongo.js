@@ -66,7 +66,6 @@ class BouquetRepositoryMongo extends IBouquetRepository {
 
         const pipeline = [
             { $match: match },
-
             {
                 $addFields: {
                     subOccasionIdObj: {
@@ -78,7 +77,6 @@ class BouquetRepositoryMongo extends IBouquetRepository {
                     }
                 }
             },
-
             {
                 $lookup: {
                     from: "suboccasions",
@@ -95,8 +93,6 @@ class BouquetRepositoryMongo extends IBouquetRepository {
             }
         ];
 
-
-
         if (search_query) {
             pipeline.push({
                 $match: {
@@ -108,7 +104,6 @@ class BouquetRepositoryMongo extends IBouquetRepository {
             });
         }
 
-
         if (name) {
             pipeline.push({
                 $match: {
@@ -117,13 +112,10 @@ class BouquetRepositoryMongo extends IBouquetRepository {
             });
         }
 
-
         if (subOccasionId) {
             pipeline.push({
                 $match: {
-                    $expr: {
-                        $eq: ["$subOccasionsDetails._id", { $toObjectId: subOccasionId }]
-                    }
+                    $expr: { $eq: [{ $toString: "$subOccasionId" }, subOccasionId] }
                 }
             });
         }
@@ -137,7 +129,32 @@ class BouquetRepositoryMongo extends IBouquetRepository {
         pipeline.push({ $skip: skip });
         pipeline.push({ $limit: Number(limit) });
 
-        const data = await BouquetModel.aggregate(pipeline);
+        pipeline.push({
+            $addFields: {
+                subOccasionId: {
+                    $mergeObjects: [
+                        "$subOccasionsDetails",
+                        { id: "$subOccasionsDetails._id" } 
+                    ]
+                },
+                subOccasionName: "$subOccasionsDetails.name"
+            }
+        });
+
+        
+
+        const rawData = await BouquetModel.aggregate(pipeline);
+
+        const data = rawData.map(item => new Bouquet({
+            id: item._id.toString(),
+            name: item.name,
+            description: item.description,
+            price: item.price,
+            subOccasionId: item.subOccasionId,
+            images: item.images || [],
+            createdAt: item.createdAt,
+            updatedAt: item.updatedAt
+        }));
 
         return {
             page: Number(page),
@@ -147,6 +164,7 @@ class BouquetRepositoryMongo extends IBouquetRepository {
             data
         };
     }
+
 
 }
 
