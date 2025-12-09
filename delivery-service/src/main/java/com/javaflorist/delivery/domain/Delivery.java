@@ -2,11 +2,10 @@ package com.javaflorist.delivery.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "deliveries")
+@Table(name = "Deliveries")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -17,7 +16,7 @@ public class Delivery {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "delivery_id")
-    private Integer id;
+    private Integer deliveryId;
 
     @Column(name = "order_id")
     private Integer orderId;

@@ -1,66 +1,40 @@
 package com.javaflorist.delivery.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.javaflorist.delivery.domain.Delivery;
 import com.javaflorist.delivery.domain.DeliveryEvent;
 import com.javaflorist.delivery.dto.DeliveryEventDto;
 import com.javaflorist.delivery.repository.DeliveryEventRepository;
 import com.javaflorist.delivery.repository.DeliveryRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class DeliveryEventService {
 
     private final DeliveryEventRepository eventRepo;
     private final DeliveryRepository deliveryRepo;
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
-    public DeliveryEventService(DeliveryEventRepository eventRepo, DeliveryRepository deliveryRepo) {
-        this.eventRepo = eventRepo;
-        this.deliveryRepo = deliveryRepo;
-    }
 
     public void process(DeliveryEventDto dto) {
-        try {
-            // Parse JSON message
-            JsonNode json = objectMapper.readTree(dto.getMessage());
 
-            Integer orderId = json.has("orderId") ? json.get("orderId").asInt() : null;
-            String status = json.has("status") ? json.get("status").asText() : null;
 
-            // Create event
-            DeliveryEvent event = new DeliveryEvent();
-            event.setQueueName(dto.getQueueName());
-            event.setMessage(dto.getMessage()); // raw → sửa thành dto.getMessage()
+        DeliveryEvent event = DeliveryEvent.builder()
+                .orderId(dto.getOrderId())
+                .status(dto.getStatus())
+                .queueName(dto.getQueueName())
+                .message(dto.getMessage())
+                .build();
+        eventRepo.save(event);
 
-            if (orderId != null) {
-                event.setOrderId(String.valueOf(orderId)); // FIX LỖI Integer → String
+
+        if (dto.getOrderId() != null) {
+            Delivery d = deliveryRepo.findByOrderId(dto.getOrderId());
+            if (d != null) {
+                d.setStatus(dto.getStatus());
+                deliveryRepo.save(d);
             }
-
-            if (status != null) {
-                event.setStatus(status);
-            }
-
-            // Lưu event
-            eventRepo.save(event);
-
-            // Nếu có orderId thì update bảng delivery
-            if (orderId != null) {
-
-                Delivery d = deliveryRepo.findByOrderId(orderId);
-
-                if (d != null) {
-                    d.setStatus(status);
-                    deliveryRepo.save(d);
-                }
-            }
-
-            System.out.println("✔ Saved event & updated delivery: " + dto.getQueueName());
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            System.out.println("❌ Error processing event");
         }
+
+        System.out.println("✔ Event saved: " + dto.getQueueName());
     }
 }

@@ -2,35 +2,33 @@ package com.javaflorist.delivery.listener;
 
 import com.javaflorist.delivery.dto.DeliveryEventDto;
 import com.javaflorist.delivery.service.DeliveryEventService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class DeliveryEventListener {
 
     private final DeliveryEventService service;
 
-    public DeliveryEventListener(DeliveryEventService service) {
-        this.service = service;
-    }
-
     @RabbitListener(queues = "delivery.started")
-    public void handleDeliveryStarted(String message) {
-        service.process(new DeliveryEventDto("delivery.started", message));
+    public void onStarted(String msg) {
+        service.process(new DeliveryEventDto(1, "started", "delivery.started", msg));
     }
 
     @RabbitListener(queues = "delivery.in_transit")
-    public void handleDeliveryInTransit(String message) {
-        service.process(new DeliveryEventDto("delivery.in_transit", message));
+    public void onTransit(String msg) {
+        service.process(new DeliveryEventDto(1, "in_transit", "delivery.in_transit", msg));
     }
 
     @RabbitListener(queues = "delivery.completed")
-    public void handleDeliveryCompleted(String message) {
-        service.process(new DeliveryEventDto("delivery.completed", message));
+    public void onCompleted(String msg) {
+        service.process(new DeliveryEventDto(1, "completed", "delivery.completed", msg));
     }
 
     @RabbitListener(queues = "delivery.failed")
-    public void handleDeliveryFailed(String message) {
-        service.process(new DeliveryEventDto("delivery.failed", message));
+    public void onFailed(String msg) {
+        service.process(new DeliveryEventDto(1, "failed", "delivery.failed", msg));
     }
 }

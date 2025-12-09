@@ -16,8 +16,10 @@ public class DeliveryEvent {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String orderId;
+    private Integer orderId;
     private String status;
     private String queueName;
+
+    @Column(columnDefinition = "TEXT")
     private String message;
 }
