@@ -9,7 +9,7 @@ app.use("/api/payments", paymentRoutes);
 (async () => {
   await rabbit.setupRabbit();
 })();
-
+    console.log("Return URL:", String(process.env.VNPAY_RETURN_URL));
 
 startConsumer();
 module.exports = app;

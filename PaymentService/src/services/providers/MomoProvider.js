@@ -1,6 +1,7 @@
 const BasePaymentProvider = require("./BasePaymentProvider");
 const axios = require("axios");
 const crypto = require("crypto");
+const e = require("express");
 
 class MomoProvider extends BasePaymentProvider {
   getProviderName() {
@@ -26,7 +27,7 @@ class MomoProvider extends BasePaymentProvider {
       `&extraData=${extraData}` +
       `&ipnUrl=${ipnUrl}` +
       `&orderId=${orderId}` +
-      `&orderInfo=${order.description}` +
+      `&orderInfo=${order.orderId}` +
       `&partnerCode=${partnerCode}` +
       `&redirectUrl=${redirectUrl}` +
       `&requestId=${requestId}` +
@@ -38,6 +39,7 @@ class MomoProvider extends BasePaymentProvider {
       .digest("hex");
 
     const expireTime = Date.now() + 15 * 60 * 1000;
+    const expiresAt = new Date(Date.now() + 105 * 60 * 1000); 
 
     const requestBody = {
       partnerCode,
@@ -46,7 +48,7 @@ class MomoProvider extends BasePaymentProvider {
       requestId,
       amount,
       orderId,
-      orderInfo: order.description,
+      orderInfo: order.orderId,
       redirectUrl,
       ipnUrl,
       lang: "vi",
@@ -57,7 +59,7 @@ class MomoProvider extends BasePaymentProvider {
       signature,
       expireTime,
     };
-
+    console.log("📤 MoMo create payment request:");
     try {
       const res = await axios.post(
         "https://test-payment.momo.vn/v2/gateway/api/create",
@@ -67,9 +69,11 @@ class MomoProvider extends BasePaymentProvider {
       console.log("📤 MoMo create payment response:", res.data);
       return {
         url: res.data.payUrl,
+        expiresAt: expiresAt,
         providerOrderId: res.data.orderId,
       };
     } catch (err) {
+      console.error("❌ MoMo create payment error:", err.response?.data || err.message);
       throw new Error("MoMo payment creation failed");
     }
   }

@@ -33,9 +33,34 @@ class OccasionRepositoryMongo extends IOccasionRepository {
   }
 
   async getOccasionById(id) {
-     
+    let matchStage = null;
+
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      matchStage = { _id: new mongoose.Types.ObjectId(id) };
+    }
+    else {
+      let raw = String(id);
+      try {
+        raw = decodeURIComponent(raw);
+      } catch (e) { }
+
+      let normalized = raw
+        .replace(/[-_+]/g, " ")
+        .replace(/\s*&\s*/g, " & ")
+        .replace(/\s+/g, " ")
+        .trim();
+      const escaped = normalized.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+      matchStage = {
+        name: {
+          $regex: new RegExp(`^${escaped}$`, "i")
+        }
+      };
+    }
+
+
     const docs = await OccasionModel.aggregate([
-      { $match: { _id: new mongoose.Types.ObjectId(id) } },
+      { $match: matchStage },
       {
         $lookup: {
           from: "suboccasions",
@@ -47,14 +72,16 @@ class OccasionRepositoryMongo extends IOccasionRepository {
     ]);
 
     const doc = docs[0];
-console.log('Fetching occasion by eID:', id);
+
+    console.log("Fetching occasion by ID or NAME:", id);
+
     return doc
       ? new Occasion({
-          id: doc._id,
-          name: doc.name,
-          description: doc.description,
-          subOccasions: doc.subOccasions,
-        })
+        id: doc._id,
+        name: doc.name,
+        description: doc.description,
+        subOccasions: doc.subOccasions,
+      })
       : null;
   }
 

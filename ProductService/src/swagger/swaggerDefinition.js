@@ -17,27 +17,68 @@ module.exports = {
     "/api/bouquets": {
       get: {
         tags: ["Bouquet"],
-        summary: "Get all bouquets (with filters + pagination)",
+        summary: "Get all bouquets (filters + pagination + sorting)",
         parameters: [
           { name: "search_query", in: "query", schema: { type: "string" } },
           { name: "name", in: "query", schema: { type: "string" } },
 
-          // 🔥 Fixed: use subOccasionId instead of subOccasionName
-          { 
-            name: "subOccasionId", 
-            in: "query", 
+          {
+            name: "subOccasionId",
+            in: "query",
             schema: { type: "string" },
             description: "Filter by Sub Occasion ID"
           },
 
+          {
+            name: "subOccasionName",
+            in: "query",
+            schema: { type: "string" },
+            description: "Filter by Sub Occasion Name"
+          },
+
           { name: "minPrice", in: "query", schema: { type: "number" } },
           { name: "maxPrice", in: "query", schema: { type: "number" } },
-          { name: "startDate", in: "query", schema: { type: "string", format: "date" } },
-          { name: "endDate", in: "query", schema: { type: "string", format: "date" } },
-          { name: "page", in: "query", schema: { type: "integer", default: 1 } },
-          { name: "limit", in: "query", schema: { type: "integer", default: 10 } },
-          { name: "sortBy", in: "query", schema: { type: "string", default: "createdAt" } },
-          { name: "order", in: "query", schema: { type: "string", enum: ["asc", "desc"], default: "desc" } }
+
+          {
+            name: "startDate",
+            in: "query",
+            schema: { type: "string", format: "date" }
+          },
+
+          {
+            name: "endDate",
+            in: "query",
+            schema: { type: "string", format: "date" }
+          },
+
+          {
+            name: "page",
+            in: "query",
+            schema: { type: "integer", default: 1 }
+          },
+
+          {
+            name: "limit",
+            in: "query",
+            schema: { type: "integer", default: 10 }
+          },
+
+          {
+            name: "sortOption",
+            in: "query",
+            schema: {
+              type: "string",
+              enum: [
+                "priceAsc",
+                "priceDesc",
+                "nameAsc",
+                "nameDesc",
+                "newest",
+                "oldest"
+              ]
+            },
+            description: "Sort bouquets"
+          }
         ],
         responses: {
           200: {
@@ -51,7 +92,10 @@ module.exports = {
                     limit: { type: "integer" },
                     totalItems: { type: "integer" },
                     totalPages: { type: "integer" },
-                    data: { type: "array", items: { $ref: "#/components/schemas/Bouquet" } }
+                    data: {
+                      type: "array",
+                      items: { $ref: "#/components/schemas/Bouquet" }
+                    }
                   }
                 }
               }
@@ -79,10 +123,11 @@ module.exports = {
             }
           }
         },
-        responses: { 201: { description: "Bouquet created" } }
+        responses: {
+          201: { description: "Bouquet created" }
+        }
       }
     },
-
     "/api/bouquets/{id}": {
       get: {
         tags: ["Bouquet"],
@@ -121,11 +166,11 @@ module.exports = {
       get: {
         tags: ["Occasion"],
         summary: "Get all occasions",
-        responses: { 
-          200: { 
-            description: "List of occasions", 
-            content: { "application/json": { schema: { type: "array", items: { $ref: "#/components/schemas/Occasion" } } } } 
-          } 
+        responses: {
+          200: {
+            description: "List of occasions",
+            content: { "application/json": { schema: { type: "array", items: { $ref: "#/components/schemas/Occasion" } } } }
+          }
         }
       },
       post: {
@@ -140,16 +185,34 @@ module.exports = {
       }
     },
 
+
     "/api/occasions/{id}": {
       get: {
         tags: ["Occasion"],
-        summary: "Get occasion by ID",
-        parameters: [{ name: "id", in: "path", required: true }],
-        responses: { 
-          200: { description: "Occasion object", content: { "application/json": { schema: { $ref: "#/components/schemas/Occasion" } } } }, 
-          404: { description: "Not found" } 
+        summary: "Get occasion by ID or name",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "Keyword hoặc ID",
+            example: "Love-&-Romance",
+          }
+        ],
+        responses: {
+          200: {
+            description: "Occasion object",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/Occasion" }
+              }
+            }
+          },
+          404: { description: "Not found" }
         }
       },
+
+
       put: {
         tags: ["Occasion"],
         summary: "Update occasion",
@@ -175,11 +238,11 @@ module.exports = {
       get: {
         tags: ["SubOccasion"],
         summary: "Get all sub occasions",
-        responses: { 
-          200: { 
-            description: "List of sub-occasions", 
-            content: { "application/json": { schema: { type: "array", items: { $ref: "#/components/schemas/SubOccasion" } } } } 
-          } 
+        responses: {
+          200: {
+            description: "List of sub-occasions",
+            content: { "application/json": { schema: { type: "array", items: { $ref: "#/components/schemas/SubOccasion" } } } }
+          }
         }
       },
       post: {
@@ -196,9 +259,9 @@ module.exports = {
         tags: ["SubOccasion"],
         summary: "Get sub occasion by ID",
         parameters: [{ name: "id", in: "path", required: true }],
-        responses: { 
-          200: { description: "Sub occasion object", content: { "application/json": { schema: { $ref: "#/components/schemas/SubOccasion" } } } }, 
-          404: { description: "Not found" } 
+        responses: {
+          200: { description: "Sub occasion object", content: { "application/json": { schema: { $ref: "#/components/schemas/SubOccasion" } } } },
+          404: { description: "Not found" }
         }
       },
       put: {
@@ -226,11 +289,11 @@ module.exports = {
       get: {
         tags: ["Greeting"],
         summary: "Get all greetings",
-        responses: { 
-          200: { 
-            description: "List of greetings", 
-            content: { "application/json": { schema: { type: "array", items: { $ref: "#/components/schemas/Greeting" } } } } 
-          } 
+        responses: {
+          200: {
+            description: "List of greetings",
+            content: { "application/json": { schema: { type: "array", items: { $ref: "#/components/schemas/Greeting" } } } }
+          }
         }
       },
       post: {
@@ -247,9 +310,9 @@ module.exports = {
         tags: ["Greeting"],
         summary: "Get greeting by ID",
         parameters: [{ name: "id", in: "path", required: true }],
-        responses: { 
-          200: { description: "Greeting object", content: { "application/json": { schema: { $ref: "#/components/schemas/Greeting" } } } }, 
-          404: { description: "Not found" } 
+        responses: {
+          200: { description: "Greeting object", content: { "application/json": { schema: { $ref: "#/components/schemas/Greeting" } } } },
+          404: { description: "Not found" }
         }
       },
       put: {

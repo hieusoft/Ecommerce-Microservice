@@ -37,8 +37,8 @@ async function startServer() {
         app.use('/api/coupons', CouponRoutes(rabbitMQService));
 
 
-        // const couponConsumer = new CouponConsumer(rabbitMQService, dbPool);
-        // await couponConsumer.start();
+        const couponConsumer = new CouponConsumer(rabbitMQService, dbPool);
+        await couponConsumer.start();
 
         const PORT = process.env.PORT || 5001;
         const server = app.listen(PORT, () => {

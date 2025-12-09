@@ -1,7 +1,15 @@
 const rabbit = require("../config/rabbitmq");
 const orderModel = require("../models/orderModel");
 const orderItemModel = require("../models/orderItemModel");
+const redisService = require("../services/RedisService");
+const axios = require("axios");
+const crypto = require("crypto");
 
+function generateCacheKey(prefix, query) {
+  const serialized = JSON.stringify(query); // biến query thành chuỗi
+  const hash = crypto.createHash("sha256").update(serialized).digest("hex");
+  return `${prefix}:${hash}`;
+}
 function generateRandomCode(length = 8) {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let result = "";
@@ -10,7 +18,6 @@ function generateRandomCode(length = 8) {
   }
   return result;
 }
-
 
 async function recalcTotalPrice(orderId) {
   const items = await orderItemModel.getOrderItems(orderId);
@@ -28,10 +35,8 @@ async function recalcTotalPrice(orderId) {
   return total;
 }
 
-
 async function createOrder(orderData) {
   const orderCode = generateRandomCode();
-  
   let totalPrice = 0;
   const items = [];
 
@@ -46,63 +51,134 @@ async function createOrder(orderData) {
     totalPrice += price * quantity;
 
     items.push({
-      bouquet_id: item.bouquet_id,
+      bouquet_id: Number(item.bouquet_id),
       quantity,
       price,
     });
   }
 
+  let discountData = null;
 
+  if (orderData.coupon_code) {
+    discountData = await redisService.getObjectAsync(
+      `coupon:validate:${orderData.coupon_code}`
+    );
+
+    if (!discountData) {
+      console.log("Calling coupon validation API...");
+
+      try {
+        const response = await axios.post(
+          "http://localhost:5001/api/coupons/validate",
+          {
+            coupon_code: orderData.coupon_code,
+            user_id: Number(orderData.userId),
+            total_price: totalPrice,
+          },
+          {
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+
+        console.log("Coupon API status:", response.status);
+
+        if (!response.data || !response.data.coupon) {
+          throw new Error("Invalid coupon response format");
+        }
+
+        const coupon = response.data.coupon;
+
+        discountData = {
+          valid: coupon.valid === true,
+          discount_type: coupon.discount_type ?? "amount",
+          discount_value: Number(coupon.discount_value ?? 0),
+          min_price: Number(coupon.min_price ?? 0),
+          coupon_id: Number(coupon.coupon_id),
+        };
+      } catch (err) {
+        throw new Error(
+          err.response?.data?.error || "Coupon validation failed"
+        );
+      }
+    }
+  }
+  let discountAmount = 0;
+
+  if (discountData?.valid) {
+    if (discountData.discount_type === "amount") {
+      discountAmount = discountData.discount_value;
+    } else if (discountData.discount_type === "percent") {
+      discountAmount = Math.floor(
+        (totalPrice * discountData.discount_value) / 100
+      );
+    }
+  }
+
+  totalPrice = Math.max(totalPrice - discountAmount, 0);
   const order = await orderModel.createOrder(
-    Number(orderData.user_id),
     orderCode,
+    Number(orderData.userId),
+    Number(orderData.recipient_id),
     totalPrice,
-    orderData.description
+    orderData.description || "",
+    orderData.delivery_date || null,
+    orderData.delivery_time || null
   );
-
-
   for (const item of items) {
     await orderItemModel.addOrderItem(
-      order.order_id,
+      Number(order.order_id),
       item.bouquet_id,
       item.quantity,
       item.price
     );
   }
-  if (orderData.coupon_code) {
-    
-  await orderModel.updateOrder({
-    order_id: orderId,
-    total_price: totalPrice,
-  });
-  msg = {
-    orderId: order.order_id,
+  if (orderData.coupon_code && discountData?.valid) {
+    await orderModel.updateOrderCoupon({
+      order_id: Number(order.order_id),
+      coupon_code: orderData.coupon_code,
+      discountAmount: discountAmount,
+    });
+
+    const msg = {
+      coupon_id: discountData.coupon_id,
+      order_id: Number(order.order_id),
+      user_id: Number(orderData.userId),
+    };
+
+    rabbit.publish("order_events", "order.coupon", msg);
+  }
+  rabbit.publish("order_events", "order.created", {
+    orderId: Number(order.order_id),
     amount: totalPrice,
-    converted_amount: totalPrice,
     currency: "VND",
     provider: orderData.provider,
-    description: order.description,
-  };
-  rabbit.publish("order_events", "order.created", msg);
+  });
   return {
     ...order,
     items,
     total_price: totalPrice,
+    discount: discountAmount,
   };
 }
 
-
 async function getAllOrders(query) {
-    return await orderModel.getAllOrdersWithQuery(query);
-}
+  const cacheKey = generateCacheKey("orders:list", query);
+  const cached = await redisService.getObjectAsync(cacheKey);
+  if (cached) {
+    return cached;
+  }
+  const data = await orderModel.getAllOrdersWithQuery(query);
+  await redisService.setObjectAsync(cacheKey, data, 60);
 
+  return data;
+}
 
 
 async function getOrderById(orderId) {
   return await orderModel.getOrderById(orderId);
 }
 async function getOrdersByUserId(userId, query) {
-  return await orderModel.getOrdersByUserId(userId,query);
+  return await orderModel.getOrdersByUserId(userId, query);
 }
 
 async function updateOrder(order_id, updateData) {
@@ -114,7 +190,7 @@ async function updateOrder(order_id, updateData) {
     order_code: updateData.order_code,
     status: updateData.status,
     description: updateData.description,
-    total_price: order.total_price, 
+    total_price: order.total_price,
   });
 
   return updated;
@@ -126,7 +202,6 @@ async function deleteOrder(orderId) {
 
   return await orderModel.deleteOrder(orderId);
 }
-
 
 async function addOrderItem(orderId, itemData) {
   const order = await orderModel.getOrderById(orderId);
@@ -148,14 +223,12 @@ async function addOrderItem(orderId, itemData) {
   };
 }
 
-
 async function getOrderItems(orderId) {
   const order = await orderModel.getOrderById(orderId);
   if (!order) throw new Error("Order not found");
 
   return await orderItemModel.getOrderItems(orderId);
 }
-
 
 async function updateOrderItem(orderId, orderItemId, itemData) {
   orderItemId = Number(orderItemId);
@@ -203,8 +276,6 @@ async function deleteOrderItem(orderId, orderItemId) {
     total_price: newTotal,
   };
 }
-
-// ----------------------------------
 
 module.exports = {
   createOrder,

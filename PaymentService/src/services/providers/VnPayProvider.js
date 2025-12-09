@@ -79,6 +79,7 @@ class VnPayProvider extends BasePaymentProvider {
     return {
       url: paymentUrl,
       providerOrderId: orderId,
+      expiresAt: new Date(Date.now() + 15 * 60 * 1000),
     };
   }
 

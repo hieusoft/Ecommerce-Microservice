@@ -1,4 +1,3 @@
-// events/rabbitmq.js
 const amqp = require("amqplib");
 
 const RABBITMQ_URL = process.env.RABBITMQ_URL || "amqp://guest:guest@rabbitmq:5672/";
@@ -6,9 +5,9 @@ const RABBITMQ_URL = process.env.RABBITMQ_URL || "amqp://guest:guest@rabbitmq:56
 let connection = null;
 let channel = null;
 
-// ---------------- Connect & Channel ----------------
+
 async function connect() {
-  if (channel) return channel; // nếu đã có channel, trả luôn
+  if (channel) return channel;
 
   connection = await amqp.connect(RABBITMQ_URL);
   channel = await connection.createChannel();
@@ -28,7 +27,6 @@ async function connect() {
   return channel;
 }
 
-// ---------------- Setup Exchange & Queue ----------------
 async function assertExchangeQueue(exchange, queue, routingKey = "", type = "direct") {
   const ch = await connect();
 
@@ -39,14 +37,12 @@ async function assertExchangeQueue(exchange, queue, routingKey = "", type = "dir
   console.log(`🔗 Queue '${queue}' bound to exchange '${exchange}' with key '${routingKey}'`);
 }
 
-// ---------------- Publish ----------------
 async function publish(exchange, routingKey, msg) {
   const ch = await connect();
   ch.publish(exchange, routingKey, Buffer.from(JSON.stringify(msg)), { persistent: true });
   console.log(`📤 Published to ${exchange}:${routingKey}`, msg);
 }
 
-// ---------------- Consume ----------------
 async function consume(queue, handler) {
   const ch = await connect();
 

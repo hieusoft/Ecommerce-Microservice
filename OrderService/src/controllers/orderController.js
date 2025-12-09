@@ -28,8 +28,10 @@ async function getAllOrders(req, res) {
         let result;
         if (roles.includes("Admin")) {
             result = await orderService.getAllOrders(query);
+            
         } else {
             result = await orderService.getOrdersByUserId(userId, query);
+            
         }
 
         return res.json(result);
@@ -61,6 +63,7 @@ async function updateOrder(req, res) {
         res.status(500).json({ message: err.message || 'Failed to update order' });
     }
 }
+
 
 async function deleteOrder(req, res) {
     try {

@@ -38,14 +38,14 @@ class BouquetRepositoryMongo extends IBouquetRepository {
             search_query,
             name,
             subOccasionId,
+            subOccasionName,
             minPrice,
             maxPrice,
             startDate,
             endDate,
             page = 1,
             limit = 10,
-            sortBy = "createdAt",
-            order = "desc"
+            sortOption,
         } = query;
 
         const skip = (page - 1) * limit;
@@ -119,13 +119,48 @@ class BouquetRepositoryMongo extends IBouquetRepository {
                 }
             });
         }
+        if (subOccasionName) {
+            let raw = String(subOccasionName);
+            try {
+                raw = decodeURIComponent(raw);
+            } catch (e) {
+
+            }
+            let normalized = raw
+                .replace(/[-_+]/g, " ")
+                .replace(/\s*&\s*/g, " & ")
+                .replace(/\s+/g, " ")
+                .trim();
+            ;
+            pipeline.push({
+                $match: {
+                    "subOccasionsDetails.name": {
+                        $regex: new RegExp(`^${normalized}$`, "i")
+                    }
+                }
+            });
+        }
+
 
 
         const countPipeline = [...pipeline, { $count: "total" }];
         const count = await BouquetModel.aggregate(countPipeline);
         const totalItems = count.length > 0 ? count[0].total : 0;
+        if (sortOption) {
+            if (sortOption === "priceAsc")
+                pipeline.push({ $sort: { price: 1 } });
+            else if (sortOption === "priceDesc")
+                pipeline.push({ $sort: { price: -1 } });
+            else if (sortOption === "nameAsc")
+                pipeline.push({ $sort: { name: 1 } });
+            else if (sortOption === "nameDesc")
+                pipeline.push({ $sort: { name: -1 } });
+            else if (sortOption === "oldest")
+                pipeline.push({ $sort: { createdAt: 1 } });
+            else if (sortOption === "newest")
+                pipeline.push({ $sort: { createdAt: -1 } });
+        }
 
-        pipeline.push({ $sort: { [sortBy]: order === "desc" ? -1 : 1 } });
         pipeline.push({ $skip: skip });
         pipeline.push({ $limit: Number(limit) });
 
@@ -134,14 +169,14 @@ class BouquetRepositoryMongo extends IBouquetRepository {
                 subOccasionId: {
                     $mergeObjects: [
                         "$subOccasionsDetails",
-                        { id: "$subOccasionsDetails._id" } 
+                        { id: "$subOccasionsDetails._id" }
                     ]
                 },
                 subOccasionName: "$subOccasionsDetails.name"
             }
         });
 
-        
+
 
         const rawData = await BouquetModel.aggregate(pipeline);
 

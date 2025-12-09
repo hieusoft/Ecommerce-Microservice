@@ -1,13 +1,17 @@
 CREATE TABLE Orders (
-    order_id INT IDENTITY(1,1) PRIMARY KEY, 
-    order_code NVARCHAR(50) UNIQUE,    
-    user_id INT,
-    total_price DECIMAL(10,2),
-    status NVARCHAR(30) DEFAULT 'Pending' 
-        CHECK (status IN ('Pending','Paid','Cancelled','Shipping','Completed')),
-    description NVARCHAR(MAX),  
+    order_id INT IDENTITY(1,1) PRIMARY KEY,
+    order_code NVARCHAR(50) UNIQUE NOT NULL,
+    user_id INT NOT NULL,                 
+    recipient_id INT NOT NULL,              
+    total_price DECIMAL(10,2) NOT NULL,
+    discount DECIMAL(10,2) DEFAULT 0,
+    coupon_code NVARCHAR(50) NULL,
+    status NVARCHAR(30) DEFAULT 'Pending' CHECK (status IN ('Pending','Paid','Cancelled','Shipping','Completed')),
+    description NVARCHAR(MAX) NULL,
+    delivery_date DATE NOT NULL,
+    delivery_time TIME NULL,
     created_at DATETIME DEFAULT GETDATE(),
-    updated_at DATETIME DEFAULT GETDATE()
+    updated_at DATETIME DEFAULT GETDATE(),
 );
 
 

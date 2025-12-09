@@ -9,10 +9,10 @@ async function startConsumer() {
         const orderData = msg; 
 
         try {
-            // Kiểm tra xem order này đã có payment chưa
+            
             const existingPayment = await PaymentService.findPaymentByOrderId(orderData.orderId);
 
-            if (existingPayment) {
+            if (existingPayment && existingPayment.expiresAt > new Date()) {
                 console.log(`⚠️ Payment for order ${orderData.orderId} already exists. Skipping.`);
                 if (rabbit.ack) rabbit.ack(msg); 
                 return;

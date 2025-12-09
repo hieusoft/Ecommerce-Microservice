@@ -1,20 +1,19 @@
 CREATE TABLE Payments (
     payment_id INT IDENTITY(1,1) PRIMARY KEY,
 
-    order_id INT NOT NULL UNIQUE,               -- Sửa: int + duy nhất
+    order_id INT NOT NULL UNIQUE,
 
     provider NVARCHAR(50) NOT NULL,
     provider_order_id NVARCHAR(50) NOT NULL,
 
     amount DECIMAL(18,2) NOT NULL,
     currency NVARCHAR(10) NOT NULL,
-
     converted_amount DECIMAL(18,2),
-
     status NVARCHAR(20) NOT NULL DEFAULT 'PENDING',
-
     payment_url NVARCHAR(2048),
     callback_data NVARCHAR(MAX),
+
+    expires_at DATETIME NULL, 
 
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE()

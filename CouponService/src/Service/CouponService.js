@@ -1,5 +1,6 @@
 const sql = require('mssql');
-
+const RabbitMQ = require('./RabbitMqService');
+const redisService = require('./RedisService');
 class CouponService {
     static async getAll(pool) {
         const result = await pool.request().query('SELECT * FROM Coupons');
@@ -72,6 +73,8 @@ class CouponService {
     }
 
     static async validate(pool, coupon_code, total_price) {
+        const cached = await redisService.getObjectAsync(`coupon:validate:${coupon_code}`);
+        if (cached) return cached;
         const result = await pool.request()
             .input('code', sql.VarChar, coupon_code)
             .query('SELECT * FROM Coupons WHERE code = @code');
@@ -91,14 +94,16 @@ class CouponService {
 
         if (coupon.min_price !== null && total_price < coupon.min_price)
             return { valid: false, reason: `Order total must be at least ${coupon.min_price}` };
-
-        return {
-            valid: true,
-            coupon_id: coupon.id,
-            discount_type: coupon.discount_type,
-            discount_value: coupon.discount_value,
-            min_price: coupon.min_price
-        };
+        const response = {
+                valid: true,
+                coupon_id: coupon.id,
+                discount_type: coupon.discount_type,
+                discount_value: coupon.discount_value,
+                min_price: coupon.min_price
+            };
+        await redisService.setObjectAsync(`coupon:validate:${coupon_code}`, response, 600);
+    
+        return response;
     }
 
 

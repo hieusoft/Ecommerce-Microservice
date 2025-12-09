@@ -1,19 +1,23 @@
 const { pool, poolConnect } = require('../config/db');
 
 
-async function createOrder(user_id, order_code,total_price, description) {
+async function createOrder(order_code, user_id, recipient_id, total_price, description, delivery_date, delivery_time) {
     await poolConnect;
 
     const result = await pool.request()
         .input('user_id', user_id)
+        .input('recipient_id', recipient_id)
         .input('order_code', order_code)
         .input('total_price', total_price)
         .input('description', description || '')
+        .input('delivery_date', delivery_date )
+        .input('delivery_time', delivery_time )
         .query(`
-            INSERT INTO Orders (user_id, order_code,total_price, description)
+            INSERT INTO Orders (user_id, recipient_id, order_code, total_price, description, delivery_date, delivery_time)
             OUTPUT INSERTED.*
-            VALUES (@user_id, @order_code,@total_price, @description)
+            VALUES (@user_id, @recipient_id, @order_code, @total_price, @description, @delivery_date, @delivery_time)
         `);
+
     return result.recordset[0];
 }
 
@@ -39,6 +43,29 @@ async function updateOrderTotal(order_id, total_price) {
             WHERE order_id = @order_id
         `);
 }
+async function updateOrderCoupon({order_id, coupon_code, discountAmount}) {
+    await poolConnect;
+    const orderResult = await pool.request()
+        .input('order_id', order_id)
+        .query(`SELECT * FROM Orders WHERE order_id = @order_id`);
+    if (!orderResult) throw new Error('Order not found');
+   
+    const newTotalPrice = Math.max( orderResult.recordset[0].total_price - discountAmount, 0);
+    await pool.request()
+        .input('order_id', order_id)
+        .input('coupon_code', coupon_code)
+        .input('discountAmount', discountAmount)
+        .input('total_price', newTotalPrice)
+        .query(`
+            UPDATE Orders
+            SET coupon_code = @coupon_code,
+                discount = @discountAmount,
+                total_price = @total_price,
+                updated_at = GETDATE()
+            WHERE order_id = @order_id
+        `);
+}
+
 async function getAllOrdersWithQuery(query) {
     await poolConnect;
 
@@ -272,6 +299,7 @@ module.exports = {
     getOrdersByUserId,
     updateOrderTotal,
     getOrderById,
+    updateOrderCoupon,
     updateOrder,
     deleteOrder,
     applyCoupon

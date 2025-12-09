@@ -24,9 +24,6 @@ const CouponRoutes = (rabbitMQService) => {
     
     router.post('/validate', (req, res) => couponController.validateCoupon(req, res));
 
-   
-    router.post('/apply', (req, res) => couponController.applyCouponToOrder(req, res));
-
     return router;
 };
 

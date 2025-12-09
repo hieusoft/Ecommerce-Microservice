@@ -135,7 +135,7 @@ class BouquetUseCase {
 
             const bouquets = await this.bouquetRepository.getAllBouquets(query);
 
-            // Lưu cache 30 phút
+            
             await this.redisService.setObjectAsync(key, bouquets, 1800);
 
             return bouquets;
