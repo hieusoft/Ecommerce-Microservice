@@ -23,22 +23,23 @@ async function createOrder(req, res) {
 async function getAllOrders(req, res) {
     try {
         const { userId, roles } = getUserFromToken(req);
-        console.log("+++++++++++++++")
-        console.log(userId)
-        
+        const query = req.query;
 
-        let orders;
-        if (roles.includes('Admin')) {
-            orders = await orderService.getAllOrders();
+        let result;
+        if (roles.includes("Admin")) {
+            result = await orderService.getAllOrders(query);
         } else {
-            orders = await orderService.getOrdersByUserId(userId);
+            result = await orderService.getOrdersByUserId(userId, query);
         }
 
-        res.json(orders);
+        return res.json(result);
+
     } catch (err) {
-        res.status(401).json({ message: err.message });
+        console.error(err);
+        return res.status(500).json({ message: err.message });
     }
 }
+
 
 async function getOrderById(req, res) {
     try {

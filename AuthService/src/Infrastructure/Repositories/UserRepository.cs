@@ -13,6 +13,13 @@ namespace Infrastructure.Repositories
         {
             _context = context;
         }
+        public IQueryable<User> Query()
+        {
+            return _context.Users
+                .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+                .AsQueryable();
+        }
 
         public async Task<User?> GetByIdAsync(int id)
         {

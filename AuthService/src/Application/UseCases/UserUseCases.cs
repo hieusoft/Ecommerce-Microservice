@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.UseCases
 {
@@ -23,16 +24,54 @@ namespace Application.UseCases
             _rabbitMqService = rabbitMqService;
             _redisService = redisService;
         }
-        public async Task<IEnumerable<UserResponseDto>> GetAllUsersAsync()
+        public async Task<PagedResponse<UserResponseDto>> GetAllUsersAsync(UserQueryModelDto query)
         {
-            var users = await _userRepository.GetAllAsync();
-            return users.Select(u => new UserResponseDto
+            var q = _userRepository.Query();
+
+          
+            if (!string.IsNullOrWhiteSpace(query.Search))
             {
-                UserId = u.UserId,
-                Email = u.Email,
-                Roles = u.UserRoles?.Select(ur => ur.Role.RoleName).ToList() ?? new List<string>()
-            });
+                q = q.Where(u =>
+                    u.Email.Contains(query.Search) ||
+                    u.FullName.Contains(query.Search) ||
+                    u.Username.Contains(query.Search)
+                );
+            }
+
+            if (!string.IsNullOrWhiteSpace(query.Role))
+            {
+                q = q.Where(u =>
+                    u.UserRoles.Any(ur => ur.Role.RoleName == query.Role)
+                );
+            }
+
+            if (query.IsBanned.HasValue)
+            {
+                q = q.Where(u => u.IsBanned == query.IsBanned.Value);
+            }
+
+           
+            int page = query.Page <= 0 ? 1 : query.Page;
+            int limit = query.Limit <= 0 ? 10 : query.Limit;
+
+            var totalItems = await q.CountAsync(); 
+
+            var users = await q
+                .Skip((page - 1) * limit)
+                .Take(limit)
+                .Select(u => new UserResponseDto
+                {
+                    UserId = u.UserId,
+                    Email = u.Email,
+                    Roles = u.UserRoles.Select(r => r.Role.RoleName).ToList()
+                })
+                .ToListAsync();
+
+   
+            return new PagedResponse<UserResponseDto>(users, page, limit, totalItems);
         }
+
+
         public async Task<UserResponseDto> GetUserByIdAsync(int id)
         {
             var user = await _userRepository.GetByIdAsync(id);

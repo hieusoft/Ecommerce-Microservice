@@ -54,12 +54,13 @@ namespace Api.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+        [Authorize(Roles = "Admin,Manager")]
         [HttpGet]
-        public async Task<IActionResult> GetAllUsers()
+        public async Task<IActionResult> GetAllUsers([FromQuery] UserQueryModelDto query)
         {
             try
             {
-                var users = await _userUseCases.GetAllUsersAsync();
+                var users = await _userUseCases.GetAllUsersAsync(query);
                 return Ok(users);
             }
             catch (Exception ex)

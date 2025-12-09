@@ -11,9 +11,7 @@ function generateRandomCode(length = 8) {
   return result;
 }
 
-// ----------------------------------
-// Recalculate total price of an order
-// ----------------------------------
+
 async function recalcTotalPrice(orderId) {
   const items = await orderItemModel.getOrderItems(orderId);
 
@@ -30,9 +28,7 @@ async function recalcTotalPrice(orderId) {
   return total;
 }
 
-// ----------------------------------
-// Create new order + items
-// ----------------------------------
+
 async function createOrder(orderData) {
   const orderCode = generateRandomCode();
   
@@ -56,7 +52,7 @@ async function createOrder(orderData) {
     });
   }
 
-  // Create order
+
   const order = await orderModel.createOrder(
     Number(orderData.user_id),
     orderCode,
@@ -64,7 +60,7 @@ async function createOrder(orderData) {
     orderData.description
   );
 
-  // Insert items
+
   for (const item of items) {
     await orderItemModel.addOrderItem(
       order.order_id,
@@ -73,8 +69,14 @@ async function createOrder(orderData) {
       item.price
     );
   }
+  if (orderData.coupon_code) {
+    
+  await orderModel.updateOrder({
+    order_id: orderId,
+    total_price: totalPrice,
+  });
   msg = {
-    orderId: 102,
+    orderId: order.order_id,
     amount: totalPrice,
     converted_amount: totalPrice,
     currency: "VND",
@@ -90,20 +92,19 @@ async function createOrder(orderData) {
 }
 
 
-async function getAllOrders() {
-  return await orderModel.getAllOrders();
+async function getAllOrders(query) {
+    return await orderModel.getAllOrdersWithQuery(query);
 }
+
 
 
 async function getOrderById(orderId) {
   return await orderModel.getOrderById(orderId);
 }
-async function getOrdersByUserId(orderId) {
-  return await orderModel.getOrdersByUserId(orderId);
+async function getOrdersByUserId(userId, query) {
+  return await orderModel.getOrdersByUserId(userId,query);
 }
-// ----------------------------------
-// Update Order (not items)
-// ----------------------------------
+
 async function updateOrder(order_id, updateData) {
   const order = await orderModel.getOrderById(order_id);
   if (!order) throw new Error("Order not found");
@@ -113,15 +114,12 @@ async function updateOrder(order_id, updateData) {
     order_code: updateData.order_code,
     status: updateData.status,
     description: updateData.description,
-    total_price: order.total_price, // total không chỉnh ở đây
+    total_price: order.total_price, 
   });
 
   return updated;
 }
 
-// ----------------------------------
-// Delete Order
-// ----------------------------------
 async function deleteOrder(orderId) {
   const order = await orderModel.getOrderById(orderId);
   if (!order) throw new Error("Order not found");
@@ -129,9 +127,7 @@ async function deleteOrder(orderId) {
   return await orderModel.deleteOrder(orderId);
 }
 
-// ----------------------------------
-// Add Order Item
-// ----------------------------------
+
 async function addOrderItem(orderId, itemData) {
   const order = await orderModel.getOrderById(orderId);
   if (!order) throw new Error("Order not found");
@@ -152,9 +148,7 @@ async function addOrderItem(orderId, itemData) {
   };
 }
 
-// ----------------------------------
-// Get all items of an order
-// ----------------------------------
+
 async function getOrderItems(orderId) {
   const order = await orderModel.getOrderById(orderId);
   if (!order) throw new Error("Order not found");
@@ -162,9 +156,7 @@ async function getOrderItems(orderId) {
   return await orderItemModel.getOrderItems(orderId);
 }
 
-// ----------------------------------
-// Update Order Item
-// ----------------------------------
+
 async function updateOrderItem(orderId, orderItemId, itemData) {
   orderItemId = Number(orderItemId);
 
@@ -191,9 +183,6 @@ async function updateOrderItem(orderId, orderItemId, itemData) {
   };
 }
 
-// ----------------------------------
-// Delete Order Item
-// ----------------------------------
 async function deleteOrderItem(orderId, orderItemId) {
   orderItemId = Number(orderItemId);
 

@@ -39,19 +39,171 @@ async function updateOrderTotal(order_id, total_price) {
             WHERE order_id = @order_id
         `);
 }
-async function getAllOrders() {
+async function getAllOrdersWithQuery(query) {
     await poolConnect;
-    const result = await pool.request()
-        .query(`SELECT * FROM Orders ORDER BY created_at DESC`);
-    return result.recordset;
+
+    const page = parseInt(query.page) || 1;
+    const limit = parseInt(query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    const status = query.status || null;
+    const search = query.search || null;
+    const minPrice = query.minPrice || null;
+    const maxPrice = query.maxPrice || null;
+    const fromDate = query.fromDate || null;
+    const toDate = query.toDate || null;
+
+    const sortBy = query.sortBy || "created_at";
+    const orderBy = query.order === "asc" ? "ASC" : "DESC";
+
+    let where = "WHERE 1 = 1";
+    const request = pool.request();
+
+    if (status) {
+        where += " AND status = @status";
+        request.input("status", status);
+    }
+
+    if (search) {
+        where += " AND order_code LIKE '%' + @search + '%'";
+        request.input("search", search);
+    }
+
+    if (minPrice) {
+        where += " AND total_price >= @minPrice";
+        request.input("minPrice", minPrice);
+    }
+
+    if (maxPrice) {
+        where += " AND total_price <= @maxPrice";
+        request.input("maxPrice", maxPrice);
+    }
+
+    if (fromDate) {
+        where += " AND created_at >= @fromDate";
+        request.input("fromDate", fromDate);
+    }
+
+    if (toDate) {
+        where += " AND created_at <= @toDate";
+        request.input("toDate", toDate);
+    }
+
+    const countQuery = `
+        SELECT COUNT(*) AS total
+        FROM Orders
+        ${where}
+    `;
+
+    const countResult = await request.query(countQuery);
+    const totalItems = countResult.recordset[0].total;
+    const totalPages = Math.ceil(totalItems / limit);
+
+    const dataQuery = `
+        SELECT *
+        FROM Orders
+        ${where}
+        ORDER BY ${sortBy} ${orderBy}
+        OFFSET ${offset} ROWS
+        FETCH NEXT ${limit} ROWS ONLY
+    `;
+
+    const dataResult = await request.query(dataQuery);
+
+    return {
+        page,
+        limit,
+        totalItems,
+        totalPages,
+        data: dataResult.recordset
+    };
 }
-async function getOrdersByUserId(user_id) {
-     await poolConnect;
-    const result = await pool.request()
-        .input('user_id', user_id)
-        .query(`SELECT * FROM Orders WHERE user_id = @user_id`);
-    return result.recordset[0];
+
+
+async function getOrdersByUserId(user_id, query) {
+    await poolConnect;
+
+    const page = parseInt(query.page) || 1;
+    const limit = parseInt(query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    const status = query.status || null;
+    const search = query.search || null;
+    const minPrice = query.minPrice || null;
+    const maxPrice = query.maxPrice || null;
+    const from = query.from || null;
+    const to = query.to || null;
+
+    const sortBy = query.sortBy || "created_at";
+    const order = query.order === "asc" ? "ASC" : "DESC";
+
+    // Build dynamic WHERE
+    let where = `WHERE user_id = @user_id `;
+    let request = pool.request().input("user_id", user_id);
+
+    if (status) {
+        where += ` AND status = @status`;
+        request.input("status", status);
+    }
+
+    if (search) {
+        where += ` AND order_code LIKE '%' + @search + '%'`;
+        request.input("search", search);
+    }
+
+    if (minPrice) {
+        where += ` AND total_price >= @minPrice`;
+        request.input("minPrice", minPrice);
+    }
+
+    if (maxPrice) {
+        where += ` AND total_price <= @maxPrice`;
+        request.input("maxPrice", maxPrice);
+    }
+
+    if (from) {
+        where += ` AND created_at >= @from`;
+        request.input("from", from);
+    }
+
+    if (to) {
+        where += ` AND created_at <= @to`;
+        request.input("to", to);
+    }
+
+    // Query count
+    const countQuery = `
+        SELECT COUNT(*) AS total
+        FROM Orders
+        ${where}
+    `;
+
+    const countResult = await request.query(countQuery);
+    const totalItems = countResult.recordset[0].total;
+    const totalPages = Math.ceil(totalItems / limit);
+
+    // Query data (pagination)
+    const dataQuery = `
+        SELECT *
+        FROM Orders
+        ${where}
+        ORDER BY ${sortBy} ${order}
+        OFFSET ${offset} ROWS
+        FETCH NEXT ${limit} ROWS ONLY
+    `;
+
+    const dataResult = await request.query(dataQuery);
+
+    return {
+        page,
+        limit,
+        totalItems,
+        totalPages,
+        data: dataResult.recordset
+    };
 }
+
+
 async function getOrderById(order_id) {
     await poolConnect;
     const result = await pool.request()
@@ -116,7 +268,7 @@ async function applyCoupon(order_id, discountAmount) {
 module.exports = {
     createOrder,
     updateOrderCode,
-    getAllOrders,
+    getAllOrdersWithQuery,
     getOrdersByUserId,
     updateOrderTotal,
     getOrderById,
