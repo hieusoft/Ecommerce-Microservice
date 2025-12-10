@@ -219,7 +219,13 @@ namespace Api.Controllers
         {
             try
             {
-                await _userUseCases.AddRecipientAsync(dto);
+                var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+                if (userIdClaim == null)
+                    return Unauthorized(new { message = "Invalid token" });
+
+                var userId = int.Parse(userIdClaim.Value);
+
+                await _userUseCases.AddRecipientAsync(dto,userId);
                 return Ok(new { message = "Recipient added successfully" });
             }
             catch (Exception ex)

@@ -195,10 +195,10 @@ namespace Application.UseCases
             });
         }
 
-        public async Task<IEnumerable<RecipientRequestDto>> GetRecipientsByUserIdAsync(int userId)
+        public async Task<IEnumerable<RecipientResponseDto>> GetRecipientsByUserIdAsync(int userId)
         {
             var recipients = await _userRepository.GetRecipientsByUserIdAsync(userId);
-            return recipients.Select(r => new RecipientRequestDto
+            return recipients.Select(r => new RecipientResponseDto
             {
                 RecipientId = r.RecipientId,
                 UserId = r.UserId,
@@ -210,12 +210,12 @@ namespace Application.UseCases
             });
         }
 
-        public async Task<RecipientRequestDto?> GetRecipientById(int recipientId)
+        public async Task<RecipientResponseDto?> GetRecipientById(int recipientId)
         {
             var recipient = await _userRepository.GetRecipientByIdAsync(recipientId);
             if (recipient == null) return null;
 
-            return new RecipientRequestDto
+            return new RecipientResponseDto
             {
                 RecipientId = recipient.RecipientId,
                 FullName = recipient.FullName,
@@ -227,13 +227,13 @@ namespace Application.UseCases
             };
         }
 
-        public async Task AddRecipientAsync(RecipientRequestDto dto)
+        public async Task AddRecipientAsync(RecipientRequestDto dto,int userId)
         {
-            var user = await _userRepository.GetByIdAsync(dto.UserId);
+            var user = await _userRepository.GetByIdAsync(userId);
             if (user == null) throw new Exception("User not found");
             var recipient = new RecipientInfo
             {
-                UserId = dto.UserId,
+                UserId = userId,
                 FullName = dto.FullName,
                 AddressLine = dto.AddressLine,
                 City = dto.City,
@@ -244,7 +244,7 @@ namespace Application.UseCases
             if (recipient.IsDefault)
             {
               
-                var existingRecipient = await _userRepository.GetRecipientsByUserIdAsync(dto.UserId);
+                var existingRecipient = await _userRepository.GetRecipientsByUserIdAsync(userId);
                 foreach (var c in existingRecipient)
                 {
                     if (c.IsDefault)

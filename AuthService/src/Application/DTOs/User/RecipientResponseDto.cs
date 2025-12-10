@@ -4,8 +4,11 @@ using System.Text;
 
 namespace Application.DTOs.User
 {
-    public class RecipientRequestDto
+    public class RecipientResponseDto
     {
+        public int RecipientId { get; set; }
+
+        public int UserId { get; set; }
         public string FullName { get; set; }
         public string AddressLine { get; set; } = string.Empty;
         public string? City { get; set; }
