@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const sql = require('mssql');
-const RabbitMqService = require('./src/Service/RabbitMqService');
+const RabbitMqService = require('./src/Service/RabbitmqService');
 const CouponConsumer = require('./src/Events/CouponConsumer');
 const CouponRoutes = require('./src/Routes/CouponRoutes');
 
