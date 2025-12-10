@@ -1,20 +1,20 @@
+# Sử dụng image Node.js chính thức
+FROM node:20-alpine
 
-FROM node:18-alpine
-
-
+# Tạo thư mục làm việc trong container
 WORKDIR /app
 
-
+# Copy file package.json và package-lock.json
 COPY package*.json ./
 
-
+# Cài đặt dependencies
 RUN npm install --production
 
-# 5. Copy toàn bộ service vào container
+
 COPY . .
 
-# 6. Expose port (trùng với PORT trong env hoặc docker-compose)
+
 EXPOSE 8083
 
-# 7. Start app
+# Lệnh chạy service
 CMD ["node", "index.js"]

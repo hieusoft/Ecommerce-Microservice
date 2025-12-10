@@ -1,24 +1,20 @@
-# Dockerfile cho PaymentService (Node.js)
-
-# 1️⃣ Chọn base image Node.js LTS
+# Sử dụng image Node.js chính thức
 FROM node:20-alpine
 
-# 2️⃣ Thiết lập thư mục làm việc
+# Tạo thư mục làm việc trong container
 WORKDIR /app
 
-# 3️⃣ Copy package.json và package-lock.json trước để cache layer npm install
+# Copy file package.json và package-lock.json
 COPY package*.json ./
 
-# 4️⃣ Cài dependencies
+# Cài đặt dependencies
 RUN npm install --production
 
 
 COPY . .
 
-ENV PORT=8084
-
 
 EXPOSE 8084
 
-# 8️⃣ Command chạy app
+# Lệnh chạy service
 CMD ["node", "index.js"]

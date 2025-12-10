@@ -41,6 +41,7 @@ namespace Api.Controllers
 
                 return Ok(new
                 {
+                    userProfile.UserId,
                     userProfile.FullName,
                     userProfile.UserName,
                     userProfile.Email,

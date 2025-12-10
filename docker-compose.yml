@@ -124,7 +124,19 @@ services:
       - "8084:8084"
     networks:
       - micro-net
-
+  couponservice:
+    build:
+      context: ./CouponService
+      dockerfile: Dockerfile
+    container_name: couponservice
+    depends_on:
+      - rabbitmq
+    environment:
+      PORT: 8086
+    ports:
+      - "8084:8084"
+    networks:
+      - micro-net
   apigateway:
     build:
       context: ./APIGateway
@@ -142,8 +154,8 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: "Production"
     volumes:
-      - ./APIGateway/src/ocelot.json:/app/ocelot.json  # Mount config file
-  # ====================================
+      - ./APIGateway/src/ocelot.json:/app/ocelot.json  
+
 
 networks:
   micro-net:

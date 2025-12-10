@@ -160,6 +160,122 @@
       "UpstreamHttpMethod": [ "POST", "PUT", "DELETE" ],
       "Priority": 12,
       "DelegatingHandlers": [ "RedisTokenValidator" ]
+    },
+
+    // Orders Service
+    {
+      "DownstreamPathTemplate": "/api/orders/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "orderservice",
+          "Port": 8083
+        }
+      ],
+      "UpstreamPathTemplate": "/orders/{everything}",
+      "UpstreamHttpMethod": [ "GET" ],
+      "Priority": 13
+    },
+    {
+      "DownstreamPathTemplate": "/api/orders/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "orderservice",
+          "Port": 8083
+        }
+      ],
+      "UpstreamPathTemplate": "/orders/{everything}",
+      "UpstreamHttpMethod": [ "POST", "PUT", "DELETE" ],
+      "Priority": 14,
+      "DelegatingHandlers": [ "RedisTokenValidator" ]
+    },
+
+    // Payment Service
+    {
+      "DownstreamPathTemplate": "/api/payments/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "paymentservice",
+          "Port": 8084
+        }
+      ],
+      "UpstreamPathTemplate": "/payments/{everything}",
+      "UpstreamHttpMethod": [ "GET" ],
+      "Priority": 15
+    },
+    {
+      "DownstreamPathTemplate": "/api/payments/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "paymentservice",
+          "Port": 8084
+        }
+      ],
+      "UpstreamPathTemplate": "/payments/{everything}",
+      "UpstreamHttpMethod": [ "POST", "PUT", "DELETE" ],
+      "Priority": 16,
+      "DelegatingHandlers": [ "RedisTokenValidator" ]
+    },
+
+    
+    {
+      "DownstreamPathTemplate": "/api/coupons/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "couponservice",
+          "Port": 8086
+        }
+      ],
+      "UpstreamPathTemplate": "/coupons/{everything}",
+      "UpstreamHttpMethod": [ "GET" ],
+      "Priority": 17
+    },
+    {
+      "DownstreamPathTemplate": "/api/coupons/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "couponservice",
+          "Port": 8085
+        }
+      ],
+      "UpstreamPathTemplate": "/coupons/{everything}",
+      "UpstreamHttpMethod": [ "POST", "PUT", "DELETE" ],
+      "Priority": 18,
+      "DelegatingHandlers": [ "RedisTokenValidator" ]
+    },
+
+    
+    {
+      "DownstreamPathTemplate": "/api/notifications/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "notificationservice",
+          "Port": 8086
+        }
+      ],
+      "UpstreamPathTemplate": "/notifications/{everything}",
+      "UpstreamHttpMethod": [ "GET" ],
+      "Priority": 19
+    },
+    {
+      "DownstreamPathTemplate": "/api/notifications/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "notificationservice",
+          "Port": 8086
+        }
+      ],
+      "UpstreamPathTemplate": "/notifications/{everything}",
+      "UpstreamHttpMethod": [ "POST", "PUT", "DELETE" ],
+      "Priority": 20,
+      "DelegatingHandlers": [ "RedisTokenValidator" ]
     }
   ],
   "GlobalConfiguration": {
