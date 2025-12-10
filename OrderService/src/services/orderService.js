@@ -1,7 +1,7 @@
 const rabbit = require("../config/rabbitmq");
 const orderModel = require("../models/orderModel");
 const orderItemModel = require("../models/orderItemModel");
-const redisService = require("../services/RedisService");
+const redisService = require("../services/redisService");
 const axios = require("axios");
 const crypto = require("crypto");
 

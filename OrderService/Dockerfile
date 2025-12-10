@@ -1,20 +1,20 @@
-# Sử dụng image Node.js chính thức
+# 1. Chọn base image Node.js
 FROM node:20-alpine
 
-# Tạo thư mục làm việc trong container
-WORKDIR /app
+# 2. Thiết lập working directory trong container
+WORKDIR /usr/src/app
 
-# Copy file package.json và package-lock.json
+# 3. Copy package.json và package-lock.json trước (tận dụng cache)
 COPY package*.json ./
 
-# Cài đặt dependencies
+# 4. Cài dependencies
 RUN npm install --production
 
-
+# 5. Copy toàn bộ source code vào container
 COPY . .
 
+# 6. Expose port mà service Node.js sẽ chạy
+EXPOSE 8080
 
-EXPOSE 8083
-
-# Lệnh chạy service
+# 7. Chạy app
 CMD ["node", "index.js"]

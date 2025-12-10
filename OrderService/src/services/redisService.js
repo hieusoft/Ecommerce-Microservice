@@ -1,10 +1,14 @@
 const Redis = require("ioredis");
 
+const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
+
 class RedisService {
   constructor() {
-    this.client = new Redis({
-      host: "127.0.0.1",
-      port: 6379,
+
+    this.client = new Redis(REDIS_URL);
+
+    this.client.on("connect", () => {
+      console.log("Redis connected successfully!");
     });
 
     this.client.on("error", (err) => {
@@ -12,7 +16,6 @@ class RedisService {
     });
   }
 
-  
   async setStringAsync(key, value, expiryInSeconds = null) {
     if (expiryInSeconds) {
       await this.client.set(key, value, "EX", expiryInSeconds);
