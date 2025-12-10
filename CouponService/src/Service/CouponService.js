@@ -1,5 +1,5 @@
 const sql = require('mssql');
-const RabbitMQ = require('./RabbitmqService');
+const RabbitMQ = require('./RabbitMQService');
 const redisService = require('./RedisService');
 class CouponService {
     static async getAll(pool) {
