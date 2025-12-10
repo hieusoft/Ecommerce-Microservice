@@ -233,7 +233,7 @@
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
       "Priority": 18,
       "DelegatingHandlers": [ "RedisTokenValidator" ]
-    }
+    },
 
 
     
