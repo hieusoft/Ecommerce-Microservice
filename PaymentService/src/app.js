@@ -1,6 +1,6 @@
 const express = require("express");
 const paymentRoutes = require("./routes/paymentRoutes");
-const { startConsumer } = require("./services/payment.consumer");
+const { startConsumer } = require("./services/PaymentConsumer");
 const rabbit  = require("./events/rabbitmq");
 const app = express();
 app.use(express.json());

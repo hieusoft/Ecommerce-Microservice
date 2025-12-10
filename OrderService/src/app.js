@@ -2,7 +2,9 @@ const express = require('express');
 const orderRoutes = require('./routes/orderRoutes');
 const rabbit  = require("./config/rabbitmq");
 const app = express();
+const { startConsumer } = require('./services/orderConsumer');
 
+startConsumer();
 (async () => {
   await rabbit.setupRabbit();
 })();

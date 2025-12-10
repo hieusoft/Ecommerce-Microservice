@@ -7,12 +7,12 @@ async function startConsumer() {
     rabbit.consume(queueOrder, async (msg) => {
         if (!msg) return;
         const orderData = msg; 
-
+        
         try {
             
             const existingPayment = await PaymentService.findPaymentByOrderId(orderData.orderId);
-
-            if (existingPayment && existingPayment.expiresAt > new Date()) {
+            const now = new Date();
+            if (existingPayment && existingPayment.expires_at > now && existing.status !== "SUCCESS") {
                 console.log(`⚠️ Payment for order ${orderData.orderId} already exists. Skipping.`);
                 if (rabbit.ack) rabbit.ack(msg); 
                 return;

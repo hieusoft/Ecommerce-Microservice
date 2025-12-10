@@ -33,8 +33,10 @@ class PaymentModel {
   static async updateStatusByProviderOrderId({
     providerOrderId,
     status,
-    rawData,
+    callbackData,
+    
   }) {
+    
     await poolConnect;
 
     const query = `
@@ -49,7 +51,7 @@ class PaymentModel {
       .request()
       .input("providerOrderId", sql.NVarChar, providerOrderId)
       .input("status", sql.NVarChar, status)
-      .input("callbackData", sql.NVarChar, rawData)
+      .input("callbackData", sql.NVarChar, callbackData)
       .query(query);
   }
   static async findByProviderOrderId(providerOrderId) {
@@ -131,7 +133,7 @@ class PaymentModel {
   if (expired==="true") { whereClause += " AND expires_at IS NOT NULL AND expires_at<GETDATE()"; }
   if (expired==="false") { whereClause += " AND expires_at IS NOT NULL AND expires_at>=GETDATE()"; }
 
-  // Count totalItems
+
   const countRequest = pool.request();
   params.forEach(p => countRequest.input(p.name, p.type, p.value));
   const countResult = await countRequest.query(`SELECT COUNT(*) AS total FROM Payments ${whereClause}`);

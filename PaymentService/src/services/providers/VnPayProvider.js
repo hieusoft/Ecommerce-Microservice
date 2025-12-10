@@ -18,8 +18,8 @@ class VnPayProvider extends BasePaymentProvider {
     let vnpUrl = String(process.env.VNPAY_URL);
     let returnUrl = String(process.env.VNPAY_RETURN_URL);
 
-    let orderId = moment(date).format("DDHHmmss");
-    let amount = order.amount;
+    let orderId = "ORD-VNPAY" + order.orderId;
+    let amount = order.converted_amount;
     let locale = order.language || "vn";
 
   

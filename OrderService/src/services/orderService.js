@@ -150,7 +150,7 @@ async function createOrder(orderData) {
   rabbit.publish("order_events", "order.created", {
     orderId: Number(order.order_id),
     amount: totalPrice,
-    currency: "VND",
+    currency: orderData.currency || "USD",
     provider: orderData.provider,
   });
   return {

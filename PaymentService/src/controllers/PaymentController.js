@@ -34,7 +34,7 @@ class PaymentController {
 
   async handleMomoCallback(req, res) {
     try {
-      const data = req.body;
+       const data = JSON.parse(JSON.stringify(req.query));
       const result = await PaymentService.handleCallback("momo", data);
       res.json(result);
     } catch (err) {

@@ -1,12 +1,48 @@
 const ProviderFactory = require("./ProviderFactory");
 const PaymentModel = require("../models/PaymentModel.js");
 const rabbit = require("../events/rabbitmq");
+const axios = require("axios");
 const e = require("express");
+async function convertCurrency(amount, fromCurrency, toCurrency) {
+  try {
+    fromCurrency = fromCurrency.toUpperCase();
+    toCurrency = toCurrency.toUpperCase();
+    const response = await axios.get(
+      `https://open.er-api.com/v6/latest/${fromCurrency}`
+    );
+    if (response.data.result !== "success") {
+      throw new Error("Failed to fetch exchange rates");
+    }
+    const rates = response.data.rates;
+    if (!rates[toCurrency]) {
+      throw new Error(`Currency ${toCurrency} not found in rates`);
+    }
+
+    const rate = rates[toCurrency];
+    const convertedAmount = Math.round(amount * rate);
+
+    return convertedAmount;
+  } catch (err) {
+    console.error("Currency conversion failed:", err.message);
+    return null;
+  }
+}
+
 class PaymentService {
   async createPayment(order) {
     try {
       const provider = ProviderFactory.getProvider(order.provider);
+      console.log(order.amount, order.currency);
+      const fromCurrency = order.originalCurrency || "USD";
+      const toCurrency = order.currency;
 
+      const converted_amount = await convertCurrency(
+        Number(order.amount),
+        fromCurrency,
+        toCurrency
+      );
+
+      order.converted_amount = converted_amount;
       const paymentResult = await provider.createPayment(order);
 
       await PaymentModel.create({
@@ -152,41 +188,56 @@ class PaymentService {
       return { success: false, status: "ERROR", message: err.message };
     }
   }
-  async retryPayment(orderId,provider_name){
-      try {
-        const provider = ProviderFactory.getProvider(provider_name);
-        const existing = await PaymentModel.findByOrderId(orderId);
-        const now = new Date();
-        if (existing && existing.expires_at && existing.expires_at > now && existing.status !== "SUCCESS") {
-            return  existing
-        }
-        const newPayment = await provider.createPayment({
-            orderId: orderId,
-            amount: existing?.amount,             
-            currency: existing?.currency,          
-            provider: provider
-        });
-        await PaymentModel.create({
+  async retryPayment(orderId, provider_name) {
+    try {
+      const provider = ProviderFactory.getProvider(provider_name);
+      const existing = await PaymentModel.findByOrderId(orderId);
+      if (!existing) {
+            throw new Error(`No existing payment found for orderId ${orderId}`);
+          }
+      const now = new Date();
+      if (
+        existing &&
+        existing.expires_at &&
+        existing.expires_at > now &&
+        existing.status !== "SUCCESS" &&
+        existing.provider === provider_name
+      ) {
+        console.log(`⚠️ Existing valid payment found for order ${orderId}. Skipping retry.`);
+        return existing;
+      }
+      const fromCurrency = existing.originalCurrency || "USD";
+      const toCurrency = existing.currency;
+
+      const converted_amount = await convertCurrency(
+        Number(existing.amount),
+        fromCurrency,
+        toCurrency
+      );
+      const newPayment = await provider.createPayment({
+        orderId: orderId,
+        amount: existing?.amount,
+        currency: existing?.currency,
+        converted_amount: converted_amount,
+        provider: provider,
+      });
+      await PaymentModel.create({
         orderId: orderId,
         providerOrderId: newPayment.providerOrderId,
         provider: provider.getProviderName(),
         amount: existing?.amount,
-        currency:existing?.currency,
-        convertedAmount: existing?.amount,
+        currency: existing?.currency,
+        convertedAmount: converted_amount,
         status: "PENDING",
         paymentUrl: newPayment.url,
         expiresAt: newPayment.expiresAt,
-       
       });
-        return newPayment;
-        
-
+      return newPayment;
     } catch (err) {
-        console.error("❌ retryPayment error:", err);
-        throw err;
+      console.error("❌ retryPayment error:", err);
+      throw err;
     }
   }
-  
 }
 
 module.exports = new PaymentService();

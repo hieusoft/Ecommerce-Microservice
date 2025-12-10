@@ -16,7 +16,7 @@ class MomoProvider extends BasePaymentProvider {
     const ipnUrl = process.env.MOMO_IPN_URL;
 
     const requestType = "payWithMethod";
-    const amount = order.amount.toString();
+    const amount = order.converted_amount.toString();
     const orderId = partnerCode + new Date().getTime();
     const requestId = orderId;
     const extraData = "";
@@ -59,14 +59,14 @@ class MomoProvider extends BasePaymentProvider {
       signature,
       expireTime,
     };
-    console.log("📤 MoMo create payment request:");
+    
     try {
       const res = await axios.post(
         "https://test-payment.momo.vn/v2/gateway/api/create",
         requestBody,
         { headers: { "Content-Type": "application/json" } }
       );
-      console.log("📤 MoMo create payment response:", res.data);
+     
       return {
         url: res.data.payUrl,
         expiresAt: expiresAt,
@@ -79,6 +79,7 @@ class MomoProvider extends BasePaymentProvider {
   }
 
   async handleCallback(data) {
+    console.log("MoMo callback data:", data);
     const accessKey = process.env.MOMO_ACCESS_KEY;
     const secretKey = process.env.MOMO_SECRET_KEY;
     const partnerCode = process.env.MOMO_PARTNER_CODE;

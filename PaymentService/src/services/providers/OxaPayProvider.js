@@ -7,9 +7,6 @@ class OxaPayProvider extends BasePaymentProvider {
     return "oxapay";
   }
 
-  // =====================================================
-  // 1. TẠO PAYMENT OXAPAY
-  // =====================================================
   async createPayment(order) {
     try {
       const url = String(process.env.OXAPAY_URL);
