@@ -182,11 +182,17 @@ namespace Api.Controllers
         }
 
 
-        [HttpGet("{userId}/recipients")]
-        public async Task<IActionResult> GetRecipientsByUser(int userId)
+        [HttpGet("recipients")]
+        public async Task<IActionResult> GetRecipientsByUser()
         {
             try
             {
+                var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+                if (userIdClaim == null)
+                    return Unauthorized(new { message = "Invalid token" });
+
+                var userId = int.Parse(userIdClaim.Value);
+
                 var recipients = await _userUseCases.GetRecipientsByUserIdAsync(userId);
                 return Ok(recipients);
             }
@@ -250,7 +256,7 @@ namespace Api.Controllers
             }
         }
 
-        // Xóa ng??i nh?n
+       
         [HttpDelete("recipients/{recipientId}")]
         public async Task<IActionResult> DeleteRecipient(int recipientId)
         {
