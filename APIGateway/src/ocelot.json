@@ -220,7 +220,6 @@
       "DelegatingHandlers": [ "RedisTokenValidator" ]
     },
 
-    
     {
       "DownstreamPathTemplate": "/api/coupons/{everything}",
       "DownstreamScheme": "http",
@@ -231,23 +230,11 @@
         }
       ],
       "UpstreamPathTemplate": "/coupons/{everything}",
-      "UpstreamHttpMethod": [ "GET" ],
-      "Priority": 17
-    },
-    {
-      "DownstreamPathTemplate": "/api/coupons/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "couponservice",
-          "Port": 8085
-        }
-      ],
-      "UpstreamPathTemplate": "/coupons/{everything}",
-      "UpstreamHttpMethod": [ "POST", "PUT", "DELETE" ],
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
       "Priority": 18,
       "DelegatingHandlers": [ "RedisTokenValidator" ]
-    },
+    }
+
 
     
     {
@@ -256,7 +243,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "notificationservice",
-          "Port": 8086
+          "Port": 8087
         }
       ],
       "UpstreamPathTemplate": "/notifications/{everything}",
@@ -269,7 +256,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "notificationservice",
-          "Port": 8086
+          "Port": 8087
         }
       ],
       "UpstreamPathTemplate": "/notifications/{everything}",
