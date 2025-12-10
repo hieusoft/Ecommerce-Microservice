@@ -1,20 +1,20 @@
-# Sử dụng image Node.js chính thức
+# Dùng Node.js chính thức
 FROM node:20-alpine
 
-# Tạo thư mục làm việc trong container
+# Tạo thư mục làm việc
 WORKDIR /app
 
-# Copy file package.json và package-lock.json
+# Copy package.json và package-lock.json trước (tận dụng cache)
 COPY package*.json ./
 
-# Cài đặt dependencies
+# Cài dependencies
 RUN npm install --production
 
-
+# Copy toàn bộ source code vào container
 COPY . .
 
-
+# Expose port service
 EXPOSE 8086
 
-# Lệnh chạy service
+# Chạy app
 CMD ["node", "index.js"]
