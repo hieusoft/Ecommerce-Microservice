@@ -162,7 +162,6 @@
       "DelegatingHandlers": [ "RedisTokenValidator" ]
     },
 
-    // Orders Service
     {
       "DownstreamPathTemplate": "/api/orders/{everything}",
       "DownstreamScheme": "http",
@@ -191,7 +190,7 @@
       "DelegatingHandlers": [ "RedisTokenValidator" ]
     },
 
-    // Payment Service
+   
     {
       "DownstreamPathTemplate": "/api/payments/{everything}",
       "DownstreamScheme": "http",
@@ -202,20 +201,7 @@
         }
       ],
       "UpstreamPathTemplate": "/payments/{everything}",
-      "UpstreamHttpMethod": [ "GET" ],
-      "Priority": 15
-    },
-    {
-      "DownstreamPathTemplate": "/api/payments/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "paymentservice",
-          "Port": 8084
-        }
-      ],
-      "UpstreamPathTemplate": "/payments/{everything}",
-      "UpstreamHttpMethod": [ "POST", "PUT", "DELETE" ],
+      "UpstreamHttpMethod": [ "GET","POST", "PUT", "DELETE" ],
       "Priority": 16,
       "DelegatingHandlers": [ "RedisTokenValidator" ]
     },
