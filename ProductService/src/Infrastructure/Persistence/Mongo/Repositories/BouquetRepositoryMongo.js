@@ -1,7 +1,7 @@
 const BouquetModel = require("../Models/BouquetModel");
 const Bouquet = require("../../../../Domain/Entities/Bouquet");
 const IBouquetRepository = require("../../../../Application/Interfaces/IBouquetRepository ");
-
+const GreetingModel = require('../Models/GreetingModel');
 class BouquetRepositoryMongo extends IBouquetRepository {
   async createBouquet(bouquetData) {
     const bouquet = new BouquetModel(bouquetData);
@@ -9,17 +9,15 @@ class BouquetRepositoryMongo extends IBouquetRepository {
     return new Bouquet(savedBouquet.toObject());
   }
 
-  async getBouquetById(bouquetId) {
+ async getBouquetById(id) {
     // Lấy bouquet + populate subOccasion
-    const doc = await BouquetModel.findById(bouquetId).populate(
+    const doc = await BouquetModel.findById(id).populate(
       "subOccasionId"
     );
 
     if (!doc) return null;
 
     const bouquet = new Bouquet(doc.toObject());
-
-    bouquet.subOccasionName = doc.subOccasionId?.name || null;
     const greetings = await GreetingModel.find({
       subOccasionId: doc.subOccasionId.id,
     }).lean();

@@ -10,6 +10,5 @@ module.exports = (rabbitService,redisService) => {
     router.get('/', (req, res) => greetingController.getAllGreetings(req, res));
     router.put('/:id', (req, res) => greetingController.updateGreeting(req, res));
     router.delete('/:id', (req, res) => greetingController.deleteGreeting(req, res));
-
     return router;
 };
