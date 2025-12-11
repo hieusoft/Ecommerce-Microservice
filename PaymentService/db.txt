@@ -2,6 +2,7 @@ CREATE TABLE Payments (
     payment_id INT IDENTITY(1,1) PRIMARY KEY,
 
     order_id INT NOT NULL UNIQUE,
+    user_id INT NOT NULL,
 
     provider NVARCHAR(50) NOT NULL,
     provider_order_id NVARCHAR(50) NOT NULL,
@@ -16,5 +17,5 @@ CREATE TABLE Payments (
     expires_at DATETIME NULL, 
 
     created_at DATETIME DEFAULT GETDATE(),
-    updated_at DATETIME DEFAULT GETDATE()
+    updated_at DATETIME DEFAULT GETDATE(),
 );

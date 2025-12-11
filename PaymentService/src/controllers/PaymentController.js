@@ -5,7 +5,14 @@ class PaymentController {
   async createPayment(req, res) {
     try {
       console.log("Received create payment request:", req.body);
-      const { provider, orderId, amount, currency, converted_amount, description } = req.body;
+      const {
+        provider,
+        orderId,
+        amount,
+        currency,
+        converted_amount,
+        description,
+      } = req.body;
       const payUrl = await PaymentService.createPayment({
         provider,
         orderId,
@@ -34,7 +41,7 @@ class PaymentController {
 
   async handleMomoCallback(req, res) {
     try {
-       const data = JSON.parse(JSON.stringify(req.query));
+      const data = JSON.parse(JSON.stringify(req.query));
       const result = await PaymentService.handleCallback("momo", data);
       res.json(result);
     } catch (err) {
@@ -57,12 +64,20 @@ class PaymentController {
   async getPaymentByOrderId(req, res) {
     try {
       const orderId = Number(req.params.orderId);
-      
-      const paymentRecord = await PaymentService.findPaymentByOrderId(Number(orderId));
+      const { userId, roles } = getUserFromToken(req);
+      const paymentRecord = await PaymentService.findPaymentByOrderId(
+        Number(orderId)
+      );
       if (!paymentRecord) {
         return res.status(404).json({ error: "Payment record not found" });
       }
-      res.redirect(paymentRecord.payment_url); 
+      if (
+        paymentRecord.userId !== userId &&
+        !roles.includes("Admin")
+      ) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+      res.redirect(paymentRecord.payment_url);
     } catch (err) {
       console.error("❌ getPaymentByOrderId error:", err);
       res.status(500).json({ error: err.message });
@@ -86,7 +101,9 @@ class PaymentController {
   async getStatusByProviderOrderId(req, res) {
     try {
       const { providerOrderId } = req.params;
-      const status = await PaymentService.getStatusByProviderOrderId(providerOrderId);
+      const status = await PaymentService.getStatusByProviderOrderId(
+        providerOrderId
+      );
       res.json({ status });
     } catch (err) {
       console.error("❌ getStatusByProviderOrderId error:", err);
@@ -107,9 +124,15 @@ class PaymentController {
 
   async retryPayment(req, res) {
     try {
+      const { userId, roles } = getUserFromToken(req);
       const { orderId, provider } = req.params;
-      console.log(`Retrying payment for orderId: ${orderId} with provider: ${provider}`);
+      console.log(
+        `Retrying payment for orderId: ${orderId} with provider: ${provider}`
+      );
       const paymentUrl = await PaymentService.retryPayment(orderId, provider);
+      if (paymentRecord.userId !== userId && !roles.includes("Admin")) {
+      return res.status(403).json({ error: "Access denied" });
+    }
       res.json({ paymentUrl });
     } catch (err) {
       console.error("❌ retryPayment error:", err);

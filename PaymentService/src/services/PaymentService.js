@@ -55,6 +55,7 @@ class PaymentService {
         status: "PENDING",
         paymentUrl: paymentResult.url,
         expiresAt: paymentResult.expiresAt,
+
       });
 
       return {
@@ -223,7 +224,9 @@ class PaymentService {
         provider: provider,
       });
       await PaymentModel.create({
+        
         orderId: orderId,
+        userId: existing.user_id,
         providerOrderId: newPayment.providerOrderId,
         provider: provider.getProviderName(),
         amount: existing?.amount,
