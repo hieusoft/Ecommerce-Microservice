@@ -9,7 +9,7 @@ router.get("/callback/momo", PaymentController.handleMomoCallback);
 router.post("/callback/oxapay", PaymentController.handleOxaPayCallback);
 router.get("/", PaymentController.getAllPayments);
 router.get("/status/:providerOrderId", PaymentController.getStatusByProviderOrderId);
-router.get("/:orderId", PaymentController.getPaymentByOrderId);
+router.get("/order/:orderId", PaymentController.getPaymentByOrderId);
 router.get("/provider/:provider", PaymentController.getPaymentsByProvider);
 router.post("/retry/:orderId/:provider",retryRateLimiter, PaymentController.retryPayment);
 

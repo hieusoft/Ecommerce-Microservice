@@ -61,7 +61,7 @@ class PaymentController {
       if (!paymentRecord) {
         return res.status(404).json({ error: "Payment record not found" });
       }
-      res.json(paymentRecord);
+      res.redirect(paymentRecord.payUrl); 
     } catch (err) {
       console.error("❌ getPaymentByOrderId error:", err);
       res.status(500).json({ error: err.message });
