@@ -56,7 +56,7 @@ class PaymentController {
 
   async getPaymentByOrderId(req, res) {
     try {
-      const { orderId } = req.params;
+      const orderId = parseInt(req.params.orderId, 10);
       const paymentRecord = await PaymentService.findPaymentByOrderId(orderId);
       if (!paymentRecord) {
         return res.status(404).json({ error: "Payment record not found" });
