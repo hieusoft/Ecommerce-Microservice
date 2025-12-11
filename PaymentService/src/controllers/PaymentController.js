@@ -56,13 +56,13 @@ class PaymentController {
 
   async getPaymentByOrderId(req, res) {
     try {
-      const orderId = parseInt(req.params.orderId, 10);
-      console.log(`Fetching payment for orderId: ${orderId}`);
-      const paymentRecord = await PaymentService.findPaymentByOrderId(orderId);
+      const orderId = Number(req.params.orderId);
+      
+      const paymentRecord = await PaymentService.findPaymentByOrderId(Number(orderId));
       if (!paymentRecord) {
         return res.status(404).json({ error: "Payment record not found" });
       }
-      res.redirect(paymentRecord.payUrl); 
+      res.redirect(paymentRecord.payment_url); 
     } catch (err) {
       console.error("❌ getPaymentByOrderId error:", err);
       res.status(500).json({ error: err.message });

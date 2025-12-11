@@ -105,8 +105,9 @@ class PaymentService {
 
   async findPaymentByOrderId(orderId) {
     try {
+     
       const paymentRecord = await PaymentModel.findByOrderId(orderId);
-
+     
       if (!paymentRecord) {
         return null;
       }
