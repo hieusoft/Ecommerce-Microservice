@@ -1,4 +1,5 @@
 const CouponService = require('../Service/CouponService');
+const { getUserFromToken } = require('../Service/JwtUserService');
 
 class CouponController {
     constructor(rabbitMQService) {
@@ -61,10 +62,11 @@ class CouponController {
 
     async validateCoupon(req, res) {
         try {
+            const { userId, roles } = getUserFromToken(req);
 
             const pool = req.app.get('dbPool');
             const {coupon_code, total_price} = req.body;
-            const result = await CouponService.validate(pool, coupon_code, total_price);
+            const result = await CouponService.validate(pool,userId, coupon_code, total_price);
             console.log('Validation result:', result);
             if (!result.valid) return res.status(400).json({ error: result.reason });
             res.status(200).json({ message: "Coupon is valid", coupon: result });
