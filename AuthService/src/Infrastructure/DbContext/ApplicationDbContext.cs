@@ -68,9 +68,10 @@ namespace Infrastructure.DbContext
                       .IsRequired()
                       .HasMaxLength(255);
 
-                entity.Property(e => e.City)
+                entity.Property(e => e.Province)
                       .HasMaxLength(100);
-
+                entity.Property(e => e.Ward)
+                  .HasMaxLength(100);
                 entity.Property(e => e.PhoneNumber)
                       .IsRequired()
                       .HasMaxLength(20);

@@ -204,7 +204,8 @@ namespace Application.UseCases
                 UserId = r.UserId,
                 FullName = r.FullName,
                 AddressLine = r.AddressLine,
-                City = r.City,
+                Province = r.Province,
+                Ward = r.Ward,
                 PhoneNumber = r.PhoneNumber,
                 IsDefault = r.IsDefault
             });
@@ -221,7 +222,8 @@ namespace Application.UseCases
                 FullName = recipient.FullName,
                 UserId = recipient.UserId,
                 AddressLine = recipient.AddressLine,
-                City = recipient.City,
+                Province = recipient.Province,
+                Ward = recipient.Ward,
                 PhoneNumber = recipient.PhoneNumber,
                 IsDefault = recipient.IsDefault
             };
@@ -236,7 +238,8 @@ namespace Application.UseCases
                 UserId = userId,
                 FullName = dto.FullName,
                 AddressLine = dto.AddressLine,
-                City = dto.City,
+                Province = dto.Province,
+                Ward = dto.Ward,
                 PhoneNumber = dto.PhoneNumber,
                 IsDefault = dto.IsDefault
             };
@@ -264,7 +267,9 @@ namespace Application.UseCases
             if (recipient == null) throw new Exception("Recipient not found");
 
             recipient.AddressLine = dto.AddressLine;
-            recipient.City = dto.City;
+            recipient.FullName = dto.FullName;
+            recipient.Province = dto.Province;
+            recipient.Ward = dto.Ward;
             recipient.PhoneNumber = dto.PhoneNumber;
 
             if (dto.IsDefault && !recipient.IsDefault)

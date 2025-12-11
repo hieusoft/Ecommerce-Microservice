@@ -11,7 +11,8 @@ namespace Application.DTOs.User
         public int UserId { get; set; }
         public string FullName { get; set; }
         public string AddressLine { get; set; } = string.Empty;
-        public string? City { get; set; }
+        public string Province { get; set; } = string.Empty;
+        public string Ward { get; set; } = string.Empty;
         public string PhoneNumber { get; set; } = string.Empty;
         public bool IsDefault { get; set; } = false;
     }

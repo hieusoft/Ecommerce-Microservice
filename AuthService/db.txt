@@ -4,7 +4,6 @@ CREATE TABLE Users (
 
     FullName NVARCHAR(150) NULL,
     Username NVARCHAR(100) NOT NULL UNIQUE,
-
     Email NVARCHAR(100) NOT NULL UNIQUE,
     PasswordHash NVARCHAR(255) NOT NULL,
     EmailVerified BIT NOT NULL DEFAULT 0,   
@@ -67,17 +66,21 @@ CREATE TABLE EmailVerificationTokens (
 UpdatedAt DATETIME2 DEFAULT GETDATE(),
     FOREIGN KEY (UserId) REFERENCES Users(UserId)
 );
-CREATE TABLE UserContacts (
-    ContactId INT IDENTITY(1,1) PRIMARY KEY,
-    UserId INT NOT NULL,
-    AddressLine NVARCHAR(255) NOT NULL,  
-    City NVARCHAR(100),                  
-    PhoneNumber NVARCHAR(20) NOT NULL, 
-    IsDefault BIT DEFAULT 0,             
+CREATE TABLE RecipientInfo (
+    RecipientId INT IDENTITY(1,1) PRIMARY KEY,
+    UserId INT NOT NULL,                   
+    FullName NVARCHAR(150) NOT NULL,       
+    AddressLine NVARCHAR(255) NOT NULL,    
+    Province NVARCHAR(100) NULL,           -- Tỉnh/thành phố
+    Ward NVARCHAR(100) NULL,               -- Phường/xã
+    PhoneNumber NVARCHAR(20) NOT NULL,     
+    IsDefault BIT DEFAULT 0,               
     CreatedAt DATETIME2 DEFAULT GETDATE(),
     UpdatedAt DATETIME2 DEFAULT GETDATE(),
     FOREIGN KEY (UserId) REFERENCES Users(UserId)
 );
+
+
 
 
 INSERT INTO Roles (RoleName) VALUES 
