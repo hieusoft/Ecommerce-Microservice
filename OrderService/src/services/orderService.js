@@ -75,7 +75,7 @@ async function createOrder(orderData) {
     if (!discountData) {
       try {
         const response = await axios.post(
-          "http://localhost:5001/api/coupons/validate",
+          "http://localhost:8086/api/coupons/validate",
           {
             coupon_code: orderData.couponCode,
             user_id: Number(orderData.userId),
