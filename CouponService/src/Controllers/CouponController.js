@@ -69,7 +69,7 @@ class CouponController {
             const result = await CouponService.validate(pool,userId, coupon_code, total_price);
             console.log('Validation result:', result);
             if (!result.valid) return res.status(400).json({ error: result.reason });
-            res.status(200).json({ message: "Coupon is valid", coupon: result });
+            res.status(200).json({ message: "Coupon is valid", data: result });
         } catch (error) {
             console.error('Error validating coupon:', error);
             res.status(500).json({ error: "Internal Server Error"  });

@@ -178,7 +178,7 @@ class CouponService {
         return { success: false, reason: `Order total must be at least ${coupon.minPrice}` };
 
       const response = {
-        success: true,
+        valid: true,
         coupon_id: coupon.id,
         discount_type: coupon.discountType,
         discount_value: coupon.discountValue,
