@@ -39,7 +39,7 @@ async function createOrder(orderData) {
   const orderCode = generateRandomCode();
   let totalPrice = 0;
   const items = [];
-
+  console.log("Order :",orderData)
   for (const item of orderData.items) {
     const price = Number(item.price);
     const quantity = Number(item.quantity);
