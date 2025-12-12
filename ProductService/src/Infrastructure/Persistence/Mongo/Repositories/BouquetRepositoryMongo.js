@@ -25,7 +25,7 @@ class BouquetRepositoryMongo extends IBouquetRepository {
     return bouquet;
   }
 
-1  async updateBouquet(id, data) {
+  async updateBouquet(id, data) {
     const updated = await BouquetModel.findByIdAndUpdate(id, data, {
       new: true,
     }).populate("subOccasionId");
