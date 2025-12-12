@@ -36,11 +36,18 @@ async function recalcTotalPrice(orderId) {
 }
 
 async function createOrder(orderData) {
+  console.log("Order received:", orderData);
+
   const orderCode = generateRandomCode();
   let totalPrice = 0;
   const items = [];
-  console.log("Order :",orderData)
-  for (const item of orderData.items) {
+
+  
+  if (!orderData.cartItems || !Array.isArray(orderData.cartItems)) {
+    throw new Error("cartItems is required.");
+  }
+
+  for (const item of orderData.cartItems) {
     const price = Number(item.price);
     const quantity = Number(item.quantity);
 
@@ -51,50 +58,41 @@ async function createOrder(orderData) {
     totalPrice += price * quantity;
 
     items.push({
-      bouquet_id: Number(item.bouquet_id),
+      bouquet_id: item.id,     
       quantity,
-      price,
+      price
     });
   }
 
+ 
   let discountData = null;
 
-  if (orderData.coupon_code) {
+  if (orderData.couponCode) {
     discountData = await redisService.getObjectAsync(
-      `coupon:validate:${orderData.coupon_code}`
+      `coupon:validate:${orderData.couponCode}`
     );
 
     if (!discountData) {
-      console.log("Calling coupon validation API...");
-
       try {
         const response = await axios.post(
           "http://localhost:5001/api/coupons/validate",
           {
-            coupon_code: orderData.coupon_code,
+            coupon_code: orderData.couponCode,
             user_id: Number(orderData.userId),
-            total_price: totalPrice,
-          },
-          {
-            headers: { "Content-Type": "application/json" },
+            total_price: totalPrice
           }
         );
 
-        console.log("Coupon API status:", response.status);
-
-        if (!response.data || !response.data.coupon) {
-          throw new Error("Invalid coupon response format");
-        }
-
-        const coupon = response.data.coupon;
+        const coupon = response.data?.data;
+        if (!coupon) throw new Error("Invalid coupon response format");
 
         discountData = {
           valid: coupon.valid === true,
           discount_type: coupon.discount_type ?? "amount",
           discount_value: Number(coupon.discount_value ?? 0),
           min_price: Number(coupon.min_price ?? 0),
-          coupon_id: Number(coupon.coupon_id),
-        };
+          coupon_id: Number(coupon.coupon_id)
+        };        
       } catch (err) {
         throw new Error(
           err.response?.data?.error || "Coupon validation failed"
@@ -102,6 +100,10 @@ async function createOrder(orderData) {
       }
     }
   }
+
+  /* -----------------------------
+     3. Tính giảm giá
+  ------------------------------*/
   let discountAmount = 0;
 
   if (discountData?.valid) {
@@ -115,15 +117,30 @@ async function createOrder(orderData) {
   }
 
   totalPrice = Math.max(totalPrice - discountAmount, 0);
+
+  /* -----------------------------
+     4. Thêm VAT + phí ship
+  ------------------------------*/
+  totalPrice += Number(orderData.tax ?? 0);
+  totalPrice += Number(orderData.fee ?? 0);
+
+  /* -----------------------------
+     5. Tạo đơn hàng
+  ------------------------------*/
   const order = await orderModel.createOrder(
     orderCode,
     Number(orderData.userId),
-    Number(orderData.recipient_id),
+    Number(orderData.recipient_id ?? 0),
     totalPrice,
-    orderData.description || "",
-    orderData.delivery_date || null,
-    orderData.delivery_time || null
+    orderData.giftMessage || "",
+    orderData.deliveryDate || null,
+    orderData.deliveryTime || null,
+    orderData.paymentMethod || "cod"
   );
+
+  /* -----------------------------
+     6. Thêm order items
+  ------------------------------*/
   for (const item of items) {
     await orderItemModel.addOrderItem(
       Number(order.order_id),
@@ -132,32 +149,40 @@ async function createOrder(orderData) {
       item.price
     );
   }
-  if (orderData.coupon_code && discountData?.valid) {
+
+  /* -----------------------------
+     7. Lưu coupon vào order (nếu có)
+  ------------------------------*/
+  if (orderData.couponCode && discountData?.valid) {
     await orderModel.updateOrderCoupon({
       order_id: Number(order.order_id),
-      coupon_code: orderData.coupon_code,
-      discountAmount: discountAmount,
+      coupon_code: orderData.couponCode,
+      discountAmount
     });
 
-    const msg = {
+    rabbit.publish("order_events", "order.coupon", {
       coupon_id: discountData.coupon_id,
       order_id: Number(order.order_id),
-      user_id: Number(orderData.userId),
-    };
-
-    rabbit.publish("order_events", "order.coupon", msg);
+      user_id: Number(orderData.userId)
+    });
   }
+
+  /* -----------------------------
+     8. Publish event tạo đơn
+  ------------------------------*/
   rabbit.publish("order_events", "order.created", {
     orderId: Number(order.order_id),
     amount: totalPrice,
     currency: orderData.currency || "USD",
-    provider: orderData.provider,
+    provider: orderData.paymentMethod || "cod"
   });
+
+
   return {
     ...order,
     items,
     total_price: totalPrice,
-    discount: discountAmount,
+    discount: discountAmount
   };
 }
 
