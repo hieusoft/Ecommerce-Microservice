@@ -5,8 +5,9 @@ const BouquetSchema = new mongoose.Schema({
     description: { type: String, required: true },
     price: { type: Number, required: true },
     subOccasionId: { type: mongoose.Schema.Types.ObjectId, ref: 'SubOccasion', required: true },
-    images: { type: [String], default: [] }
-}, { 
+    images: { type: [String], default: [] },
+    quantity: { type: Number, default: 0 }
+}, {
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true }

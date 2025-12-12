@@ -11,7 +11,7 @@ class ImageValidator {
 
         for (const item of images) {
 
-            // lấy base64 từ item
+        
             const base64 = typeof item === "string" 
                 ? item 
                 : item?.base64;

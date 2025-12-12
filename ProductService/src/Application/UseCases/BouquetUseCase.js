@@ -5,7 +5,7 @@ const fs = require('fs');
 const crypto = require('crypto');
 
 class BouquetUseCase {
-    constructor(bouquetRepository, rabbitService, redisService ) {
+    constructor(bouquetRepository, rabbitService, redisService) {
         this.bouquetRepository = bouquetRepository;
         this.rabbitService = rabbitService;
         this.redisService = redisService;
@@ -22,7 +22,7 @@ class BouquetUseCase {
         const bouquet = await this.bouquetRepository.createBouquet(dto);
         const fullBouquet = await this.bouquetRepository.getBouquetById(bouquet.id);
 
-       
+
         if (this.rabbitService) {
             await this.rabbitService.publish('product_events', 'bouquet.created', {
                 bouquetId: fullBouquet.id,
@@ -30,14 +30,15 @@ class BouquetUseCase {
                 price: fullBouquet.price,
                 images: fullBouquet.images,
                 subOccasionName: fullBouquet.subOccasionName,
+                quantity: fullBouquet.quantity,
                 timestamp: new Date()
             });
         }
 
-        
+
         if (this.redisService) {
-            await this.redisService.setObjectAsync(`bouquet:${fullBouquet.id}`, fullBouquet, 3600); 
-           
+            await this.redisService.setObjectAsync(`bouquet:${fullBouquet.id}`, fullBouquet, 3600);
+
             await this.invalidateBouquetListCache();
         }
 
@@ -45,7 +46,9 @@ class BouquetUseCase {
     }
 
     async updateBouquet(id, dto) {
+
         const bouquet = await this.bouquetRepository.getBouquetById(id);
+        BouquetValidator.validateUpdate(dto);
         if (!bouquet) throw new Error("Bouquet not found");
 
         let oldImages = bouquet.images || [];
@@ -68,7 +71,7 @@ class BouquetUseCase {
 
         const updatedBouquet = await this.bouquetRepository.updateBouquet(id, dto);
 
-     
+
         if (oldImages.length > 0 && updatedBouquet.images) {
             for (const imgPath of oldImages) {
                 if (!updatedBouquet.images.includes(imgPath)) {
@@ -78,7 +81,7 @@ class BouquetUseCase {
             }
         }
 
-      
+
         if (this.redisService) {
             await this.redisService.setObjectAsync(`bouquet:${id}`, updatedBouquet, 3600);
             await this.invalidateBouquetListCache();
@@ -105,6 +108,7 @@ class BouquetUseCase {
     async deleteBouquet(id) {
         const bouquet = await this.bouquetRepository.getBouquetById(id);
 
+
         if (bouquet && bouquet.images) {
             for (const imgPath of bouquet.images) {
                 const fullPath = path.join(__dirname, '../../../', imgPath);
@@ -114,7 +118,7 @@ class BouquetUseCase {
 
         const result = await this.bouquetRepository.deleteBouquet(id);
 
-       
+
         if (this.redisService) {
             await this.redisService.deleteAsync(`bouquet:${id}`);
             await this.invalidateBouquetListCache();
@@ -127,7 +131,7 @@ class BouquetUseCase {
         console.log("Fetching bouquets with query:", query);
 
         if (this.redisService) {
-            
+
             const key = `bouquets:list:${crypto.createHash('md5').update(JSON.stringify(query)).digest('hex')}`;
 
             const cached = await this.redisService.getObjectAsync(key);
@@ -137,7 +141,7 @@ class BouquetUseCase {
 
             const bouquets = await this.bouquetRepository.getAllBouquets(query);
 
-            
+
             await this.redisService.setObjectAsync(key, bouquets, 1800);
 
             return bouquets;
@@ -147,7 +151,7 @@ class BouquetUseCase {
     }
 
 
-  
+
     async invalidateBouquetListCache() {
         if (!this.redisService) return;
         const keys = await this.redisService.searchKeysAsync("bouquets:list:*");

@@ -9,24 +9,23 @@ class BouquetRepositoryMongo extends IBouquetRepository {
     return new Bouquet(savedBouquet.toObject());
   }
 
-async getBouquetById(id) {
-  const doc = await BouquetModel.findById(id).populate("subOccasionId");
+  async getBouquetById(id) {
+    const doc = await BouquetModel.findById(id).populate("subOccasionId");
 
-  if (!doc) return null;
+    if (!doc) return null;
 
-  const bouquet = new Bouquet(doc.toObject());
+    const bouquet = new Bouquet(doc.toObject());
 
-  // Sửa lỗi tại đây
-  const greetings = await GreetingModel.find({
-    subOccasionId: doc.subOccasionId?._id?.toString(),
-  }).lean();
+    const greetings = await GreetingModel.find({
+      subOccasionId: doc.subOccasionId?._id?.toString(),
+    }).lean();
 
-  bouquet.greetings = greetings;
+    bouquet.greetings = greetings;
 
-  return bouquet;
-}
+    return bouquet;
+  }
 
-  async updateBouquet(id, data) {
+1  async updateBouquet(id, data) {
     const updated = await BouquetModel.findByIdAndUpdate(id, data, {
       new: true,
     }).populate("subOccasionId");
@@ -51,11 +50,20 @@ async getBouquetById(id) {
       page = 1,
       limit = 10,
       sortOption,
+      inStock
     } = query;
 
     const skip = (page - 1) * limit;
 
     const match = {};
+
+    if (inStock === "true") {
+      match.quantity = { $gt: 0 };
+    }
+
+    if (inStock === "false") {
+      match.quantity = 0;
+    }
 
     if (minPrice || maxPrice) {
       match.price = {};
@@ -133,7 +141,7 @@ async getBouquetById(id) {
       let raw = String(subOccasionName);
       try {
         raw = decodeURIComponent(raw);
-      } catch (e) {}
+      } catch (e) { }
       let normalized = raw
         .replace(/[-_+]/g, " ")
         .replace(/\s*&\s*/g, " & ")
@@ -179,6 +187,8 @@ async getBouquetById(id) {
       },
     });
 
+
+
     const rawData = await BouquetModel.aggregate(pipeline);
 
     const data = rawData.map(
@@ -190,6 +200,7 @@ async getBouquetById(id) {
           price: item.price,
           subOccasionId: item.subOccasionId,
           images: item.images || [],
+          quantity: item.quantity,
           createdAt: item.createdAt,
           updatedAt: item.updatedAt,
         })
