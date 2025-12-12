@@ -62,7 +62,7 @@ class BouquetUseCase {
                 } else if (imgItem.base64) {
                     const savedPath = await this.imageService.saveBase64Images([imgItem.base64]);
                     newImages.push(savedPath[0]);
-                } else if (imgitem.url) {
+                } else if (imgItem.url) {
                     newImages.push(imgItem.url);
                 }
             }
