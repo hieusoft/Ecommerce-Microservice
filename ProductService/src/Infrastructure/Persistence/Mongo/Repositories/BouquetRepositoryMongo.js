@@ -9,23 +9,22 @@ class BouquetRepositoryMongo extends IBouquetRepository {
     return new Bouquet(savedBouquet.toObject());
   }
 
- async getBouquetById(id) {
-    // Lấy bouquet + populate subOccasion
-    const doc = await BouquetModel.findById(id).populate(
-      "subOccasionId"
-    );
+async getBouquetById(id) {
+  const doc = await BouquetModel.findById(id).populate("subOccasionId");
 
-    if (!doc) return null;
+  if (!doc) return null;
 
-    const bouquet = new Bouquet(doc.toObject());
-    const greetings = await GreetingModel.find({
-      subOccasionId: doc.subOccasionId.id,
-    }).lean();
+  const bouquet = new Bouquet(doc.toObject());
 
-    bouquet.greetings = greetings;
+  // Sửa lỗi tại đây
+  const greetings = await GreetingModel.find({
+    subOccasionId: doc.subOccasionId?._id?.toString(),
+  }).lean();
 
-    return bouquet;
-  }
+  bouquet.greetings = greetings;
+
+  return bouquet;
+}
 
   async updateBouquet(id, data) {
     const updated = await BouquetModel.findByIdAndUpdate(id, data, {

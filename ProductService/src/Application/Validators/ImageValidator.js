@@ -9,12 +9,23 @@ class ImageValidator {
     static validateMaxSize(images, maxMB) {
         if (!Array.isArray(images)) return;
 
-        for (const base64 of images) {
+        for (const item of images) {
+
+            // lấy base64 từ item
+            const base64 = typeof item === "string" 
+                ? item 
+                : item?.base64;
+
+            if (typeof base64 !== "string") {
+                console.warn("ImageValidator: image is not base64 string:", item);
+                continue;
+            }
+
             const matches = base64.match(/^data:(.*);base64,(.*)$/);
             if (!matches) continue;
 
             const data = matches[2];
-            const sizeInBytes = (data.length * 3) / 4; 
+            const sizeInBytes = (data.length * 3) / 4;
             const sizeInMB = sizeInBytes / (1024 * 1024);
 
             if (sizeInMB > maxMB) {
