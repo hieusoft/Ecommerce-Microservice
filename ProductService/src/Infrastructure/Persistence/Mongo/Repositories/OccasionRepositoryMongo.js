@@ -32,10 +32,12 @@ class OccasionRepositoryMongo extends IOccasionRepository {
     );
   }
 
-  async getOccasionById(id) {
+async getOccasionById(id) {
     let matchStage = null;
 
-    if (mongoose.Types.ObjectId.isValid(id)) {
+    const isHexObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+
+    if (isHexObjectId) {
       matchStage = { _id: new mongoose.Types.ObjectId(id) };
     }
     else {
