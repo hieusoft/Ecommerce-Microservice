@@ -68,16 +68,17 @@ class PaymentController {
       const paymentRecord = await PaymentService.findPaymentByOrderId(
         Number(orderId)
       );
-   
+
       if (!paymentRecord) {
         return res.status(404).json({ error: "Payment record not found" });
       }
-      if (
-        paymentRecord.user_id !== Number(userId) 
-      ) {
+      if (paymentRecord.user_id !== Number(userId)) {
         return res.status(403).json({ error: "Access denied" });
       }
-      res.redirect(paymentRecord.payment_url);
+      return res.status(200).json({
+        success: true,
+        paymentUrl: paymentRecord.payment_url,
+      });
     } catch (err) {
       console.error("❌ getPaymentByOrderId error:", err);
       res.status(500).json({ error: err.message });
@@ -125,15 +126,15 @@ class PaymentController {
   async retryPayment(req, res) {
     try {
       const { userId, roles } = getUserFromToken(req);
-      
+
       const { orderId, provider } = req.params;
       console.log(
         `Retrying payment for orderId: ${orderId} with provider: ${provider}`
       );
       const paymentUrl = await PaymentService.retryPayment(orderId, provider);
-      if (paymentRecord.user_id !== Number(userId) ) {
-      return res.status(403).json({ error: "Access denied" });
-    }
+      if (paymentRecord.user_id !== Number(userId)) {
+        return res.status(403).json({ error: "Access denied" });
+      }
       res.json({ paymentUrl });
     } catch (err) {
       console.error("❌ retryPayment error:", err);
