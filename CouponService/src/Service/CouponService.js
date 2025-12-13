@@ -8,10 +8,21 @@ class CouponService {
   static async getAll(pool) {
     try {
       const result = await pool.request().query("SELECT * FROM Coupons");
-      return result.recordset.map(r => new Coupon(
-        r.id, r.code, r.discount_type, r.discount_value, r.max_uses,
-        r.expiry_date, r.occasion, r.min_price, r.created_at, r.updated_at
-      ));
+      return result.recordset.map(
+        (r) =>
+          new Coupon(
+            r.id,
+            r.code,
+            r.discount_type,
+            r.discount_value,
+            r.max_uses,
+            r.expiry_date,
+            r.occasion,
+            r.min_price,
+            r.created_at,
+            r.updated_at
+          )
+      );
     } catch (err) {
       console.error("Error getting all coupons:", err);
       throw err;
@@ -26,7 +37,10 @@ class CouponService {
         .query("SELECT id FROM Coupons WHERE code = @code");
 
       if (existing.recordset.length > 0) {
-        return { success: false, reason: `Coupon code '${couponData.code}' existed.` };
+        return {
+          success: false,
+          reason: `Coupon code '${couponData.code}' existed.`,
+        };
       }
 
       const result = await pool
@@ -37,14 +51,12 @@ class CouponService {
         .input("max_uses", sql.Int, couponData.maxUses)
         .input("expiry_date", sql.DateTime, couponData.expiryDate)
         .input("occasion", sql.VarChar, couponData.occasion)
-        .input("min_price", sql.Decimal(10, 2), couponData.minPrice)
-        .query(`
+        .input("min_price", sql.Decimal(10, 2), couponData.minPrice).query(`
                 INSERT INTO Coupons (code, discount_type, discount_value, max_uses, expiry_date, occasion, min_price)
                 VALUES (@code, @discount_type, @discount_value, @max_uses, @expiry_date, @occasion, @min_price);
                 SELECT SCOPE_IDENTITY() AS id;
             `);
 
-     
       const newCoupon = new Coupon(
         result.recordset[0].id,
         couponData.code,
@@ -78,8 +90,16 @@ class CouponService {
       if (!result.recordset[0]) return null;
       const r = result.recordset[0];
       return new Coupon(
-        r.id, r.code, r.discount_type, r.discount_value, r.max_uses,
-        r.expiry_date, r.occasion, r.min_price, r.created_at, r.updated_at
+        r.id,
+        r.code,
+        r.discount_type,
+        r.discount_value,
+        r.max_uses,
+        r.expiry_date,
+        r.occasion,
+        r.min_price,
+        r.created_at,
+        r.updated_at
       );
     } catch (err) {
       console.error("Error getting coupon by id:", err);
@@ -95,7 +115,10 @@ class CouponService {
         .query("SELECT id FROM Coupons WHERE code = @code");
 
       if (existing.recordset.length > 0) {
-        return { success: false, reason: `Coupon code '${couponData.code}' existed.` };
+        return {
+          success: false,
+          reason: `Coupon code '${couponData.code}' existed.`,
+        };
       }
 
       await pool
@@ -108,8 +131,7 @@ class CouponService {
         .input("expiry_date", sql.DateTime, data.expiryDate)
         .input("occasion", sql.VarChar, data.occasion)
         .input("min_price", sql.Decimal(10, 2), data.minPrice)
-        .input("updated_at", sql.DateTime, new Date())
-        .query(`
+        .input("updated_at", sql.DateTime, new Date()).query(`
           UPDATE Coupons 
           SET code = @code,
               discount_type = @discount_type,
@@ -146,7 +168,17 @@ class CouponService {
 
   static async validate(pool, user_id, coupon_code, total_price) {
     try {
-      const cached = await redisService.getObjectAsync(`coupon:validate:${coupon_code}`);
+      console.log(user_id,coupon_code,total_price)
+      if (!user_id || !coupon_code || !total_price) {
+        return {
+          valid: false,
+          reason: "Missing required data",
+        };
+      }
+
+      const cached = await redisService.getObjectAsync(
+        `coupon:validate:${user_id}:${coupon_code}`
+      );
       if (cached) return cached;
 
       const result = await pool
@@ -158,24 +190,39 @@ class CouponService {
       if (!couponRecord) return { success: false, reason: "Coupon not found" };
 
       const coupon = new Coupon(
-        couponRecord.id, couponRecord.code, couponRecord.discount_type,
-        couponRecord.discount_value, couponRecord.max_uses, couponRecord.expiry_date,
-        couponRecord.occasion, couponRecord.min_price, couponRecord.created_at, couponRecord.updated_at
+        couponRecord.id,
+        couponRecord.code,
+        couponRecord.discount_type,
+        couponRecord.discount_value,
+        couponRecord.max_uses,
+        couponRecord.expiry_date,
+        couponRecord.occasion,
+        couponRecord.min_price,
+        couponRecord.created_at,
+        couponRecord.updated_at
       );
 
       const check = await pool
         .request()
         .input("coupon_id", sql.Int, coupon.id)
         .input("user_id", sql.Int, user_id)
-        .query(`SELECT * FROM OrderCoupons WHERE coupon_id = @coupon_id AND user_id = @user_id`);
+        .query(
+          `SELECT * FROM OrderCoupons WHERE coupon_id = @coupon_id AND user_id = @user_id`
+        );
 
-      if (check.recordset.length > 0) return { success: false, reason: "User has already used this coupon" };
+      if (check.recordset.length > 0)
+        return { success: false, reason: "User has already used this coupon" };
 
       const now = new Date();
-      if (coupon.expiryDate && coupon.expiryDate < now) return { success: false, reason: "Coupon has expired" };
-      if (coupon.maxUses !== null && coupon.maxUses <= 0) return { success: false, reason: "Coupon usage limit reached" };
+      if (coupon.expiryDate && coupon.expiryDate < now)
+        return { success: false, reason: "Coupon has expired" };
+      if (coupon.maxUses !== null && coupon.maxUses <= 0)
+        return { success: false, reason: "Coupon usage limit reached" };
       if (coupon.minPrice !== null && total_price < coupon.minPrice)
-        return { success: false, reason: `Order total must be at least ${coupon.minPrice}` };
+        return {
+          success: false,
+          reason: `Order total must be at least ${coupon.minPrice}`,
+        };
 
       const response = {
         valid: true,
@@ -185,7 +232,11 @@ class CouponService {
         min_price: coupon.minPrice,
       };
 
-      await redisService.setObjectAsync(`coupon:validate:${coupon_code}`, response, 600);
+      await redisService.setObjectAsync(
+        `coupon:validate:${coupon_code}`,
+        response,
+        600
+      );
       return response;
     } catch (err) {
       console.error("Error validating coupon:", err);
@@ -199,17 +250,26 @@ class CouponService {
         .request()
         .input("coupon_id", sql.Int, coupon_id)
         .input("user_id", sql.Int, user_id)
-        .query(`SELECT * FROM OrderCoupons WHERE coupon_id = @coupon_id AND user_id = @user_id`);
+        .query(
+          `SELECT * FROM OrderCoupons WHERE coupon_id = @coupon_id AND user_id = @user_id`
+        );
 
-      if (check.recordset.length > 0) return { success: false, reason: "User has already used this coupon" };
+      if (check.recordset.length > 0)
+        return { success: false, reason: "User has already used this coupon" };
 
       const update = await pool
         .request()
         .input("coupon_id", sql.Int, coupon_id)
-        .query(`UPDATE Coupons SET max_uses = max_uses - 1 WHERE id = @coupon_id AND max_uses > 0`);
+        .query(
+          `UPDATE Coupons SET max_uses = max_uses - 1 WHERE id = @coupon_id AND max_uses > 0`
+        );
 
       if (update.rowsAffected[0] === 0)
-        return { success: false, reason: "Coupon cannot be applied. It may have expired or reached its usage limit." };
+        return {
+          success: false,
+          reason:
+            "Coupon cannot be applied. It may have expired or reached its usage limit.",
+        };
 
       const orderCoupon = new OrderCoupon(order_id, coupon_id, new Date());
 
@@ -218,7 +278,9 @@ class CouponService {
         .input("coupon_id", sql.Int, coupon_id)
         .input("order_id", sql.Int, order_id)
         .input("user_id", sql.Int, user_id)
-        .query(`INSERT INTO OrderCoupons (order_id, coupon_id, user_id) VALUES (@order_id, @coupon_id, @user_id)`);
+        .query(
+          `INSERT INTO OrderCoupons (order_id, coupon_id, user_id) VALUES (@order_id, @coupon_id, @user_id)`
+        );
 
       return { success: true, orderCoupon };
     } catch (err) {

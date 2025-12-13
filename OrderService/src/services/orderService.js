@@ -6,7 +6,7 @@ const axios = require("axios");
 const crypto = require("crypto");
 
 function generateCacheKey(prefix, query) {
-  const serialized = JSON.stringify(query); // biến query thành chuỗi
+  const serialized = JSON.stringify(query); 
   const hash = crypto.createHash("sha256").update(serialized).digest("hex");
   return `${prefix}:${hash}`;
 }
@@ -63,19 +63,18 @@ async function createOrder(orderData) {
       price
     });
   }
-
  
   let discountData = null;
-
+console.log("Order received:")
   if (orderData.couponCode) {
     discountData = await redisService.getObjectAsync(
-      `coupon:validate:${orderData.couponCode}`
+      `coupon:validate:${orderData.userId}:${orderData.couponCode}`
     );
 
     if (!discountData) {
       try {
         const response = await axios.post(
-          "http://couponservice:8086/api/coupons/validate",
+          "http://localhost:8086/api/coupons/validate",
           {
             coupon_code: orderData.couponCode,
             user_id: Number(orderData.userId),
@@ -101,9 +100,6 @@ async function createOrder(orderData) {
     }
   }
 
-  /* -----------------------------
-     3. Tính giảm giá
-  ------------------------------*/
   let discountAmount = 0;
 
   if (discountData?.valid) {
@@ -115,32 +111,29 @@ async function createOrder(orderData) {
       );
     }
   }
-
+  console.log(discountData)
   totalPrice = Math.max(totalPrice - discountAmount, 0);
 
-  /* -----------------------------
-     4. Thêm VAT + phí ship
-  ------------------------------*/
+
   totalPrice += Number(orderData.tax ?? 0);
   totalPrice += Number(orderData.fee ?? 0);
 
-  /* -----------------------------
-     5. Tạo đơn hàng
-  ------------------------------*/
-  const order = await orderModel.createOrder(
-    orderCode,
-    Number(orderData.userId),
-    Number(orderData.recipient_id ?? 0),
-    totalPrice,
-    orderData.giftMessage || "",
-    orderData.deliveryDate || null,
-    orderData.deliveryTime || null,
-    orderData.paymentMethod || "cod"
-  );
+  console.log("TOtal",totalPrice)
 
-  /* -----------------------------
-     6. Thêm order items
-  ------------------------------*/
+const order = await orderModel.createOrder(
+  orderCode,
+  Number(orderData.userId),
+  totalPrice,
+  orderData.tax,
+  orderData.fee,
+  orderData.giftMessage || "",      
+  orderData.description || null,   
+  orderData.deliveryDate || null,   
+  orderData.deliveryTime || null,   
+  discountAmount,                   
+  orderData.couponCode || null 
+);
+
   for (const item of items) {
     await orderItemModel.addOrderItem(
       Number(order.order_id),
@@ -150,16 +143,7 @@ async function createOrder(orderData) {
     );
   }
 
-  /* -----------------------------
-     7. Lưu coupon vào order (nếu có)
-  ------------------------------*/
   if (orderData.couponCode && discountData?.valid) {
-    await orderModel.updateOrderCoupon({
-      order_id: Number(order.order_id),
-      coupon_code: orderData.couponCode,
-      discountAmount
-    });
-
     rabbit.publish("order_events", "order.coupon", {
       coupon_id: discountData.coupon_id,
       order_id: Number(order.order_id),
@@ -167,9 +151,7 @@ async function createOrder(orderData) {
     });
   }
 
-  /* -----------------------------
-     8. Publish event tạo đơn
-  ------------------------------*/
+
   rabbit.publish("order_events", "order.created", {
     orderId: Number(order.order_id),
     amount: totalPrice,

@@ -2,13 +2,14 @@ CREATE TABLE Orders (
     order_id INT IDENTITY(1,1) PRIMARY KEY,
     order_code NVARCHAR(50) UNIQUE NOT NULL,
     user_id INT NOT NULL,
-    recipient_id INT NOT NULL,
     total_price DECIMAL(10,2) NOT NULL,
     discount DECIMAL(10,2) DEFAULT 0,
     coupon_code NVARCHAR(50) NULL,
 
     vat_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
     shipping_fee DECIMAL(10,2) NOT NULL DEFAULT 0,
+
+    message NVARCHAR(MAX) NULL,   -- 👈 lời nhắn của khách
 
     status NVARCHAR(30) DEFAULT 'Pending'
         CHECK (status IN ('Pending','Paid','Cancelled','Shipping','Completed')),
@@ -21,10 +22,11 @@ CREATE TABLE Orders (
 
 
 
+
 CREATE TABLE OrderItems (
     order_item_id INT IDENTITY(1,1) PRIMARY KEY, 
     order_id INT NOT NULL,       -- BẮT BUỘC
-    bouquet_id INT,
+    bouquet_id VARCHAR(50),
     quantity INT DEFAULT 1,
     price DECIMAL(10,2),
     created_at DATETIME DEFAULT GETDATE(),

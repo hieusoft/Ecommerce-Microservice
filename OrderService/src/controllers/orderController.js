@@ -5,13 +5,13 @@ async function createOrder(req, res) {
         const { userId, roles } = getUserFromToken(req);
 
         
-      
         const orderData = {
             ...req.body,
             userId
         };
 
         const order = await orderService.createOrder(orderData);
+        
         res.status(201).json(order);
     } catch (err) {
         console.error(err);
