@@ -3,6 +3,7 @@ const PaymentModel = require("../models/PaymentModel.js");
 const rabbit = require("../events/rabbitmq");
 const axios = require("axios");
 const e = require("express");
+const { consoleLogger } = require("vnpay");
 async function convertCurrency(amount, fromCurrency, toCurrency) {
   try {
     fromCurrency = fromCurrency.toUpperCase();
@@ -31,6 +32,7 @@ async function convertCurrency(amount, fromCurrency, toCurrency) {
 class PaymentService {
   async createPayment(order) {
     try {
+    
       const provider = ProviderFactory.getProvider(order.provider);
       console.log(order.amount, order.currency);
       const fromCurrency = order.originalCurrency || "USD";
@@ -44,9 +46,10 @@ class PaymentService {
 
       order.converted_amount = converted_amount;
       const paymentResult = await provider.createPayment(order);
-
+      console.log(paymentResult.url)
       await PaymentModel.create({
         orderId: order.orderId,
+        userId : order.userId,
         providerOrderId: paymentResult.providerOrderId,
         provider: provider.getProviderName(),
         amount: order.amount,

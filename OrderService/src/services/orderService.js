@@ -154,6 +154,7 @@ const order = await orderModel.createOrder(
 
   rabbit.publish("order_events", "order.created", {
     orderId: Number(order.order_id),
+    userId: orderData.userId,
     amount: totalPrice,
     currency: orderData.currency || "USD",
     provider: orderData.paymentMethod || "cod"
