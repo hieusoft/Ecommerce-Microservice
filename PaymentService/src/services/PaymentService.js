@@ -131,7 +131,7 @@ class PaymentService {
       const paymentRecord = await PaymentModel.findByProviderOrderId(
         providerOrderId
       );
-
+      
       if (!paymentRecord) {
         return {
           success: false,
@@ -169,9 +169,15 @@ class PaymentService {
         });
       }
 
-      return {
+           return {
         success: true,
         status: paymentResult.status,
+        providerOrderId,
+        orderId: paymentRecord.order_id,
+        orderCode: paymentRecord.order_code,
+        paymentMethod: paymentRecord.provider,
+        amount: paymentRecord.amount,
+        currency: paymentRecord.currency,
         message: "Callback processed successfully",
       };
     } catch (err) {
@@ -193,7 +199,7 @@ class PaymentService {
         providerOrderId,
         orderId: paymentRecord.order_id,
         orderCode: paymentRecord.order_code,
-        paymentMethod: paymentRecord.method,
+        paymentMethod: paymentRecord.provider,
         amount: paymentRecord.amount,
         currency: paymentRecord.currency,
         message: "Callback processed successfully",
