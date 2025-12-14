@@ -23,12 +23,12 @@ class PaymentController {
       });
 
       return res.redirect(
-        `${frontendUrl}/checkout/thankyou/${result.orderCode}?${params.toString()}`
+        `${frontendUrl}/checkout/thankyou/${result.orderId}?${params.toString()}`
       );
     }
 
     return res.redirect(
-      `${frontendUrl}/checkout/failed/${result?.orderCode ?? ""}`
+      `${frontendUrl}/checkout/failed/${result?.orderId ?? ""}`
     );
   };
 
