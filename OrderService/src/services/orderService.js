@@ -183,8 +183,18 @@ async function getAllOrders(query) {
 
 
 async function getOrderById(orderId) {
-  return await orderModel.getOrderById(orderId);
+  const order = await orderModel.getOrderById(orderId);
+
+  if (!order) return null;
+
+  const orderItems = await orderItemModel.getOrderItems(orderId)
+
+  return {
+    ...order,
+    items: orderItems
+  };
 }
+
 async function getOrdersByUserId(userId, query) {
   return await orderModel.getOrdersByUserId(userId, query);
 }
