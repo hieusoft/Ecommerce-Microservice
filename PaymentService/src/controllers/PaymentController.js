@@ -78,6 +78,7 @@ class PaymentController {
       return res.status(200).json({
         success: true,
         paymentUrl: paymentRecord.payment_url,
+        providerOrderId : paymentRecord.provider_order_id
       });
     } catch (err) {
       console.error("❌ getPaymentByOrderId error:", err);
