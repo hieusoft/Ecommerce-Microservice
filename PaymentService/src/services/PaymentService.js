@@ -32,7 +32,6 @@ async function convertCurrency(amount, fromCurrency, toCurrency) {
 class PaymentService {
   async createPayment(order) {
     try {
-    
       const provider = ProviderFactory.getProvider(order.provider);
       console.log(order.amount, order.currency);
       const fromCurrency = order.originalCurrency || "USD";
@@ -46,10 +45,10 @@ class PaymentService {
 
       order.converted_amount = converted_amount;
       const paymentResult = await provider.createPayment(order);
-      console.log(paymentResult.url)
+      console.log(paymentResult.url);
       await PaymentModel.create({
         orderId: order.orderId,
-        userId : order.userId,
+        userId: order.userId,
         providerOrderId: paymentResult.providerOrderId,
         provider: provider.getProviderName(),
         amount: order.amount,
@@ -58,7 +57,6 @@ class PaymentService {
         status: "PENDING",
         paymentUrl: paymentResult.url,
         expiresAt: paymentResult.expiresAt,
-
       });
 
       return {
@@ -109,9 +107,8 @@ class PaymentService {
 
   async findPaymentByOrderId(orderId) {
     try {
-     
       const paymentRecord = await PaymentModel.findByOrderId(orderId);
-     
+
       if (!paymentRecord) {
         return null;
       }
@@ -190,7 +187,17 @@ class PaymentService {
         );
       }
 
-      return { success: false, status: "ERROR", message: err.message };
+      return {
+        success: true,
+        status: paymentResult.status,
+        providerOrderId,
+        orderId: paymentRecord.order_id,
+        orderCode: paymentRecord.order_code,
+        paymentMethod: paymentRecord.method,
+        amount: paymentRecord.amount,
+        currency: paymentRecord.currency,
+        message: "Callback processed successfully",
+      };
     }
   }
   async retryPayment(orderId, provider_name) {
@@ -198,8 +205,8 @@ class PaymentService {
       const provider = ProviderFactory.getProvider(provider_name);
       const existing = await PaymentModel.findByOrderId(orderId);
       if (!existing) {
-            throw new Error(`No existing payment found for orderId ${orderId}`);
-          }
+        throw new Error(`No existing payment found for orderId ${orderId}`);
+      }
       const now = new Date();
       if (
         existing &&
@@ -208,7 +215,9 @@ class PaymentService {
         existing.status !== "SUCCESS" &&
         existing.provider === provider_name
       ) {
-        console.log(`⚠️ Existing valid payment found for order ${orderId}. Skipping retry.`);
+        console.log(
+          `⚠️ Existing valid payment found for order ${orderId}. Skipping retry.`
+        );
         return existing;
       }
       const fromCurrency = existing.originalCurrency || "USD";
@@ -227,7 +236,6 @@ class PaymentService {
         provider: provider,
       });
       await PaymentModel.create({
-        
         orderId: orderId,
         userId: existing.user_id,
         providerOrderId: newPayment.providerOrderId,

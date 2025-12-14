@@ -1,10 +1,39 @@
 const PaymentService = require("../services/PaymentService");
 const { getUserFromToken } = require("../services/jwtUserService");
-
+function getAuthUser(req, res) {
+  try {
+    return getUserFromToken(req);
+  } catch (err) {
+    res.status(401).json({ message: "Unauthorized" });
+    return null;
+  }
+}
 class PaymentController {
+  redirectToFrontend(res, result) {
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+
+    if (result?.success && result.status === "SUCCESS") {
+      const params = new URLSearchParams({
+        status: result.status,
+        method: result.paymentMethod,
+        amount: String(result.amount ?? ""),
+        currency: result.currency || "VND",
+      });
+
+      return res.redirect(
+        `${frontendUrl}/checkout/thankyou/${
+          result.orderCode
+        }?${params.toString()}`
+      );
+    }
+
+    return res.redirect(
+      `${frontendUrl}/checkout/failed/${result?.orderCode ?? ""}`
+    );
+  }
+
   async createPayment(req, res) {
     try {
-      console.log("Received create payment request:", req.body);
       const {
         provider,
         orderId,
@@ -13,6 +42,7 @@ class PaymentController {
         converted_amount,
         description,
       } = req.body;
+
       const payUrl = await PaymentService.createPayment({
         provider,
         orderId,
@@ -21,7 +51,8 @@ class PaymentController {
         converted_amount,
         description,
       });
-      res.json({ payUrl });
+
+      return res.json({ payUrl });
     } catch (err) {
       console.error("❌ createPayment error:", err);
       res.status(500).json({ error: err.message });
@@ -30,23 +61,23 @@ class PaymentController {
 
   async handleVnPayCallback(req, res) {
     try {
-      const data = JSON.parse(JSON.stringify(req.query));
+      const data = { ...req.query };
       const result = await PaymentService.handleCallback("vnpay", data);
-      res.json(result);
+      return this.redirectToFrontend(res, result);
     } catch (err) {
       console.error("❌ handleVnPayCallback error:", err);
-      res.status(500).json({ error: err.message });
+      return this.redirectToFrontend(res, null);
     }
   }
 
   async handleMomoCallback(req, res) {
     try {
-      const data = JSON.parse(JSON.stringify(req.query));
+      const data = { ...req.query };
       const result = await PaymentService.handleCallback("momo", data);
-      res.json(result);
+      return this.redirectToFrontend(res, result);
     } catch (err) {
       console.error("❌ handleMomoCallback error:", err);
-      res.status(500).json({ error: err.message });
+      return this.redirectToFrontend(res, null);
     }
   }
 
@@ -54,48 +85,39 @@ class PaymentController {
     try {
       const data = req.body;
       const result = await PaymentService.handleCallback("oxapay", data);
-      res.json(result);
+      return this.redirectToFrontend(res, result);
     } catch (err) {
       console.error("❌ handleOxaPayCallback error:", err);
-      res.status(500).json({ error: err.message });
+      return this.redirectToFrontend(res, null);
     }
   }
 
   async getPaymentByOrderId(req, res) {
     try {
       const orderId = Number(req.params.orderId);
-      const { userId, roles } = getUserFromToken(req);
-      const paymentRecord = await PaymentService.findPaymentByOrderId(
-        Number(orderId)
-      );
+      const user = getAuthUser(req, res);
+      if (!user) return;
+
+      const { userId } = user;
+
+      const paymentRecord = await PaymentService.findPaymentByOrderId(orderId);
 
       if (!paymentRecord) {
         return res.status(404).json({ error: "Payment record not found" });
       }
+
       if (paymentRecord.user_id !== Number(userId)) {
         return res.status(403).json({ error: "Access denied" });
       }
-      return res.status(200).json({
+
+      return res.json({
         success: true,
         paymentUrl: paymentRecord.payment_url,
-        providerOrderId : paymentRecord.provider_order_id
+        providerOrderId: paymentRecord.provider_order_id,
+        status: paymentRecord.status,
       });
     } catch (err) {
       console.error("❌ getPaymentByOrderId error:", err);
-      res.status(500).json({ error: err.message });
-    }
-  }
-
-  async getAllPayments(req, res) {
-    try {
-      const { userId, roles } = getUserFromToken(req);
-      if (!roles.includes("Admin")) {
-        return res.status(403).json({ error: "Access denied" });
-      }
-      const payments = await PaymentService.getAllPayments(req.query);
-      res.json(payments);
-    } catch (err) {
-      console.error("❌ getAllPayments error:", err);
       res.status(500).json({ error: err.message });
     }
   }
@@ -106,9 +128,28 @@ class PaymentController {
       const status = await PaymentService.getStatusByProviderOrderId(
         providerOrderId
       );
-      res.json({ status });
+
+      return res.json({ status });
     } catch (err) {
       console.error("❌ getStatusByProviderOrderId error:", err);
+      res.status(500).json({ error: err.message });
+    }
+  }
+
+  async getAllPayments(req, res) {
+    try {
+      const user = getAuthUser(req, res);
+      if (!user) return;
+
+      const { roles } = user;
+      if (!roles.includes("Admin")) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+
+      const payments = await PaymentService.getAllPayments(req.query);
+      res.json(payments);
+    } catch (err) {
+      console.error("❌ getAllPayments error:", err);
       res.status(500).json({ error: err.message });
     }
   }
@@ -117,6 +158,7 @@ class PaymentController {
     try {
       const { provider } = req.params;
       const payments = await PaymentService.getPaymentsByProvider(provider);
+
       res.json(payments);
     } catch (err) {
       console.error("❌ getPaymentsByProvider error:", err);
@@ -126,16 +168,26 @@ class PaymentController {
 
   async retryPayment(req, res) {
     try {
-      const { userId, roles } = getUserFromToken(req);
+      const user = getAuthUser(req, res);
+      if (!user) return;
 
+      const { userId } = user;
       const { orderId, provider } = req.params;
-      console.log(
-        `Retrying payment for orderId: ${orderId} with provider: ${provider}`
+
+      const paymentRecord = await PaymentService.findPaymentByOrderId(
+        Number(orderId)
       );
-      const paymentUrl = await PaymentService.retryPayment(orderId, provider);
+
+      if (!paymentRecord) {
+        return res.status(404).json({ error: "Payment not found" });
+      }
+
       if (paymentRecord.user_id !== Number(userId)) {
         return res.status(403).json({ error: "Access denied" });
       }
+
+      const paymentUrl = await PaymentService.retryPayment(orderId, provider);
+
       res.json({ paymentUrl });
     } catch (err) {
       console.error("❌ retryPayment error:", err);
