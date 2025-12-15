@@ -31,7 +31,7 @@ namespace src.Services
 
                 case "email.verification_requested_q":
                     {
-                        var verifyUrl = $"{_domain}/verify-email?token={Uri.EscapeDataString(dto.Token)}";
+                        var verifyUrl = $"{_domain}/auth/verify-email?token=={Uri.EscapeDataString(dto.Token)}";
 
                         dto.Token = verifyUrl;
 
