@@ -166,12 +166,7 @@ namespace Api.Controllers
                     SameSite = SameSiteMode.Strict,
                     Expires = DateTimeOffset.UtcNow.AddDays(7)
                 });
-                return Ok(new
-                {
-                    message = "Password has been reset successfully",
-                    accessToken,
-                    refreshToken
-                });
+                return Redirect("http://localhost:3000/login");
             }
             catch (Exception ex)
             {
@@ -187,7 +182,8 @@ namespace Api.Controllers
             {
                 var dto = new VerifyEmailRequestDto { Token = token };
                 await _authUseCases.VerifyEmailAsync(dto);
-                return Ok(new { message = "Email verified successfully" });
+                return Redirect("http://localhost:3000/login");
+
             }
             catch (Exception ex)
             {
@@ -229,7 +225,7 @@ namespace Api.Controllers
             try
             {
                 await _authUseCases.ResendVerificationEmailAsync(dto);
-                return Ok(new { message = "Verification email has been sent" });
+                return Redirect("http://localhost:3000/login");
             }
             catch (Exception ex)
             {

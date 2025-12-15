@@ -139,6 +139,29 @@ services:
       - "8086:8086"
     networks:
       - micro-net
+  notificationservice:
+    build:
+      context: ./NotificationService
+      dockerfile: Dockerfile
+    container_name: notificationservice
+    depends_on:
+      - rabbitmq
+      - redis
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Production"
+
+      # RabbitMQ__Host: rabbitmq
+      # RabbitMQ__Port: 5672
+      # RabbitMQ__User: guest
+      # RabbitMQ__Pass: guest
+
+      # Redis__Host: redis
+      # Redis__Port: 6379
+    ports:
+      - "8087:8087"
+    networks:
+      - micro-net
+   
   apigateway:
     build:
       context: ./APIGateway

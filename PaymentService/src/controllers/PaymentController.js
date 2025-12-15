@@ -26,7 +26,6 @@ class PaymentController {
         `${frontendUrl}/checkout/thankyou/${result.orderId}?${params.toString()}`
       );
     }
-
     return res.redirect(
       `${frontendUrl}/checkout/failed/${result?.orderId ?? ""}`
     );

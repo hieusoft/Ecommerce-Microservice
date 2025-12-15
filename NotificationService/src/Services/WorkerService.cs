@@ -28,16 +28,34 @@ namespace src.Services
         {
             switch (queue)
             {
+
                 case "email.verification_requested_q":
                     {
-                        dto.Token = $"{_domain}={dto.Token}";
+                        var verifyUrl = $"{_domain}/verify-email?token={Uri.EscapeDataString(dto.Token)}";
+
+                        dto.Token = verifyUrl;
+
                         string title = dto.Title ?? "Verify Email";
 
-                        await SaveNotificationAsync(title, dto.Content ?? "", dto.UserId, dto);
-                        await SendEmailFromTemplate(dto.Email!, title, "email_verify_email.cshtml", dto);
+                        await SaveNotificationAsync(
+                            title,
+                            dto.Content ?? "",
+                            dto.UserId,
+                            dto
+                        );
+
+                        Console.WriteLine("Verify URL: " + verifyUrl);
+
+                        await SendEmailFromTemplate(
+                            dto.Email!,
+                            title,
+                            "email_verify_email.cshtml",
+                            dto
+                        );
 
                         break;
                     }
+
 
                 case "email.verified_q":
                     {
@@ -129,7 +147,33 @@ namespace src.Services
 
                         break;
                     }
+                case "order.paid_q":
+                    {
+                        string title = dto.Title ?? "Thông báo";
 
+                        await SaveNotificationAsync(title, dto.Content ?? "", dto.UserId, dto);
+                        await SendEmailFromTemplate(dto.Email!, title, "email_order_paid.cshtml", dto);
+
+                        break;
+                    }
+                case "order.delivery_q":
+                    {
+                        string title = dto.Title ?? "Thông báo";
+
+                        await SaveNotificationAsync(title, dto.Content ?? "", dto.UserId, dto);
+                        await SendEmailFromTemplate(dto.Email!, title, "email_order_paid.cshtml", dto);
+
+                        break;
+                    }
+                case "order.cancelled_q":
+                    {
+                        string title = dto.Title ?? "Thông báo";
+
+                        await SaveNotificationAsync(title, dto.Content ?? "", dto.UserId, dto);
+                        await SendEmailFromTemplate(dto.Email!, title, "email_order_paid.cshtml", dto);
+
+                        break;
+                    }
                 default:
                     {
                         Console.WriteLine($"Không nhận dạng được queue: {queue}");

@@ -12,7 +12,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #fdfbfb 0%, #f9f5f5 100%);
+            background: linear-gradient(135deg, #fffdf6 0%, #fff9e6 100%);
             color: #333;
             padding: 20px;
         }
@@ -24,14 +24,15 @@
             background: #fff;
             border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.05);
+            border: 1px solid #fff8e1;
         }
 
         .header {
             text-align: center;
             padding: 30px 25px;
-            background: linear-gradient(135deg, #BA68C8 0%, #F48FB1 100%);
-            color: white;
+            background: linear-gradient(135deg, #FFD54F 0%, #FFF176 100%);
+            color: #5D4037;
             font-size: 28px;
             font-weight: 800;
             letter-spacing: 0.8px;
@@ -46,44 +47,48 @@
                 left: -50%;
                 width: 200%;
                 height: 200%;
-                background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+                background: radial-gradient(circle, rgba(255,255,255,0.25) 0%, transparent 70%);
                 animation: float 6s ease-in-out infinite;
             }
 
-    
+       
 
         .content {
             padding: 35px;
             font-size: 16px;
             line-height: 1.8;
-            color: #555;
+            color: #5a4a42;
+            background: #fff;
         }
 
         .btn {
             display: inline-block;
             padding: 16px 32px;
-            background: linear-gradient(135deg, #BA68C8 0%, #F48FB1 100%);
-            color: white;
+            background: linear-gradient(135deg, #FFD54F 0%, #FFECB3 100%);
+            color: #5D4037;
             text-decoration: none;
             border-radius: 10px;
             font-weight: 700;
             margin-top: 25px;
-            box-shadow: 0 6px 20px rgba(186, 104, 200, 0.3);
+            box-shadow: 0 6px 20px rgba(255, 213, 79, 0.25);
             transition: all 0.4s ease;
+            border: none;
+            cursor: pointer;
         }
 
             .btn:hover {
                 transform: translateY(-3px);
-                box-shadow: 0 8px 25px rgba(186, 104, 200, 0.4);
+                box-shadow: 0 8px 25px rgba(255, 213, 79, 0.35);
+                background: linear-gradient(135deg, #FFC107 0%, #FFECB3 100%);
             }
 
         .footer {
             font-size: 13px;
-            color: #999;
+            color: #8d6e63;
             text-align: center;
             padding: 25px;
-            background: #fafafa;
-            border-top: 1px solid #f0f0f0;
+            background: #fffef7;
+            border-top: 1px solid #ffecb3;
         }
 
         .flower-img {
@@ -91,27 +96,41 @@
             max-height: 250px;
             object-fit: cover;
             display: block;
+            border-bottom: 3px solid #fff8e1;
         }
 
         .content-box {
             margin: 20px 0;
+            padding: 15px;
+            background: #fffef7;
+            border-radius: 10px;
+            border-left: 4px solid #FFD54F;
+        }
+
+        /* Thêm hiệu ứng ánh sáng vàng nhẹ cho toàn bộ container */
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 80%, rgba(255, 248, 225, 0.3) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 1;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">@Model.Title</div>
-
-        <img src="https://sf-static.upanhlaylink.com/img/image_2025112731c39f643c61a9fa4c6ac5be7a4ab779.jpg" class="flower-img" alt="Flower" />
-
         <div class="content">
             @RenderBody()
         </div>
         <div class="footer">
-    <p>© 2025 Bloom & Blossom. All rights reserved.</p>
-    <p>This is an automated email, please do not reply directly.</p>
-</div>
-
+            <p>© 2025 Bloom & Blossom. All rights reserved.</p>
+            <p>This is an automated email, please do not reply directly.</p>
+        </div>
     </div>
 </body>
 </html>
