@@ -7,10 +7,10 @@ using src.Services.Messaging;
 using src.Workers;
 
 var builder = WebApplication.CreateBuilder(args);
-//builder.WebHost.ConfigureKestrel(options =>
-//{
-//    options.ListenAnyIP(8087);
-//});
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(8087);
+});
 
 builder.Services.AddDbContext<NotificationDbContext>(options =>
     options.UseSqlServer(
