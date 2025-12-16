@@ -249,6 +249,7 @@ public class AuthUseCases
             Content = "You can reset your password by clicking the link",
             user.UserId,
             user.Email,
+            user.UserName,
             Token = resetToken
         });
 
@@ -269,6 +270,15 @@ public class AuthUseCases
         user.PasswordHash = _passwordHasher.HashPassword(dto.NewPassword);
         user.TokenVersion += 1;
         await _userRepository.UpdateAsync(user);
+          _rabbitMqService.Publish("auth_events", "password.reset_completed", new
+        {
+            Title = "Your password has been reset",
+            Content = "You can now log in with your new password",
+            user.UserId,
+            user.Email,
+            user.UserName,
+            ResetAt = DateTime.UtcNow
+        });
     }
 
     public async Task<(string accessToken, string refreshToken)> ResetPasswordAsync(ResetPasswordRequestDto dto)
@@ -328,6 +338,7 @@ public class AuthUseCases
             Content = "You can now log in with your new password",
             user.UserId,
             user.Email,
+            user.UserName,
             ResetAt = DateTime.UtcNow
         });
 
@@ -351,7 +362,8 @@ public class AuthUseCases
             Title = "You have successfully registered",
             Content = "Welcome to our platform!",
             user.UserId,
-            user.Email
+            user.Email,
+            user.UserName
         });
         _rabbitMqService.Publish("auth_events", "email.verified", new
         {
@@ -359,6 +371,7 @@ public class AuthUseCases
             Content = "Thank you for verifying your email",
             user.UserId,
             user.Email,
+            user.UserName,
             VerifiedAt = DateTime.UtcNow
         });
     }
@@ -404,6 +417,7 @@ public class AuthUseCases
             Content = "Please verify your email by clicking the link",
             user.UserId,
             user.Email,
+            user.UserName,
             Token = verificationToken
         });
     }
