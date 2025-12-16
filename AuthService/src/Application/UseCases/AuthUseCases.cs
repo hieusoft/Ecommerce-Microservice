@@ -249,7 +249,7 @@ public class AuthUseCases
             Content = "You can reset your password by clicking the link",
             user.UserId,
             user.Email,
-            user.UserName,
+            user.Username,
             Token = resetToken
         });
 
@@ -276,7 +276,7 @@ public class AuthUseCases
             Content = "You can now log in with your new password",
             user.UserId,
             user.Email,
-            user.UserName,
+            user.Username,
             ResetAt = DateTime.UtcNow
         });
     }
@@ -320,7 +320,7 @@ public class AuthUseCases
             Content = "You can now log in with your new password",
             user.UserId,
             user.Email,
-            user.UserName,
+            user.Username,
             ResetAt = DateTime.UtcNow
         });
     }
@@ -344,7 +344,7 @@ public class AuthUseCases
             Content = "Welcome to our platform!",
             user.UserId,
             user.Email,
-            user.UserName
+            user.Username
         });
         _rabbitMqService.Publish("auth_events", "email.verified", new
         {
@@ -352,7 +352,7 @@ public class AuthUseCases
             Content = "Thank you for verifying your email",
             user.UserId,
             user.Email,
-            user.UserName,
+            user.Username,
             VerifiedAt = DateTime.UtcNow
         });
     }
@@ -398,7 +398,7 @@ public class AuthUseCases
             Content = "Please verify your email by clicking the link",
             user.UserId,
             user.Email,
-            user.UserName,
+            user.Username,
             Token = verificationToken
         });
     }
