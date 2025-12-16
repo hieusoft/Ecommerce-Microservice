@@ -58,7 +58,8 @@ async function createOrder(orderData) {
     totalPrice += price * quantity;
 
     items.push({
-      bouquet_id: item.id,     
+      bouquet_id: item.id,   
+      bouquet_name: item.name,
       quantity,
       price
     });
@@ -138,6 +139,7 @@ const order = await orderModel.createOrder(
     await orderItemModel.addOrderItem(
       Number(order.order_id),
       item.bouquet_id,
+      item.bouquet_name,
       item.quantity,
       item.price
     );
@@ -228,6 +230,7 @@ async function addOrderItem(orderId, itemData) {
   const item = await orderItemModel.addOrderItem(
     orderId,
     itemData.bouquet_id,
+    itemData.bouquet_name,          
     Number(itemData.quantity),
     Number(itemData.price)
   );
@@ -240,6 +243,7 @@ async function addOrderItem(orderId, itemData) {
     total_price: newTotal,
   };
 }
+
 
 async function getOrderItems(orderId) {
   const order = await orderModel.getOrderById(orderId);
@@ -255,14 +259,15 @@ async function updateOrderItem(orderId, orderItemId, itemData) {
   if (!order) throw new Error("Order not found");
 
   const items = await orderItemModel.getOrderItems(orderId);
-  const exists = items.find((i) => i.order_item_id === orderItemId);
+  const exists = items.find(i => i.order_item_id === orderItemId);
 
   if (!exists) throw new Error("Order item not found");
 
   const updatedItem = await orderItemModel.updateOrderItem(
     orderItemId,
-    Number(itemData.quantity),
-    Number(itemData.price)
+    itemData.quantity !== undefined ? Number(itemData.quantity) : null,
+    itemData.price !== undefined ? Number(itemData.price) : null,
+    itemData.bouquet_name ?? null   
   );
 
   const newTotal = await recalcTotalPrice(orderId);
@@ -273,6 +278,7 @@ async function updateOrderItem(orderId, orderItemId, itemData) {
     total_price: newTotal,
   };
 }
+
 
 async function deleteOrderItem(orderId, orderItemId) {
   orderItemId = Number(orderItemId);
