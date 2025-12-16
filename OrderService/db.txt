@@ -27,6 +27,8 @@ CREATE TABLE OrderItems (
     order_item_id INT IDENTITY(1,1) PRIMARY KEY, 
     order_id INT NOT NULL,       -- BẮT BUỘC
     bouquet_id VARCHAR(50),
+    bouquet_name VARCHAR(255)
+
     quantity INT DEFAULT 1,
     price DECIMAL(10,2),
     created_at DATETIME DEFAULT GETDATE(),

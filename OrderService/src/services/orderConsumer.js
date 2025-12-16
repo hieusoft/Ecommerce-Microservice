@@ -15,6 +15,7 @@ async function startConsumer() {
         const { orderId, status } = orderData;
         if (orderId && status) {
           let newStatus = status === "SUCCESS" ? "Paid" : "Cancelled";
+          console.log
           const orderRecord = await OrderModel.getOrderById(orderId);
           if (!orderRecord) {
             throw new Error(`Order with ID ${orderId} not found`);
