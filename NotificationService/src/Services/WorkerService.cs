@@ -118,17 +118,17 @@ namespace src.Services
                         break;
                     }
 
-                //case "notification.user_registered_q":
-                //    {
-                //        string title = dto.Title ?? "You have successfully registered";
+                case "notification.user_registered_q":
+                    {
+                        string title = dto.Title ?? "You have successfully registered";
 
 
 
-                //        await SaveNotificationAsync(title, dto.Content ?? "", dto.UserId, dto);
-                //        await SendEmailFromTemplate(dto.Email!, title, "email_promotion.cshtml", dto);
+                        //await SaveNotificationAsync(title, dto.Content ?? "", dto.UserId, dto);
+                        //await SendEmailFromTemplate(dto.Email!, title, "email_promotion.cshtml", dto);
 
-                //        break;
-                //    }
+                        break;
+                    }
                 case "notification.user_unbanned_q":
                     {
 
