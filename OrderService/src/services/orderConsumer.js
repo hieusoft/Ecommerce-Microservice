@@ -1,6 +1,6 @@
 const rabbit = require("../config/rabbitmq");
 const OrderModel = require("../models/orderModel");
-
+const orderService = require("./orderService")
 async function startConsumer() {
   const queues = ["payment.success_q", "payment.failed_q"];
 
@@ -15,8 +15,8 @@ async function startConsumer() {
         const { orderId, status } = orderData;
         if (orderId && status) {
           let newStatus = status === "SUCCESS" ? "Paid" : "Cancelled";
-          console.log
-          const orderRecord = await OrderModel.getOrderById(orderId);
+
+          const orderRecord = await orderService.getOrderById(orderId)
           if (!orderRecord) {
             throw new Error(`Order with ID ${orderId} not found`);
           }
