@@ -14,6 +14,7 @@ namespace Application.DTOs.User
         public string UserName { get; set; }
         public string Email { get; set; }
         public bool EmailVerified { get; set; }
+        public bool IsBanned { get; set; } = false;
         public List<string> Roles { get; set; } = new List<string>();
     }
 }
