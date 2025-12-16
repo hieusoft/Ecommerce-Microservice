@@ -17,14 +17,15 @@ namespace src.Services
         private readonly ITemplateService _templateService;
         private readonly string _domain;
         private readonly string _client;
-
-        public WorkerService(IConfiguration configuration,INotificationService notificationService, IEmailService emailService,ITemplateService templateService)
+        private readonly IUserCacheRepository _userCacheRepository;
+        public WorkerService(IConfiguration configuration,INotificationService notificationService, IEmailService emailService,ITemplateService templateService,IUserCacheRepository userCacheRepository)
         {
             _domain= configuration["Brevo:BaseUrl"] ?? "Notification Service";
             _client = configuration["Brevo:ClientUrl"];
             _notificationService = notificationService;
             _emailService = emailService;
             _templateService = templateService;
+            _userCacheRepository = userCacheRepository;
         }
         public async Task HandleQueueMessageAsync(string queue, QueueMessageDto dto)
         {
@@ -63,8 +64,12 @@ namespace src.Services
                     {
                         dto.Token = $"{_client}/login";
                         string title = dto.Title ?? "Email Verified Successfully";
-
-
+                        var user = new UserCache {
+                            FullName =dto.Name ,
+                            Username =dto.UserName,
+                            Email = dto.Email
+                        };
+                        await _userCacheRepository.AddUserAsync(user);
                         await SaveNotificationAsync(title, dto.Content ?? "", dto.UserId, dto);
                         await SendEmailFromTemplate(dto.Email!, title, "email_verification_success.cshtml", dto);
 

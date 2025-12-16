@@ -25,7 +25,7 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ITemplateService, TemplateService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IWorkerService, WorkerService>();
-
+builder.Services.AddScoped<IUserCacheRepository, UserCacheRepository>();
 
 builder.Services.AddSingleton<IRabbitMqService, RabbitMqService>();
 

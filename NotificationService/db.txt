@@ -28,7 +28,7 @@ CREATE TABLE NotificationDelivery (
     NotificationDeliveryId INT PRIMARY KEY IDENTITY(1,1),
     NotificationId INT NOT NULL,
     UserId INT NOT NULL,
-    DeliveryMethodId INT NOT NULL,   -- Email, InApp, SMS...
+    DeliveryMethodId INT NOT NULL,   
     Status INT NOT NULL DEFAULT 0,   -- 0 = Unread, 1 = Read
     CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),   -- Thời điểm tạo
     UpdatedAt DATETIME2 NULL,              -- thời điểm gửi (Email/InApp)
@@ -43,5 +43,13 @@ CREATE TABLE NotificationDelivery (
     CONSTRAINT FK_NotificationDelivery_DeliveryMethod
         FOREIGN KEY (DeliveryMethodId)
         REFERENCES DeliveryMethods(DeliveryMethodId)
+);
+
+CREATE TABLE UserCache (
+    UserId INT IDENTITY(1,1) PRIMARY KEY,
+    FullName NVARCHAR(150) NULL,
+    Username NVARCHAR(100) NOT NULL UNIQUE,
+    Email NVARCHAR(100) NOT NULL UNIQUE,
+    UpdatedAt DATETIME2 DEFAULT GETDATE()
 );
 
