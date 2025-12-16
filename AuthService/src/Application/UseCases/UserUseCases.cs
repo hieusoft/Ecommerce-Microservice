@@ -62,8 +62,12 @@ namespace Application.UseCases
                 .Select(u => new UserResponseDto
                 {
                     UserId = u.UserId,
+                    FullName = u.FullName,
+                    UserName = u.Username,
                     Email = u.Email,
-                    Roles = u.UserRoles.Select(r => r.Role.RoleName).ToList()
+                    EmailVerified = u.EmailVerified,
+                    Roles = u.UserRoles.Select(r => r.Role.RoleName).ToList(),
+                    IsBanned = u.IsBanned
                 })
                 .ToListAsync();
 
@@ -91,7 +95,8 @@ namespace Application.UseCases
                 EmailVerified = user.EmailVerified,
                 UserId = user.UserId,
                 Email = user.Email,
-                Roles = user.UserRoles?.Select(ur => ur.Role.RoleName).ToList() ?? new List<string>()
+                Roles = user.UserRoles?.Select(ur => ur.Role.RoleName).ToList() ?? new List<string>(),
+                IsBanned = user.IsBanned
             };
         }
 
@@ -304,3 +309,4 @@ namespace Application.UseCases
 
     }
 }
+
