@@ -182,7 +182,7 @@ namespace Api.Controllers
             {
                 var dto = new VerifyEmailRequestDto { Token = token };
                 await _authUseCases.VerifyEmailAsync(dto);
-                return Redirect("http://localhost:3000/login");
+                return Redirect("http://localhost:3000/login?verified=true");
 
             }
             catch (Exception ex)
@@ -225,7 +225,7 @@ namespace Api.Controllers
             try
             {
                 await _authUseCases.ResendVerificationEmailAsync(dto);
-                return Redirect("http://localhost:3000/login");
+                return Ok(new { message = "Verification email has been sent" });
             }
             catch (Exception ex)
             {

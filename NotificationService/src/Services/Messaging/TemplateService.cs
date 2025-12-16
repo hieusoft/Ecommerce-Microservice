@@ -11,15 +11,12 @@ namespace src.Services.Messaging
 
         public TemplateService()
         {
-            // Lấy đường dẫn tuyệt đối đến folder Templates
-            var rootPath = Path.Combine(Directory.GetCurrentDirectory(), "Templates");
+            // Trong Docker, AppContext.BaseDirectory = /app
+            var rootPath = Path.Combine(AppContext.BaseDirectory, "Templates");
 
-            // Nếu chưa tồn tại folder, có thể tạo
-            if (!Directory.Exists(rootPath))
-                Directory.CreateDirectory(rootPath);
-
+            // Khởi tạo engine
             _engine = new RazorLightEngineBuilder()
-                .UseFileSystemProject(rootPath) // Đường dẫn tuyệt đối
+                .UseFileSystemProject(rootPath)
                 .UseMemoryCachingProvider()
                 .Build();
         }
@@ -29,8 +26,7 @@ namespace src.Services.Messaging
             if (string.IsNullOrWhiteSpace(templateName))
                 throw new ArgumentException("Template name is required.", nameof(templateName));
 
-            string result = await _engine.CompileRenderAsync(templateName, data);
-            return result;
+            return await _engine.CompileRenderAsync(templateName, data);
         }
     }
 }

@@ -16,10 +16,12 @@ namespace src.Services
         private  readonly INotificationService _notificationService;
         private readonly ITemplateService _templateService;
         private readonly string _domain;
+        private readonly string _client;
 
         public WorkerService(IConfiguration configuration,INotificationService notificationService, IEmailService emailService,ITemplateService templateService)
         {
             _domain= configuration["Brevo:BaseUrl"] ?? "Notification Service";
+            _client = configuration["Brevo:ClientUrl"];
             _notificationService = notificationService;
             _emailService = emailService;
             _templateService = templateService;
@@ -31,7 +33,7 @@ namespace src.Services
 
                 case "email.verification_requested_q":
                     {
-                        var verifyUrl = $"{_domain}/auth/verify-email?token=={Uri.EscapeDataString(dto.Token)}";
+                        var verifyUrl = $"{_domain}/auth/verify-email?token={Uri.EscapeDataString(dto.Token)}";
 
                         dto.Token = verifyUrl;
 
@@ -59,7 +61,7 @@ namespace src.Services
 
                 case "email.verified_q":
                     {
-                        dto.Token = $"{_domain}/login";
+                        dto.Token = $"{_client}/login";
                         string title = dto.Title ?? "Email Verified Successfully";
 
 
@@ -116,17 +118,17 @@ namespace src.Services
                         break;
                     }
 
-                case "notification.user_registered_q":
-                    {
-                        string title = dto.Title ?? "You have successfully registered";
+                //case "notification.user_registered_q":
+                //    {
+                //        string title = dto.Title ?? "You have successfully registered";
 
 
 
-                        await SaveNotificationAsync(title, dto.Content ?? "", dto.UserId, dto);
-                        await SendEmailFromTemplate(dto.Email!, title, "email_promotion.cshtml", dto);
+                //        await SaveNotificationAsync(title, dto.Content ?? "", dto.UserId, dto);
+                //        await SendEmailFromTemplate(dto.Email!, title, "email_promotion.cshtml", dto);
 
-                        break;
-                    }
+                //        break;
+                //    }
                 case "notification.user_unbanned_q":
                     {
 
