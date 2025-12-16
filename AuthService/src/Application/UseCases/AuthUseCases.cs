@@ -281,57 +281,39 @@ public class AuthUseCases
         });
     }
 
-    public async Task<(string accessToken, string refreshToken)> ResetPasswordAsync(ResetPasswordRequestDto dto)
+    public async Task ResetPasswordAsync(ResetPasswordRequestDto dto)
     {
-        var resetToken = await _passwordResetTokenRepository.GetPasswordResetTokenAsync(dto.Token);
+        var resetToken = await _passwordResetTokenRepository
+            .GetPasswordResetTokenAsync(dto.Token);
 
         if (resetToken == null || resetToken.Used || resetToken.ExpiresAt < DateTime.UtcNow)
             throw new Exception("Invalid or expired reset token");
 
         var user = await _userRepository.GetByIdAsync(resetToken.UserId);
-
         if (user == null)
             throw new Exception("User not found");
+
         if (_passwordHasher.VerifyPassword(user.PasswordHash, dto.NewPassword))
             throw new Exception("New password cannot be the same as the old password");
 
 
         user.PasswordHash = _passwordHasher.HashPassword(dto.NewPassword);
+
+        
         user.TokenVersion += 1;
+
         await _redisService.SetStringAsync(
-           $"user:{user.UserId}:tokenVersion",
-           user.TokenVersion.ToString(),
-           TimeSpan.FromDays(7)
-       );
+            $"user:{user.UserId}:tokenVersion",
+            user.TokenVersion.ToString(),
+            TimeSpan.FromDays(7)
+        );
+
         await _userRepository.UpdateAsync(user);
 
+    
         resetToken.Used = true;
         await _passwordResetTokenRepository.UpdatePasswordResetTokenAsync(resetToken);
 
-
-        var roles = user.UserRoles?.Select(ur => ur.Role.RoleName) ?? new List<string>();
-      
-        var accessToken = _jwtService.GenerateAccessToken(user.UserId, user.Email, roles,user.TokenVersion);
-        var refreshToken = _jwtService.GenerateRefreshToken();
-        var existingToken = await _tokenRepository.GetRefreshTokenByUserIdAsync(user.UserId);
-
-        if (existingToken == null)
-        {
-            await _tokenRepository.AddRefreshTokenAsync(new RefreshToken
-            {
-                Token = refreshToken,
-                UserId = user.UserId,
-                ExpiresAt = DateTime.UtcNow.AddDays(7)
-            });
-        }
-        else
-        {
-            existingToken.Token = refreshToken;
-            existingToken.ExpiresAt = DateTime.UtcNow.AddDays(7);
-       
-
-            await _tokenRepository.UpdateRefreshTokenAsync(existingToken);
-        }
         _rabbitMqService.Publish("auth_events", "password.reset_completed", new
         {
             Title = "Your password has been reset",
@@ -341,9 +323,8 @@ public class AuthUseCases
             user.UserName,
             ResetAt = DateTime.UtcNow
         });
-
-        return (accessToken, refreshToken);
     }
+
 
     public async Task VerifyEmailAsync(VerifyEmailRequestDto dto)
     {

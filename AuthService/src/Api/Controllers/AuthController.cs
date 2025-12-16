@@ -153,20 +153,17 @@ namespace Api.Controllers
             }
         }
 
-        [HttpPost("reset-password")]
+      [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDto dto)
         {
             try
             {
-                var (accessToken, refreshToken) = await _authUseCases.ResetPasswordAsync(dto);
-                Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
+                await _authUseCases.ResetPasswordAsync(dto);
+
+                return Ok(new
                 {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict,
-                    Expires = DateTimeOffset.UtcNow.AddDays(7)
+                    message = "Password reset successful. Please login again."
                 });
-                return Redirect("http://localhost:3000/login");
             }
             catch (Exception ex)
             {
@@ -174,6 +171,7 @@ namespace Api.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
 
         [HttpGet("verify-email")]
         public async Task<IActionResult> VerifyEmail([FromQuery] string token)

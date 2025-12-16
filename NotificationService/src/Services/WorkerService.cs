@@ -75,7 +75,7 @@ namespace src.Services
                     {
                       
 
-                        dto.Token = $"{_domain}/reset-password?token={dto.Token}";
+                        dto.Token = $"{_client}/reset-password?token={dto.Token}";
 
                         string title = dto.Title ?? "Reset Password";
 
@@ -94,7 +94,7 @@ namespace src.Services
                     {
                       
                         string title = dto.Title ?? "";
-                        dto.Token = $"{_domain}/login";
+                        dto.Token = $"{_client}/login";
                         await SaveNotificationAsync(title, dto.Content ?? "", dto.UserId, dto);
 
                         await SendEmailFromTemplate(
