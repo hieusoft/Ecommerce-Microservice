@@ -17,6 +17,8 @@ async function startConsumer() {
           let newStatus = status === "SUCCESS" ? "Paid" : "Cancelled";
 
           const orderRecord = await orderService.getOrderById(orderId)
+         
+
           if (!orderRecord) {
             throw new Error(`Order with ID ${orderId} not found`);
           }
@@ -25,13 +27,13 @@ async function startConsumer() {
             status: newStatus,
           });
           if (status === "SUCCESS") {
-            rabbit.publish("order_events", "order.paid", { orderRecord });
+            rabbit.publish("order_events", "order.paid", orderRecord);
             
             setTimeout(() => {
-              rabbit.publish("order_events", "order.delivery", { orderRecord });
+              rabbit.publish("order_events", "order.delivery", orderRecord);
             }, 60 * 1000);
           } else {
-            rabbit.publish("order_events", "order.cancelled", { orderRecord });
+            rabbit.publish("order_events", "order.cancelled", orderRecord );
           }
           console.log(`Order ${orderId} updated to status: ${status}`);
         }
