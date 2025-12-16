@@ -109,40 +109,59 @@ class CouponService {
 
   static async update(pool, id, data) {
     try {
+      const coupon = new Coupon(
+        id,
+        data.code,
+        data.discountType,
+        data.discountValue,
+        data.maxUses,
+        data.expiryDate,
+        data.occasion,
+        data.minPrice,
+        null,
+        new Date()
+      );
+
+      
       const existing = await pool
         .request()
-        .input("code", sql.VarChar, couponData.code)
-        .query("SELECT id FROM Coupons WHERE code = @code");
+        .input("code", sql.VarChar, coupon.code)
+        .input("id", sql.Int, id)
+        .query(`
+        SELECT id FROM Coupons 
+        WHERE code = @code AND id <> @id
+      `);
 
       if (existing.recordset.length > 0) {
         return {
           success: false,
-          reason: `Coupon code '${couponData.code}' existed.`,
+          reason: `Coupon code '${coupon.code}' existed.`,
         };
       }
 
       await pool
         .request()
-        .input("id", sql.Int, id)
-        .input("code", sql.VarChar, data.code)
-        .input("discount_type", sql.VarChar, data.discountType)
-        .input("discount_value", sql.Decimal(10, 2), data.discountValue)
-        .input("max_uses", sql.Int, data.maxUses)
-        .input("expiry_date", sql.DateTime, data.expiryDate)
-        .input("occasion", sql.VarChar, data.occasion)
-        .input("min_price", sql.Decimal(10, 2), data.minPrice)
-        .input("updated_at", sql.DateTime, new Date()).query(`
-          UPDATE Coupons 
-          SET code = @code,
-              discount_type = @discount_type,
-              discount_value = @discount_value,
-              max_uses = @max_uses,
-              expiry_date = @expiry_date,
-              occasion = @occasion,
-              min_price = @min_price,
-              updated_at = @updated_at
-          WHERE id = @id
-        `);
+        .input("id", sql.Int, coupon.id)
+        .input("code", sql.VarChar, coupon.code)
+        .input("discount_type", sql.VarChar, coupon.discountType)
+        .input("discount_value", sql.Decimal(10, 2), coupon.discountValue)
+        .input("max_uses", sql.Int, coupon.maxUses)
+        .input("expiry_date", sql.DateTime, coupon.expiryDate)
+        .input("occasion", sql.VarChar, coupon.occasion)
+        .input("min_price", sql.Decimal(10, 2), coupon.minPrice)
+        .input("updated_at", sql.DateTime, coupon.updated_at)
+        .query(`
+        UPDATE Coupons SET
+          code = @code,
+          discount_type = @discount_type,
+          discount_value = @discount_value,
+          max_uses = @max_uses,
+          expiry_date = @expiry_date,
+          occasion = @occasion,
+          min_price = @min_price,
+          updated_at = @updated_at
+        WHERE id = @id
+      `);
 
       return await CouponService.getById(pool, id);
     } catch (err) {
