@@ -156,7 +156,7 @@ namespace src.Services
                         // await SaveNotificationAsync(title, dto.Content ?? "", dto.UserId, dto);
                         // await SendEmailFromTemplate(dto.Email!, title, "email_order_paid.cshtml", dto);
 
-                        // break;
+                        break;
                     }
                 case "order.delivery_q":
                     {
