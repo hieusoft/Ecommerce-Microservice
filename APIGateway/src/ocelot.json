@@ -224,7 +224,7 @@
 
     
     {
-      "DownstreamPathTemplate": "/api/notifications/{everything}",
+      "DownstreamPathTemplate": "/api/notification/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -232,12 +232,12 @@
           "Port": 8087
         }
       ],
-      "UpstreamPathTemplate": "/notifications/{everything}",
+      "UpstreamPathTemplate": "/notification/{everything}",
       "UpstreamHttpMethod": [ "GET" ],
       "Priority": 19
     },
     {
-      "DownstreamPathTemplate": "/api/notifications/{everything}",
+      "DownstreamPathTemplate": "/api/notification/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -245,7 +245,7 @@
           "Port": 8087
         }
       ],
-      "UpstreamPathTemplate": "/notifications/{everything}",
+      "UpstreamPathTemplate": "/notification/{everything}",
       "UpstreamHttpMethod": [ "POST", "PUT", "DELETE" ],
       "Priority": 20,
       "DelegatingHandlers": [ "RedisTokenValidator" ]
@@ -258,3 +258,4 @@
     "LoadBalancer": "RoundRobin"
   }
 }
+
