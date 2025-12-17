@@ -196,19 +196,16 @@ async function queryAnalytics(req, res) {
         const user = getAuthUser(req, res);
         if (!user) return;
         if (!user.roles.includes("Manager") && !user.roles.includes("Admin")) {
-            return res.status(401).json({
-                message: "Unauthorized"
+            return res.status(403).json({
+                message: "Insufficent permissions"
             });
         }
-
+        console.log(req);
         const result = await orderService.queryAnalytics(
-            req.params.date_range
+            req.query.date_range
         );
 
-        return res.json({
-            count: result.count,
-            revenue: result.revenue
-        });
+        return res.json(result);
 
     } catch (err) {
         console.error(err);

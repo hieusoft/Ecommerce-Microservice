@@ -344,17 +344,16 @@ async function queryAnalytics(date_range) {
   await poolConnect;
   let response = await pool
     .request()
-    .input("date_range", date_range)
-    .input("discountAmount", discountAmount).query(`
+    .input("date_range", -date_range).query(`
             SELECT
-              COUNT(*) AS count
+              COUNT(*) AS count,
               SUM(total_price) AS revenue
             FROM Orders
               WHERE
-                created_at >= DATEADD(DAYS, @date_range * -1, GETDATE())
-                status
+                created_at >= DATEADD(DAY, @date_range, GETDATE())
+                AND status IN ('Paid')
         `);
-    return response.recordset();
+    return response.recordset[0];
 }
 
 module.exports = {

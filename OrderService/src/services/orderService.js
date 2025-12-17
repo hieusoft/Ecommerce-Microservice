@@ -294,6 +294,10 @@ async function deleteOrderItem(orderId, orderItemId) {
   };
 }
 
+async function queryAnalytics(date_range) {
+  return orderModel.queryAnalytics(date_range);
+}
+
 module.exports = {
   createOrder,
   getAllOrders,
@@ -305,4 +309,5 @@ module.exports = {
   getOrderItems,
   updateOrderItem,
   deleteOrderItem,
+  queryAnalytics
 };
