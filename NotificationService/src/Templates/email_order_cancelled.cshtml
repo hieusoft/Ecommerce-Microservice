@@ -47,14 +47,17 @@
         </table>
 
         <h4 style="color:#C17900; margin-top:15px;">Payment Summary</h4>
-        <p><strong>Total Price:</strong> $@Model.TotalPrice.ToString("N2")</p>
-        <p><strong>Discount:</strong> $@(Model.Discount?.ToString("N2") ?? "0.00")</p>
+
+        <p><strong>Total Price (original):</strong> $@((Model.TotalPrice - (Model.VatAmount ?? 0) - (Model.ShippingFee ?? 0) + (Model.Discount ?? 0)).ToString("N2"))</p>
+        <p><strong>Discount:</strong> $@((Model.Discount ?? 0).ToString("N2"))</p>
         <p><strong>Coupon Code:</strong> @(Model.CouponCode ?? "N/A")</p>
-        <p><strong>VAT:</strong> $@(Model.VatAmount?.ToString("N2") ?? "0.00")</p>
-        <p><strong>Shipping Fee:</strong> $@(Model.ShippingFee?.ToString("N2") ?? "0.00")</p>
+        <p><strong>VAT:</strong> $@((Model.VatAmount ?? 0).ToString("N2"))</p>
+        <p><strong>Shipping Fee:</strong> $@((Model.ShippingFee ?? 0).ToString("N2"))</p>
+
         <p style="font-weight:700; color:#D4A017;">
-            <strong>Grand Total:</strong> $@((Model.TotalPrice - (Model.Discount ?? 0) + (Model.VatAmount ?? 0) + (Model.ShippingFee ?? 0)).ToString("N2"))
+            <strong>Grand Total:</strong> $@(Model.TotalPrice.ToString("N2"))
         </p>
+
 
         @if (!string.IsNullOrEmpty(Model.Description))
         {
