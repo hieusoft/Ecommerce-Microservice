@@ -65,6 +65,7 @@ namespace src.Services
                         dto.Token = $"{_client}/login";
                         string title = dto.Title ?? "Email Verified Successfully";
                         var user = new UserCache {
+                            UserId =  dto.UserId ?? 0,
                             FullName =dto.FullName ,
                             Username =dto.UserName,
                             Email = dto.Email

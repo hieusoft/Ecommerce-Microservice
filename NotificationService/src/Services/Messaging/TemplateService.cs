@@ -11,10 +11,8 @@ namespace src.Services.Messaging
 
         public TemplateService()
         {
-            // Trong Docker, AppContext.BaseDirectory = /app
             var rootPath = Path.Combine(AppContext.BaseDirectory, "Templates");
 
-            // Khởi tạo engine
             _engine = new RazorLightEngineBuilder()
                 .UseFileSystemProject(rootPath)
                 .UseMemoryCachingProvider()
