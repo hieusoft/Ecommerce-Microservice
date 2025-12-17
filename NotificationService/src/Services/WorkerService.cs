@@ -160,20 +160,50 @@ namespace src.Services
 
                 case "notification.user_unbanned_q":
                     {
+                        if (dto == null)
+                        {
+                            Console.WriteLine("DTO is null, skipping message.");
+                            break;
+                        }
 
-                        string title = dto.Title ?? "Your account has been unbanned";
+                        if (dto.UserId == null)
+                        {
+                            Console.WriteLine("DTO.UserId is null, cannot process user unbanned notification.");
+                            break;
+                        }
 
                         var loginUrl = $"{_client}/login";
-                        var user = await _userCacheRepository.GetUserByIdAsync(dto.UserId ?? 0);
-                        Console.WriteLine(dto.Items);
-                        dto.UserName = user.Username;
-                        dto.Token = loginUrl;
 
-                        await SaveNotificationAsync(title, dto.Content ?? "", dto.UserId, dto);
-                        await SendEmailFromTemplate(dto.Email!, title, "email_unban_user.cshtml", dto);
+                        var user = await _userCacheRepository.GetUserByIdAsync(dto.UserId.Value);
+                        if (user == null)
+                        {
+                            Console.WriteLine($"User with ID {dto.UserId.Value} not found.");
+                            break;
+                        }
+
+                        dto.UserName = user.Username ?? "User";
+                        dto.Token = loginUrl;
+                        dto.Email ??= user.Email ?? "";
+
+                        string title = dto.Title ?? "Your account has been unbanned";
+                        string content = dto.Content ?? "Your account has been unbanned and is now active.";
+
+                      
+                        await SaveNotificationAsync(title, content, dto.UserId, dto);
+
+                      
+                        if (!string.IsNullOrEmpty(dto.Email))
+                        {
+                            await SendEmailFromTemplate(dto.Email, title, "email_unban_user.cshtml", dto);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Email is null or empty, skipping email sending.");
+                        }
 
                         break;
                     }
+
                 //case "notification.user_registered_q":
                 //    {
                 //        string title = dto.Title ?? "You have successfully registered";
@@ -197,20 +227,49 @@ namespace src.Services
                     }
                 case "order.paid_q":
                     {
-                        
+                        if (dto == null)
+                        {
+                            Console.WriteLine("DTO is null, skipping order paid notification.");
+                            break;
+                        }
+
+                        if (dto.UserId == null)
+                        {
+                            Console.WriteLine("DTO.UserId is null, cannot process order paid notification.");
+                            break;
+                        }
+
                         string title = "Order Paid Successfully";
                         string content = $"Your order {dto.OrderCode} has been successfully paid. Total amount: {dto.TotalPrice}.";
 
-                       
-                        var user = await _userCacheRepository.GetUserByIdAsync(dto.UserId ?? 0);
+                    
+                        var user = await _userCacheRepository.GetUserByIdAsync(dto.UserId.Value);
+                        if (user == null)
+                        {
+                            Console.WriteLine($"User with ID {dto.UserId.Value} not found.");
+                            break;
+                        }
+
+                        dto.UserName = user.Username ?? "User";
+                        dto.Email ??= user.Email ?? "";
+
                         Console.WriteLine(dto.Items);
-                        dto.UserName = user.Username;
+
+                       
                         await SaveNotificationAsync(title, content, dto.UserId, dto);
 
-                        await SendEmailFromTemplate(user.Email, title, "email_order_paid.cshtml", dto);
+                        if (!string.IsNullOrEmpty(dto.Email))
+                        {
+                            await SendEmailFromTemplate(dto.Email, title, "email_order_paid.cshtml", dto);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Email is null or empty, skipping email sending.");
+                        }
 
                         break;
                     }
+
 
                 case "order.delivery_q":
                     {
