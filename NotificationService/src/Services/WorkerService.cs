@@ -225,24 +225,23 @@ namespace src.Services
 
                         break;
                     }
-                case "order.paid_q":
+                case "order.cancelled_q":
                     {
                         if (dto == null)
                         {
-                            Console.WriteLine("DTO is null, skipping order paid notification.");
+                            Console.WriteLine("DTO is null, skipping order cancelled notification.");
                             break;
                         }
 
                         if (dto.UserId == null)
                         {
-                            Console.WriteLine("DTO.UserId is null, cannot process order paid notification.");
+                            Console.WriteLine("DTO.UserId is null, cannot process order cancelled notification.");
                             break;
                         }
 
-                        string title = "Order Paid Successfully";
-                        string content = $"Your order {dto.OrderCode} has been successfully paid. Total amount: {dto.TotalPrice}.";
+                        string title = dto.Title ?? "Order Cancelled";
+                        string content = dto.Content ?? $"Your order {dto.OrderCode} has been cancelled. Total amount: ${dto.TotalPrice}.";
 
-                    
                         var user = await _userCacheRepository.GetUserByIdAsync(dto.UserId.Value);
                         if (user == null)
                         {
@@ -255,12 +254,12 @@ namespace src.Services
 
                         Console.WriteLine(dto.Items);
 
-                       
+                      
                         await SaveNotificationAsync(title, content, dto.UserId, dto);
 
                         if (!string.IsNullOrEmpty(dto.Email))
                         {
-                            await SendEmailFromTemplate(dto.Email, title, "email_order_paid.cshtml", dto);
+                            await SendEmailFromTemplate(dto.Email, title, "email_order_cancelled.cshtml", dto);
                         }
                         else
                         {
@@ -271,18 +270,10 @@ namespace src.Services
                     }
 
 
+
                 case "order.delivery_q":
                     {
                         // string title = dto.Title ?? "Thông báo";
-
-                        // await SaveNotificationAsync(title, dto.Content ?? "", dto.UserId, dto);
-                        // await SendEmailFromTemplate(dto.Email!, title, "email_order_paid.cshtml", dto);
-
-                        break;
-                    }
-                case "order.cancelled_q":
-                    {
-                        string title = dto.Title ?? "Thông báo";
 
                         // await SaveNotificationAsync(title, dto.Content ?? "", dto.UserId, dto);
                         // await SendEmailFromTemplate(dto.Email!, title, "email_order_paid.cshtml", dto);
