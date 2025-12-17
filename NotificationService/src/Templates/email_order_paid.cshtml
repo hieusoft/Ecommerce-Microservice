@@ -4,41 +4,85 @@
 }
 
 <div class="content-box">
+
     <div class="verification-box">
-        <p style="margin-bottom: 20px; font-size: 16px; color: #666;">
-            Hello <strong>@Model.Name</strong>,<br><br>
+        <p style="margin-bottom: 20px; font-size: 16px; color: #5a4a42;">
+            Hello <strong style="color: #D4A017;">@Model.UserName</strong>,<br><br>
             Thank you for your order! Your payment has been successfully processed.
         </p>
 
         <div style="text-align: center; margin: 30px 0;">
-            <a href="@Model.OrderLink" class="btn" style="font-size: 18px; padding: 18px 40px;">
+            <a href="@Model.OrderLink" class="btn" style="font-size: 18px; padding: 18px 40px; color: #5D4037;">
                 View Order Details
             </a>
         </div>
     </div>
 
-    <div class="instructions">
-        <h3 style="color: #BA68C8; margin-bottom: 15px;">Order Information</h3>
+    <div class="instructions"
+         style="margin-top: 30px; padding: 20px; background: #FFFDF5;
+                border-radius: 10px; border: 1px solid #FFECB3;">
 
-        <p style="margin: 5px 0; color: #666;">
-            <strong>Order Number:</strong> @Model.OrderNumber
+        <h3 style="color: #C17900; margin-bottom: 15px; font-size: 18px; font-weight: 600;">
+            Order Information
+        </h3>
+
+        <p style="margin: 5px 0; color: #5a4a42;">
+            <strong>Order Code:</strong> @Model.OrderCode
+        </p>
+        <p style="margin: 5px 0; color: #5a4a42;">
+            <strong>Order Status:</strong> @Model.Status
+        </p>
+        <p style="margin: 5px 0; color: #5a4a42;">
+            <strong>Delivery Date:</strong> @(Model.DeliveryDate?.ToString("dd/MM/yyyy") ?? "N/A")
+            <strong>at</strong> @(Model.DeliveryTime?.ToString("HH:mm") ?? "N/A")
+        </p>
+        <p style="margin: 5px 0; color: #5a4a42;">
+            <strong>Message:</strong> @Model.Message
         </p>
 
-        <p style="margin: 5px 0; color: #666;">
-            <strong>Order Date:</strong> @Model.OrderDate
+        <h4 style="margin-top: 15px; color: #C17900;">Items</h4>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+            <thead>
+                <tr style="background: #FFECB3; color: #5D4037; text-align: left;">
+                    <th style="padding: 8px; border-bottom: 1px solid #FFECB3;">Product</th>
+                    <th style="padding: 8px; border-bottom: 1px solid #FFECB3;">Quantity</th>
+                    <th style="padding: 8px; border-bottom: 1px solid #FFECB3;">Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Items != null)
+                {
+                    foreach (var item in Model.Items)
+                    {
+                        <tr>
+                            <td style="padding: 8px; border-bottom: 1px solid #FFECB3;">@item.Name</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #FFECB3;">@item.Quantity</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #FFECB3;">@item.Price.ToString("C")</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+
+        <h4 style="margin-top: 15px; color: #C17900;">Payment Summary</h4>
+        <p style="margin: 5px 0; color: #5a4a42;"><strong>Total Price:</strong> @Model.TotalPrice.ToString("C")</p>
+        <p style="margin: 5px 0; color: #5a4a42;"><strong>Discount:</strong> @Model.Discount?.ToString("C") ?? "0"</p>
+        <p style="margin: 5px 0; color: #5a4a42;"><strong>Coupon Code:</strong> @Model.CouponCode ?? "N/A"</p>
+        <p style="margin: 5px 0; color: #5a4a42;"><strong>VAT:</strong> @Model.VatAmount?.ToString("C") ?? "0"</p>
+        <p style="margin: 5px 0; color: #5a4a42;"><strong>Shipping Fee:</strong> @Model.ShippingFee?.ToString("C") ?? "0"</p>
+        <p style="margin: 10px 0; font-weight: 700; color: #D4A017;">
+            <strong>Grand Total:</strong> @(Model.TotalPrice - (Model.Discount ?? 0) + (Model.VatAmount ?? 0) + (Model.ShippingFee ?? 0)).ToString("C")
         </p>
 
-        <p style="margin: 5px 0; color: #666;">
-            <strong>Total Amount:</strong> @Model.TotalAmount
-        </p>
+        @if (!string.IsNullOrEmpty(Model.Description))
+        {
+            <p style="margin-top: 10px; color: #5a4a42;"><strong>Note:</strong> @Model.Description</p>
+        }
 
-        <p style="margin: 20px 0; color: #666;">
-            You will receive a separate email with shipping confirmation and tracking information once your order is on its way.
-        </p>
     </div>
 
-    <p style="margin-top: 30px;">
+    <p style="margin-top: 30px; padding-top: 10px; border-top: 1px solid #FFECB3; color: #5a4a42;">
         Thank you for shopping with us!<br>
-        <strong>The Bloom & Blossom Team</strong>
+        <strong style="color: #C17900; font-weight: 600;">The Java Florit Team</strong>
     </p>
 </div>

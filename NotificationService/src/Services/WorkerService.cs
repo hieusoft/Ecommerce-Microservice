@@ -161,13 +161,21 @@ namespace src.Services
                     }
                 case "order.paid_q":
                     {
-                        string title = dto.Title ?? "Thông báo";
+                        
+                        string title = "Order Paid Successfully";
+                        string content = $"Your order {dto.OrderCode} has been successfully paid. Total amount: {dto.TotalPrice}.";
 
-                        // await SaveNotificationAsync(title, dto.Content ?? "", dto.UserId, dto);
-                        // await SendEmailFromTemplate(dto.Email!, title, "email_order_paid.cshtml", dto);
+                       
+                        var user = await _userCacheRepository.GetUserByIdAsync(dto.UserId ?? 0);
+                        Console.WriteLine(dto.Items);
+                        dto.UserName = user.Username;
+                        await SaveNotificationAsync(title, content, dto.UserId, dto);
+
+                        await SendEmailFromTemplate(user.Email, title, "email_order_paid.cshtml", dto);
 
                         break;
                     }
+
                 case "order.delivery_q":
                     {
                         // string title = dto.Title ?? "Thông báo";
