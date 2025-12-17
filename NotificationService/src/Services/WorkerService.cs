@@ -114,7 +114,9 @@ namespace src.Services
 
                 case "notification.user_banned_q":
                     {
+                        var supportUrl = $"{_client}/suppor";
 
+                        dto.Token = supportUrl;
                         string title = dto.Title ?? "Your account has been banned";
 
                         await SaveNotificationAsync(title, dto.Content ?? "", dto.UserId, dto);
@@ -127,6 +129,9 @@ namespace src.Services
 
                         string title = dto.Title ?? "Your account has been unbanned";
 
+                        var loginUrl = $"{_client}/login";
+
+                        dto.Token = loginUrl;
 
                         await SaveNotificationAsync(title, dto.Content ?? "", dto.UserId, dto);
                         await SendEmailFromTemplate(dto.Email!, title, "email_unban_user.cshtml", dto);
