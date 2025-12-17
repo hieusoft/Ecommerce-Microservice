@@ -115,7 +115,9 @@ namespace src.Services
                 case "notification.user_banned_q":
                     {
                         var supportUrl = $"{_client}/suppor";
-
+                        var user = await _userCacheRepository.GetUserByIdAsync(dto.UserId ?? 0);
+                        Console.WriteLine(dto.Items);
+                        dto.UserName = user.Username;
                         dto.Token = supportUrl;
                         string title = dto.Title ?? "Your account has been banned";
 
@@ -130,7 +132,9 @@ namespace src.Services
                         string title = dto.Title ?? "Your account has been unbanned";
 
                         var loginUrl = $"{_client}/login";
-
+                        var user = await _userCacheRepository.GetUserByIdAsync(dto.UserId ?? 0);
+                        Console.WriteLine(dto.Items);
+                        dto.UserName = user.Username;
                         dto.Token = loginUrl;
 
                         await SaveNotificationAsync(title, dto.Content ?? "", dto.UserId, dto);
