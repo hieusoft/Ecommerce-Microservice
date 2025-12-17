@@ -20,6 +20,7 @@ router.get('/:orderId/items', orderController.getOrderItems);
 
 router.put('/:orderId/items/:orderItemId', orderController.updateOrderItem);
 
+router.get('/analytics', orderController.queryAnalytics);
 
 
 

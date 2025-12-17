@@ -1,4 +1,4 @@
-const { pool, poolConnect } = require("../config/db");
+const { pool, poolConnect, sql } = require("../config/db");
 
 async function createOrder(
   order_code,
@@ -339,6 +339,24 @@ async function applyCoupon(order_id, discountAmount) {
         `);
 }
 
+async function queryAnalytics(date_range) {
+  date_range = Math.min(Math.max(date_range, 1), 30)
+  await poolConnect;
+  let response = await pool
+    .request()
+    .input("date_range", date_range)
+    .input("discountAmount", discountAmount).query(`
+            SELECT
+              COUNT(*) AS count
+              SUM(total_price) AS revenue
+            FROM Orders
+              WHERE
+                created_at >= DATEADD(DAYS, @date_range * -1, GETDATE())
+                status
+        `);
+    return response.recordset();
+}
+
 module.exports = {
   createOrder,
   updateOrderCode,
@@ -350,4 +368,5 @@ module.exports = {
   updateOrder,
   deleteOrder,
   applyCoupon,
+  queryAnalytics
 };

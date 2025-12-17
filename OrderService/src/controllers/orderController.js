@@ -191,6 +191,34 @@ async function deleteOrderItem(req, res) {
     }
 }
 
+async function queryAnalytics(req, res) {
+    try {
+        const user = getAuthUser(req, res);
+        if (!user) return;
+        if (!user.roles.includes("Manager") && !user.roles.includes("Admin")) {
+            return res.status(401).json({
+                message: "Unauthorized"
+            });
+        }
+
+        const result = await orderService.queryAnalytics(
+            req.params.date_range
+        );
+
+        return res.json({
+            count: result.count,
+            revenue: result.revenue
+        });
+
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            message: err.message || 'Failed to delete order item'
+        });
+    }
+}
+
+
 module.exports = {
     createOrder,
     getAllOrders,
@@ -200,5 +228,6 @@ module.exports = {
     addOrderItem,
     getOrderItems,
     updateOrderItem,
-    deleteOrderItem
+    deleteOrderItem,
+    queryAnalytics,
 };
