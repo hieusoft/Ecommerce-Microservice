@@ -1,173 +1,39 @@
 ﻿@model dynamic
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>@Model.Title</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+@{
+    Layout = "_Layout.cshtml";
+}
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #fffdf6 0%, #fff9e6 100%);
-            color: #333;
-            padding: 20px;
-        }
+<div class="content-box">
 
-        .container {
-            width: 100%;
-            max-width: 600px;
-            margin: auto;
-            background: #fff;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.05);
-            border: 1px solid #fff8e1;
-            position: relative;
-        }
+    <div class="verification-box">
 
-            .container::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: radial-gradient(circle at 20% 80%, rgba(255, 248, 225, 0.3) 0%, transparent 50%);
-                pointer-events: none;
-                z-index: 1;
-            }
+        <p>
+            Hello <strong>@Model.UserName</strong>,<br><br>
+            Thank you for registering with Java Florit. To complete your registration, please verify your email address by clicking the button below:
+        </p>
 
-        .header {
-            text-align: center;
-            padding: 30px 25px;
-            background: linear-gradient(135deg, #FFD54F 0%, #FFF176 100%);
-            color: #5D4037;
-            font-size: 28px;
-            font-weight: 800;
-            letter-spacing: 0.8px;
-            position: relative;
-            overflow: hidden;
-        }
-
-            .header::before {
-                content: '';
-                position: absolute;
-                top: -50%;
-                left: -50%;
-                width: 200%;
-                height: 200%;
-                background: radial-gradient(circle, rgba(255,255,255,0.25) 0%, transparent 70%);
-                animation: float 6s ease-in-out infinite;
-            }
-
-        .content {
-            padding: 35px;
-            font-size: 16px;
-            line-height: 1.8;
-            color: #5a4a42;
-            background: #fff;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 16px 32px;
-            background: linear-gradient(135deg, #FFD54F 0%, #FFECB3 100%);
-            color: #5D4037;
-            text-decoration: none;
-            border-radius: 10px;
-            font-weight: 700;
-            margin-top: 25px;
-            box-shadow: 0 6px 20px rgba(255, 213, 79, 0.25);
-            transition: all 0.4s ease;
-            border: none;
-            cursor: pointer;
-        }
-
-            .btn:hover {
-                transform: translateY(-3px);
-                box-shadow: 0 8px 25px rgba(255, 213, 79, 0.35);
-                background: linear-gradient(135deg, #FFC107 0%, #FFECB3 100%);
-            }
-
-        .footer {
-            font-size: 13px;
-            color: #8d6e63;
-            text-align: center;
-            padding: 25px;
-            background: #fffef7;
-            border-top: 1px solid #ffecb3;
-        }
-
-        .content-box {
-            margin: 20px 0;
-            padding: 15px;
-            background: #fffef7;
-            border-radius: 10px;
-            border-left: 4px solid #FFD54F;
-        }
-
-        .instructions {
-            margin-top: 30px;
-            padding: 20px;
-            background: #FFFDF5;
-            border-radius: 10px;
-            border: 1px solid #FFECB3;
-        }
-
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">@Model.Title</div>
-
-        <div class="content">
-            <div class="content-box">
-                <div class="verification-box">
-                    <p style="margin-bottom: 20px; font-size: 16px; color: #5a4a42;">
-                        Hello <strong style="color: #D4A017;">@Model.UserName</strong>,<br><br>
-                        Thank you for registering with Java Florit. To complete your registration and start enjoying our services, please verify your email address by clicking the button below:
-                    </p>
-
-                    <div style="text-align: center; margin: 30px 0;">
-                        <a href="@Model.Token" class="btn" style="font-size: 18px; padding: 18px 40px; color: #5D4037;">
-                            Verify Email Address
-                        </a>
-                    </div>
-
-                    <p style="color: #A1887F; font-size: 14px; margin-top: 20px; font-style: italic;">
-                        This verification link will expire in 24 hours.
-                    </p>
-                </div>
-
-                <div class="instructions">
-                    <h3 style="color: #C17900; margin-bottom: 15px; font-size: 18px; font-weight: 600;">Need Help?</h3>
-                    <p style="margin: 10px 0; color: #5a4a42;">
-                        If the button doesn't work, copy and paste this link into your browser:
-                    </p>
-                    <p style="margin: 10px 0; background: #FFF9E6; padding: 12px; border-radius: 6px; word-break: break-all; font-size: 14px; color: #B77E00; border: 1px solid #FFECB3;">
-                        @Model.Token
-                    </p>
-                    <p style="margin: 15px 0 5px 0; color: #5a4a42; font-size: 14px;">
-                        If you didn't create an account with Java Florit, please ignore this email.
-                    </p>
-                </div>
-
-                <p style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #FFECB3; color: #5a4a42;">
-                    Best regards,<br>
-                    <strong style="color: #C17900; font-weight: 600;">The Java Florit Team</strong>
-                </p>
-            </div>
+        <div style="text-align: center; margin: 20px 0;">
+            <a href="@Model.Token" class="btn" style="padding: 12px 30px; display:inline-block; background:#FFD54F; color:#5D4037; text-decoration:none; border-radius:6px;">
+                Verify Email Address
+            </a>
         </div>
 
-        <div class="footer">
-            <p>© 2025 Java Florit. All rights reserved.</p>
-            <p>This is an automated email, please do not reply directly.</p>
-        </div>
+        <p style="font-size: 14px; color:#666;">
+            This verification link will expire in 24 hours.
+        </p>
     </div>
-</body>
-</html>
+
+    <div class="instructions" style="margin-top: 20px; padding: 15px; background:#FFFDF5; border-radius:6px; border:1px solid #FFECB3;">
+        <h3 style="color:#C17900; margin-bottom:10px;">Need Help?</h3>
+        <p>If the button doesn't work, copy and paste this link into your browser:</p>
+        <p style="background:#FFF9E6; padding:8px; border-radius:4px; word-break:break-all; font-size:14px; color:#B77E00; border:1px solid #FFECB3;">
+            @Model.Token
+        </p>
+        <p>If you didn't create an account with Java Florit, please ignore this email.</p>
+    </div>
+
+    <p style="margin-top:20px; border-top:1px solid #FFECB3; padding-top:10px;">
+        Best regards,<br>
+        <strong style="color:#C17900;">The Java Florit Team</strong>
+    </p>
+</div>
