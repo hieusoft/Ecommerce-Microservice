@@ -114,18 +114,49 @@ namespace src.Services
 
                 case "notification.user_banned_q":
                     {
-                        var supportUrl = $"{_client}/suppor";
-                        var user = await _userCacheRepository.GetUserByIdAsync(dto.UserId ?? 0);
-                        Console.WriteLine(dto.Items);
-                        dto.UserName = user.Username;
-                        dto.Token = supportUrl;
-                        string title = dto.Title ?? "Your account has been banned";
+                        if (dto == null)
+                        {
+                            Console.WriteLine("DTO is null, skipping message.");
+                            break;
+                        }
 
-                        await SaveNotificationAsync(title, dto.Content ?? "", dto.UserId, dto);
-                        await SendEmailFromTemplate(dto.Email!, title, "email_ban_user.cshtml", dto);
+                        if (dto.UserId == null)
+                        {
+                            Console.WriteLine("DTO.UserId is null, cannot process user banned notification.");
+                            break;
+                        }
+
+                        var supportUrl = $"{_client}/support";
+
+                        var user = await _userCacheRepository.GetUserByIdAsync(dto.UserId.Value);
+                        if (user == null)
+                        {
+                            Console.WriteLine($"User with ID {dto.UserId.Value} not found.");
+                            break;
+                        }
+
+                     
+                        dto.UserName = user.Username ?? "User";
+                        dto.Token = supportUrl;
+                        dto.Email ??= user.Email ?? ""; 
+
+                        string title = dto.Title ?? "Your account has been banned";
+                        string content = dto.Content ?? "Your account has been banned due to policy violations.";
+
+                        await SaveNotificationAsync(title, content, dto.UserId, dto);
+
+                        if (!string.IsNullOrEmpty(dto.Email))
+                        {
+                            await SendEmailFromTemplate(dto.Email, title, "email_ban_user.cshtml", dto);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Email is null or empty, skipping email sending.");
+                        }
 
                         break;
                     }
+
                 case "notification.user_unbanned_q":
                     {
 
