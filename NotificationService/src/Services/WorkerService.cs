@@ -47,7 +47,7 @@ namespace src.Services
                             dto
                         );
 
-                        Console.WriteLine("Verify URL: " + verifyUrl);
+                       
 
                         await SendEmailFromTemplate(
                             dto.Email!,
@@ -65,7 +65,7 @@ namespace src.Services
                         dto.Token = $"{_client}/login";
                         string title = dto.Title ?? "Email Verified Successfully";
                         var user = new UserCache {
-                            FullName =dto.Name ,
+                            FullName =dto.FullName ,
                             Username =dto.UserName,
                             Email = dto.Email
                         };
@@ -118,19 +118,7 @@ namespace src.Services
                         string title = dto.Title ?? "Your account has been banned";
 
                         await SaveNotificationAsync(title, dto.Content ?? "", dto.UserId, dto);
-                        await SendEmailFromTemplate(dto.Email!, title, "email_promotion.cshtml", dto);
-
-                        break;
-                    }
-
-                case "notification.user_registered_q":
-                    {
-                        string title = dto.Title ?? "You have successfully registered";
-
-
-
-                        //await SaveNotificationAsync(title, dto.Content ?? "", dto.UserId, dto);
-                        //await SendEmailFromTemplate(dto.Email!, title, "email_promotion.cshtml", dto);
+                        await SendEmailFromTemplate(dto.Email!, title, "email_ban_user.cshtml", dto);
 
                         break;
                     }
@@ -141,10 +129,22 @@ namespace src.Services
 
 
                         await SaveNotificationAsync(title, dto.Content ?? "", dto.UserId, dto);
-                        await SendEmailFromTemplate(dto.Email!, title, "email_promotion.cshtml", dto);
+                        await SendEmailFromTemplate(dto.Email!, title, "email_unban_user.cshtml", dto);
 
                         break;
                     }
+                //case "notification.user_registered_q":
+                //    {
+                //        string title = dto.Title ?? "You have successfully registered";
+
+
+
+                //        //await SaveNotificationAsync(title, dto.Content ?? "", dto.UserId, dto);
+                //        //await SendEmailFromTemplate(dto.Email!, title, "email_promotion.cshtml", dto);
+
+                //        break;
+                //    }
+
                 case "notification.email_q":
                     {
                         string title = dto.Title ?? "Thông báo";

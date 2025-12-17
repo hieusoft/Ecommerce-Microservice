@@ -344,6 +344,7 @@ public class AuthUseCases
             Content = "Welcome to our platform!",
             user.UserId,
             user.Email,
+            
             UserName = user.Username,
         });
         _rabbitMqService.Publish("auth_events", "email.verified", new
@@ -353,6 +354,7 @@ public class AuthUseCases
             user.UserId,
             user.Email,
             UserName = user.Username,
+            FullName = user.FullName,
             VerifiedAt = DateTime.UtcNow
         });
     }

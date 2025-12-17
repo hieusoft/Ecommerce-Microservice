@@ -7,5 +7,7 @@ namespace src.Interfaces
     {
       
         Task AddUserAsync(UserCache user);
+        Task<UserCache?> GetUserByIdAsync(int userId);
+
     }
 }
