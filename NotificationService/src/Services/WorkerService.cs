@@ -225,6 +225,52 @@ namespace src.Services
 
                         break;
                     }
+                case "order.paid_q":
+                    {
+                        if (dto == null)
+                        {
+                            Console.WriteLine("DTO is null, skipping order paid notification.");
+                            break;
+                        }
+
+                        if (dto.UserId == null)
+                        {
+                            Console.WriteLine("DTO.UserId is null, cannot process order paid notification.");
+                            break;
+                        }
+
+                        string title = "Order Paid Successfully";
+                        string content = $"Your order {dto.OrderCode} has been successfully paid. Total amount: {dto.TotalPrice}.";
+
+                    
+                        var user = await _userCacheRepository.GetUserByIdAsync(dto.UserId.Value);
+                        if (user == null)
+                        {
+                            Console.WriteLine($"User with ID {dto.UserId.Value} not found.");
+                            break;
+                        }
+
+                        dto.UserName = user.Username ?? "User";
+                        dto.Email ??= user.Email ?? "";
+
+                        Console.WriteLine(dto.Items);
+
+                       
+                        await SaveNotificationAsync(title, content, dto.UserId, dto);
+
+                        if (!string.IsNullOrEmpty(dto.Email))
+                        {
+                            await SendEmailFromTemplate(dto.Email, title, "email_order_paid.cshtml", dto);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Email is null or empty, skipping email sending.");
+                        }
+
+                        break;
+                    }
+
+
                 case "order.cancelled_q":
                     {
                         if (dto == null)
@@ -254,9 +300,10 @@ namespace src.Services
 
                         Console.WriteLine(dto.Items);
 
-                      
+                        // Lưu thông báo vào database
                         await SaveNotificationAsync(title, content, dto.UserId, dto);
 
+                        // Gửi email sử dụng template order cancelled
                         if (!string.IsNullOrEmpty(dto.Email))
                         {
                             await SendEmailFromTemplate(dto.Email, title, "email_order_cancelled.cshtml", dto);
@@ -268,7 +315,6 @@ namespace src.Services
 
                         break;
                     }
-
 
 
                 case "order.delivery_q":
