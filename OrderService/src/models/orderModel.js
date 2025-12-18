@@ -1,4 +1,4 @@
-const { pool, poolConnect } = require("../config/db");
+const { pool, poolConnect, sql } = require("../config/db");
 
 async function createOrder(
   order_code,
@@ -339,6 +339,33 @@ async function applyCoupon(order_id, discountAmount) {
         `);
 }
 
+async function queryAnalytics(date_range) {
+  date_range = Math.min(Math.max(date_range, 1), 30)
+  await poolConnect;
+  let response = await pool
+    .request()
+    .input("date_range", -date_range).query(`
+            SELECT
+              CASE 
+                WHEN @date_range > -7 THEN FORMAT(created_at, 'yyyy-MM-dd HH:00')
+                ELSE FORMAT(created_at, 'yyyy-MM-dd')
+              END AS time_bucket,
+              COUNT(*) AS count,
+              SUM(total_price) AS revenue
+            FROM Orders
+            WHERE
+              created_at >= DATEADD(DAY, @date_range, GETDATE())
+              AND status IN ('Paid')
+            GROUP BY
+              CASE 
+                WHEN @date_range > -7 THEN FORMAT(created_at, 'yyyy-MM-dd HH:00')
+                ELSE FORMAT(created_at, 'yyyy-MM-dd')
+              END
+            ORDER BY time_bucket
+        `);
+    return response.recordset;
+}
+
 module.exports = {
   createOrder,
   updateOrderCode,
@@ -350,4 +377,5 @@ module.exports = {
   updateOrder,
   deleteOrder,
   applyCoupon,
+  queryAnalytics
 };

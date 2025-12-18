@@ -191,6 +191,31 @@ async function deleteOrderItem(req, res) {
     }
 }
 
+async function queryAnalytics(req, res) {
+    try {
+        const user = getAuthUser(req, res);
+        if (!user) return;
+        if (!user.roles.includes("Manager") && !user.roles.includes("Admin")) {
+            return res.status(403).json({
+                message: "Insufficent permissions"
+            });
+        }
+        console.log(req);
+        const result = await orderService.queryAnalytics(
+            req.query.date_range
+        );
+
+        return res.json(result);
+
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            message: err.message || 'Failed to delete order item'
+        });
+    }
+}
+
+
 module.exports = {
     createOrder,
     getAllOrders,
@@ -200,5 +225,6 @@ module.exports = {
     addOrderItem,
     getOrderItems,
     updateOrderItem,
-    deleteOrderItem
+    deleteOrderItem,
+    queryAnalytics,
 };
