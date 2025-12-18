@@ -10,9 +10,11 @@ namespace src.DTOs
         public string DeliveryMethod { get; set; }     
         public int Status { get; set; }                
        
-        public string? Metadata { get; set; }          
+        public string? Metadata { get; set; } 
+         public NotificationDto? Notification { get; set; }
       
         public NotificationDeliveryDto() { }
+
         public NotificationDeliveryDto(NotificationDelivery entity)
         {
           
@@ -21,7 +23,15 @@ namespace src.DTOs
             DeliveryMethod = entity.DeliveryMethod?.Name ?? "";
             Status = entity.Status;
             Metadata = entity.Metadata;
-          
+            Notification = new NotificationDto
+            {
+                Title = entity.Notification.Title,
+                Content = entity.Notification.Content,
+                CreatedBy = entity.Notification.CreatedBy,
+                IsBroadcast = entity.Notification.IsBroadcast,
+
+            };
+
         }
     }
 }
