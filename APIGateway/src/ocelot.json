@@ -189,6 +189,19 @@
       "Priority": 14,
       "DelegatingHandlers": [ "RedisTokenValidator" ]
     },
+  {
+    "DownstreamPathTemplate": "/api/payments/callback",
+    "DownstreamScheme": "http",
+    "DownstreamHostAndPorts": [
+      {
+        "Host": "paymentservice",
+        "Port": 8084
+      }
+    ],
+    "UpstreamPathTemplate": "/payments/callback",
+    "UpstreamHttpMethod": [ "POST", "GET" ],
+    "Priority": 15
+  },
 
    
     {
@@ -201,7 +214,7 @@
         }
       ],
       "UpstreamPathTemplate": "/payments/{everything}",
-      "UpstreamHttpMethod": [ "POST", "PUT", "DELETE" ],
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE" ],
       "Priority": 16,
       "DelegatingHandlers": [ "RedisTokenValidator" ]
     },
@@ -258,5 +271,6 @@
     "LoadBalancer": "RoundRobin"
   }
 }
+
 
 
