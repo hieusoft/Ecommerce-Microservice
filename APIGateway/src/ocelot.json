@@ -218,6 +218,20 @@
       "DelegatingHandlers": [ "RedisTokenValidator" ]
     },
     {
+      "DownstreamPathTemplate": "/api/chat/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "chatbotservice",
+          "Port": 8086
+        }
+      ],
+      "UpstreamPathTemplate": "/chat/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "Priority": 17,
+      "DelegatingHandlers": [ "RedisTokenValidator" ]
+    },
+    {
       "DownstreamPathTemplate": "/api/coupons/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [

@@ -31,19 +31,20 @@ export class ChatMessageRepository {
 
   
   static async getByConversation(conversationId) {
-    if (!conversationId) throw new Error('conversationId is required');
+  if (!conversationId) throw new Error('conversationId is required');
 
-    const pool = await getDB();
-    const result = await pool
-      .request()
-      .input('conversation_id', sql.NVarChar(64), conversationId)
-      .query(`
-        SELECT *
-        FROM ${CHAT_MESSAGES_TABLE}
-        WHERE ${ChatMessageColumns.CONVERSATION_ID} = @conversation_id
-        ORDER BY ${ChatMessageColumns.CREATED_AT} ASC;
-      `);
+  const pool = await getDB();
+  const result = await pool
+    .request()
+    .input('conversation_id', sql.NVarChar(64), conversationId)
+    .query(`
+      SELECT TOP 15 *
+      FROM ${CHAT_MESSAGES_TABLE}
+      WHERE ${ChatMessageColumns.CONVERSATION_ID} = @conversation_id
+      ORDER BY ${ChatMessageColumns.CREATED_AT} DESC;
+    `);
 
-    return result.recordset;
-  }
+  return result.recordset;
+}
+
 }

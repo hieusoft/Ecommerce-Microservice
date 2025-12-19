@@ -15,16 +15,19 @@ function getAuthUser(req, res) {
     }
 }
 
-router.post('/send', async (req, res) => {
+router.post('/', async (req, res) => {
   try {
-    const { user_id, message } = req.body;
-
-    if (!user_id || !message) {
+    const user = getAuthUser(req, res);
+        if (!user) return;
+    const { userId, roles } = user;
+    const {message} = req.body
+    console.log("userId",userId)
+    if (!userId || !message) {
       return res.status(400).json({
         error: 'Missing required fields: user_id and message'
       });
     }
-    const response = await ChatService.processMessage(user_id, message);
+    const response = await ChatService.processMessage(userId, message);
     return res.json({
       response: response
     });
@@ -50,10 +53,10 @@ router.get('/', async (req, res) => {
       });
     }
 
-    const messages = await ChatService.getConversation(user_id);
+    const messages = await ChatService.getMessage(userId);
 
     return res.json({
-      user_id,
+      userId,
       messages
     });
   } catch (error) {

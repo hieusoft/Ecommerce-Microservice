@@ -139,6 +139,19 @@ services:
       - "8086:8086"
     networks:
       - micro-net
+  chatbotservice:
+    build:
+      context: ./ChatBotService
+      dockerfile: Dockerfile
+    container_name: chatbotservice
+    depends_on:
+      - redis
+    environment:
+      PORT: 8085
+    ports:
+      - "8085:8085"
+    networks:
+      - micro-net    
   notificationservice:
     build:
       context: ./NotificationService

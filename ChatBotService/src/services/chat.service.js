@@ -112,7 +112,22 @@ export class ChatService {
     return response;
   }
 
-  static async getMessage(userId){
-     return ConversationRepository.getByUserId(userId);
+  static async getMessage(userId) {
+
+  const conversation = await ConversationRepository.getByUserId(userId);
+
+  if (!conversation) {
+    return null; 
   }
+
+  const messages = await ChatMessageRepository.getByConversation(
+    conversation.id
+  );
+
+  return {
+    conversationId: conversation.id,
+    messages
+  };
+}
+
 }
