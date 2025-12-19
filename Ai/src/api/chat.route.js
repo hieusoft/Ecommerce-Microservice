@@ -1,9 +1,19 @@
-/** Chat API routes. */
+
 import express from 'express';
 import { ChatService } from '../services/chat.service.js';
+import  { getUserFromToken } from '../services/jwt.service.js';
 
 const router = express.Router();
-
+function getAuthUser(req, res) {
+    try {
+   
+        return getUserFromToken(req); 
+        
+    } catch (err) {
+        res.status(401).json({ message: 'Unauthorized' });
+        return null;
+    }
+}
 
 router.post('/send', async (req, res) => {
   try {
@@ -14,9 +24,7 @@ router.post('/send', async (req, res) => {
         error: 'Missing required fields: user_id and message'
       });
     }
-
     const response = await ChatService.processMessage(user_id, message);
-
     return res.json({
       response: response
     });
@@ -24,37 +32,40 @@ router.post('/send', async (req, res) => {
     console.error('Error processing chat message:', error);
     return res.status(500).json({
       error: 'Internal server error',
-      message: error.message
+      message: error.message || error.toString() || 'Unknown error occurred'
     });
   }
 });
 
-/**
- * POST /chat/change-flow
- * Chuyển sang flow khác (end current flow và start new flow)
- */
-router.post('/change-flow', async (req, res) => {
+router.get('/', async (req, res) => {
   try {
-    const { user_id, flow } = req.body;
+    const user = getAuthUser(req, res);
+        if (!user) return;
 
-    if (!user_id || !flow) {
+    const { userId, roles } = user;
+
+    if (!userId) {
       return res.status(400).json({
-        error: 'Missing required fields: user_id and flow'
+        error: 'Missing required query param: user_id'
       });
     }
 
-    const result = await ChatService.changeFlow(user_id, flow);
+    const messages = await ChatService.getConversation(user_id);
 
-    return res.json(result);
+    return res.json({
+      user_id,
+      messages
+    });
   } catch (error) {
-    console.error('Error changing flow:', error);
+    console.error('Error getting chat history:', error);
     return res.status(500).json({
       error: 'Internal server error',
-      message: error.message
+      message: error.message || error.toString() || 'Unknown error occurred'
     });
   }
 });
 
 export default router;
+
 
 

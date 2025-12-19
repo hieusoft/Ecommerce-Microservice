@@ -2,9 +2,7 @@ import { getDB, sql } from '../core/database.js';
 import { CHAT_MESSAGES_TABLE, ChatMessageColumns } from '../models/chatMessage.model.js';
 
 export class ChatMessageRepository {
-  /**
-   * Tạo tin nhắn mới
-   */
+  
   static async create({ conversationId, sender, message, flow = null, state = null }) {
     if (!conversationId) throw new Error('conversationId is required');
 
@@ -31,9 +29,7 @@ export class ChatMessageRepository {
     return result.recordset[0];
   }
 
-  /**
-   * Lấy danh sách tin nhắn theo conversationId
-   */
+  
   static async getByConversation(conversationId) {
     if (!conversationId) throw new Error('conversationId is required');
 

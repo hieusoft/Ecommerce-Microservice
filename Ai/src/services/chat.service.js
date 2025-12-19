@@ -1,108 +1,118 @@
-
 import { AIService } from './ai.service.js';
 import { StateService } from './state.service.js';
 import { ConversationRepository } from '../repositories/conversation.repo.js';
 import { ChatMessageRepository } from '../repositories/chatMessage.repo.js';
 import { PlaceOrderFlow } from '../flows/placeOrder.flow.js';
 import { FAQFlow } from '../flows/faq.flow.js';
-import { PLACE_ORDER, FAQ, ALL_FLOWS } from '../constants/flows.js';
+import { GreetingFlow } from '../flows/greeting.flow.js';
+import { PLACE_ORDER, FAQ, GREETING } from '../constants/flows.js';
 
 export class ChatService {
- 
-static async processMessage(userId, message) {
-  const state = await StateService.getState(userId);
-  
-  let currentFlow = state.flow;
-  const currentStep = state.step;
-  
-  // Chỉ detect flow mới khi:
-  // 1. Không có flow hiện tại (flow đã kết thúc)
-  // 2. Hoặc AI xác nhận user muốn kết thúc flow hiện tại
-  const shouldEndCurrentFlow = await AIService.shouldEndCurrentFlow(message, currentFlow, currentStep);
-  
-  if (shouldEndCurrentFlow) {
-    // User muốn kết thúc flow hiện tại, detect flow mới
-    const detectedFlow = await AIService.detectFlow(message);
-    console.log(`Flow end detected. Current: ${currentFlow}, Detected: ${detectedFlow}`);
-    
-    if (!currentFlow || detectedFlow !== currentFlow) {
-      // Chuyển sang flow mới
-      console.log(`Flow change: ${currentFlow} -> ${detectedFlow}`);
-      await StateService.clearState(userId);
-      currentFlow = detectedFlow;
-      await StateService.setState(userId, currentFlow, null, {});
-    }
-  } else if (!currentFlow) {
-    // Chưa có flow, detect flow mới
-    const detectedFlow = await AIService.detectFlow(message);
-    currentFlow = detectedFlow;
-    await StateService.setState(userId, currentFlow);
-  }
-  
-  // Nếu có flow hiện tại và không muốn kết thúc, tiếp tục flow hiện tại
-  console.log(`Processing with flow: ${currentFlow}, step: ${currentStep}`);
 
-  let conversation = await ConversationRepository.getByUserId(userId);
-  if (!conversation) {
-    conversation = await ConversationRepository.create(userId, currentFlow);
-  } else if (conversation.current_flow !== currentFlow) {
-    conversation = await ConversationRepository.updateFlow(conversation.id, currentFlow);
-  }
+  static async processMessage(userId, message) {
+    console.log("=== ChatService.processMessage ===");
+    console.log("userId:", userId);
+    console.log("message:", message);
 
-  const conversationId = conversation.id;
+    let state = await StateService.getState(userId);
+    let flow = state?.flow || null;
+    console.log("Initial state:", state);
+    console.log("Initial flow:", flow);
 
-  await ChatMessageRepository.create({
-    conversationId,
-    sender: "USER",
-    message
-  });
+    const nlu = await AIService.detectIntent(message, state?.data || {});
+    console.log("NLU:", nlu);
 
-
-  let response;
-  if (currentFlow === PLACE_ORDER) {
-    [response] = await PlaceOrderFlow.handle(userId, message, state);
-  } else if (currentFlow === FAQ) {
-    [response] = await FAQFlow.handle(userId, message, state);
-  } else {
-    response = "Xin lỗi, tôi chưa hiểu. Bạn có thể nói rõ hơn không?";
-  }
-
-  await ChatMessageRepository.create({
-    conversationId,
-    sender: "ASSISTANT",
-    message: response
-  });
-
-  return response;
-}
-
-  
-  static async changeFlow(userId, newFlow) {
-   
-    if (!newFlow || !ALL_FLOWS.includes(newFlow)) {
-      throw new Error(`Invalid flow: ${newFlow}. Valid flows: ${ALL_FLOWS.join(', ')}`);
-    }
-    
-   
-    await StateService.clearState(userId);
-    
-    
-    await StateService.setState(userId, newFlow, null, {});
- 
-    let conversation = await ConversationRepository.getByUserId(userId);
-    if (conversation) {
-      conversation = await ConversationRepository.updateFlow(conversation.id, newFlow);
+    if (!flow) {
+      if (nlu.intent === "GREETING") {
+        flow = GREETING;
+        await StateService.setState(userId, flow, null, {});
+        console.log("Flow set to GREETING (new)");
+      } else if (nlu.intent === "START_ORDER") {
+        flow = PLACE_ORDER;
+        await StateService.setState(userId, flow, "ASK_OCCASION", {});
+        console.log("Flow set to PLACE_ORDER (new)");
+      } else {
+        flow = FAQ;
+        await StateService.setState(userId, flow, null, {});
+        console.log("Flow set to FAQ (new)");
+      }
     } else {
-      conversation = await ConversationRepository.create(userId, newFlow);
+      if (nlu.intent === "GREETING") {
+        flow = GREETING;
+        await StateService.setState(userId, flow, null, {});
+        console.log("Flow switched to GREETING");
+      } else if (nlu.intent === "START_ORDER" && flow === FAQ) {
+        flow = PLACE_ORDER;
+        await StateService.setState(userId, flow, "ASK_OCCASION", {});
+        console.log("Flow switched from FAQ to PLACE_ORDER");
+      } else if (nlu.intent === "FAQ" && flow === PLACE_ORDER) {
+        flow = FAQ;
+        await StateService.setState(userId, flow, null, {});
+        console.log("Flow switched from PLACE_ORDER to FAQ");
+      } else {
+        console.log("Flow remains:", flow);
+      }
     }
-    
-    return {
-      success: true,
-      message: `Đã chuyển sang flow: ${newFlow}`,
-      conversation_id: conversation.id,
-      current_flow: newFlow
-    };
+    console.log("Selected flow:", flow);
+
+    state = await StateService.getState(userId);
+    console.log("Updated state:", state);
+
+    let conversation = await ConversationRepository.getByUserId(userId);
+    if (!conversation) {
+      conversation = await ConversationRepository.create(userId, flow);
+      console.log("Created new conversation:", conversation);
+    } else if (conversation.current_flow !== flow) {
+      conversation = await ConversationRepository.updateFlow(conversation.id, flow);
+      console.log("Updated conversation flow:", conversation);
+    } else {
+      console.log("Existing conversation:", conversation);
+    }
+
+    const conversationId = conversation.id;
+    console.log("conversationId:", conversationId);
+
+    await ChatMessageRepository.create({
+      conversationId,
+      sender: "USER",
+      message
+    });
+
+
+    let response;
+    console.log("Dispatching to flow:", flow);
+
+    switch (flow) {
+      case PLACE_ORDER:
+        console.log("Calling PlaceOrderFlow.handle");
+        [response] = await PlaceOrderFlow.handle(userId, nlu, state, message);
+        break;
+
+      case GREETING:
+        console.log("Calling GreetingFlow.handle");
+        [response] = await GreetingFlow.handle(userId, message, state);
+        break;
+
+      case FAQ:
+      default:
+        console.log("Calling FAQFlow.handle");
+        [response] = await FAQFlow.handle(userId, message, state);
+        break;
+    }
+    console.log("Flow response:", response);
+
+
+    await ChatMessageRepository.create({
+      conversationId,
+      sender: "ASSISTANT",
+      message: response
+    });
+
+    console.log("=== End ChatService.processMessage ===");
+    return response;
   }
 
+  static async getMessage(userId){
+     return ConversationRepository.getByUserId(userId);
+  }
 }
-

@@ -22,10 +22,6 @@ export const config = {
   REDIS_DB: Number(process.env.REDIS_DB) || 0,
   REDIS_PASSWORD: process.env.REDIS_PASSWORD || null,
 
-  // AWS Bedrock Configuration
-  AWS_ACCESS_KEY: process.env.AWS_ACCESS_KEY || null,
-  AWS_SECRET_KEY: process.env.AWS_SECRET_KEY || null,
-  AWS_REGION: process.env.AWS_REGION || 'ap-southeast-1',
-  AWS_BEDROCK_CLAUDE_ARN: process.env.AWS_BEDROCK_CLAUDE_ARN || 'arn:aws:bedrock:ap-southeast-1:692957432909:inference-profile/apac.anthropic.claude-sonnet-4-20250514-v1:0'
+ OPENROUTER_API_KEY : process.env.OPENROUTER_API_KEY || 0
 };
 

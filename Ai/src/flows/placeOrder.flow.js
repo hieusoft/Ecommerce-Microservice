@@ -1,65 +1,105 @@
-import { StateService } from '../services/state.service.js';
-import { ApiService } from '../services/api.service.js';
+import { StateService } from "../services/state.service.js";
+import { ApiService } from "../services/api.service.js";
+import { AIService } from "../services/ai.service.js";
 
 export class PlaceOrderFlow {
-  static STEPS = {
-    ask_ocassion: "Bạn muốn mua hoa cho dịp nào? Chúng tôi có các dịp sau:",
-    ask_suboccasion: "Dựa theo dịp đó, bạn có thể chọn loại bó hoa sau:",
-    ask_bouquet: "Bạn chọn bó hoa nào?",
-    ask_color: "Bạn muốn màu sắc nào cho bó hoa?",
-    ask_quantity: "Bạn muốn bao nhiêu bó?",
-    ask_recipient: "Vui lòng cho tôi biết tên người nhận và số điện thoại.",
-    ask_address: "Vui lòng cho tôi biết địa chỉ giao hàng.",
-    ask_note: "Bạn có muốn gửi kèm lời nhắn không?",
-    confirm: "Cảm ơn bạn! Đơn hàng của bạn đã được ghi nhận."
-  };
+  static async handle(userId, nlu, state, userMessage = "") {
+    const step = state.step ?? "ASK_OCCASION";
+    const data = state.data ?? {};
 
-  static async handle(userId, message, state) {
-    const step = state.step || "ask_ocassion";
-    const data = state.data || {};
+    try {
+      let occasions = [];
+      let subOccasions = [];
+      let bouquets = state.bouquets || [];
 
-    switch (step) {
-      case "ask_ocassion": {
-        const occasions = await ApiService.getOccasions();
-        await StateService.setState(userId, "PLACE_ORDER", "ask_suboccasion", data);
-        return [
-          `${PlaceOrderFlow.STEPS.ask_ocassion}\n${occasions.map(o => `- ${o.name}`).join("\n")}`,
-          { step: "ask_suboccasion", data, occasions }
-        ];
-      }
+      if (step === "ASK_OCCASION") {
+        occasions = await ApiService.getOccasions();
+        console.log("Fetched occasions:", occasions);
+      } else if (step === "ASK_SUBOCCASION") {
+        subOccasions = state.subOccasions || [];
 
-      case "ask_suboccasion": {
-        const occasions = await ApiService.getOccasions();
-        
-        const selectedOccasion = occasions.find(o => o.name.toLowerCase() === message.toLowerCase());
-        if (!selectedOccasion) {
-          return [`Xin lỗi, chúng tôi không có dịp đó. Vui lòng chọn lại:\n${occasions.map(o => `- ${o.name}`).join("\n")}`,
-                  { step: "ask_suboccasion", data, occasions }];
+        if (!subOccasions.length && data.occasion) {
+          const occasion = await ApiService.getOccasionByName(data.occasion);
+          if (occasion.subOccasions && Array.isArray(occasion.subOccasions)) {
+            subOccasions = occasion.subOccasions;
+          }
         }
-
-        data.ocassion = selectedOccasion.name;
-        const subOccasions = selectedOccasion.subOccasions || [];
-        await StateService.setState(userId, "PLACE_ORDER", "ask_bouquet", data);
-        return [
-          `${PlaceOrderFlow.STEPS.ask_suboccasion}\n${subOccasions.map(s => `- ${s.name}`).join("\n")}`,
-          { step: "ask_bouquet", data, subOccasions }
-        ];
+      } else if (step === "ASK_BOUQUET") {
+        bouquets = state.bouquets || [];
+        if (!bouquets.length && data.suboccasion) {
+          bouquets = await ApiService.getBouquets(data.suboccasion);
+        }
       }
 
-    
-    case "ask_bouquet": {
-      data.suboccasion = message; 
-      const bouquets = await ApiService.getBouquets(data.suboccasion); 
-      await StateService.setState(userId, "PLACE_ORDER", "ask_color", data);
-      
+      const aiResult = await AIService.processFlowStep(step, userMessage, {
+        occasions,
+        subOccasions,
+        bouquets: Array.isArray(bouquets) ? bouquets : (bouquets.data || []),
+        data
+      });
+
+      console.log("AI result:", aiResult);
+
+
+
+      if (aiResult.selectedItem) {
+        const { type, name, id } = aiResult.selectedItem;
+        
+
+        if (type === "occasion") {
+          data.occasion = name;
+          const nextStep = aiResult.nextStep || "ASK_SUBOCCASION";
+          await StateService.setState(userId, "PLACE_ORDER", nextStep, data);
+          
+          
+          if (nextStep === "ASK_SUBOCCASION") {
+            const occasion = await ApiService.getOccasionByName(name);
+            const subOccasions = occasion.subOccasions || [];
+            return [aiResult.response, { step: nextStep, data, subOccasions }];
+          }
+        } else if (type === "suboccasion") {
+          data.suboccasion = name;
+          const nextStep = aiResult.nextStep || "ASK_BOUQUET";
+          await StateService.setState(userId, "PLACE_ORDER", nextStep, data);
+          
+       
+          if (nextStep === "ASK_BOUQUET") {
+            const bouquets = await ApiService.getBouquets(name);
+            return [aiResult.response, { step: nextStep, data, bouquets }];
+          }
+        } else if (type === "bouquet") {
+          data.bouquet = name;
+          data.bouquetId = id;
+          
+          
+          const normalizeForUrl = (text) => {
+            return text?.toLowerCase()
+              .replace(/[&]/g, 'and')
+              .replace(/[^a-z0-9\s-]/g, '')
+              .replace(/\s+/g, '-')
+              .replace(/-+/g, '-')
+              .trim();
+          };
+          
+          const orderLink = `/${normalizeForUrl(data.occasion)}/${normalizeForUrl(data.suboccasion)}/${id}`;
+          
+          await StateService.clearState(userId);
+          
+          return [
+            `${aiResult.response}\n\nLink đặt hàng: ${orderLink}`,
+            { step: "DONE", data }
+          ];
+        }
+      }
+
+      return [aiResult.response, { ...state, occasions, subOccasions, bouquets }];
+
+    } catch (error) {
+      console.error("Error in PlaceOrderFlow:", error);
       return [
-        `${PlaceOrderFlow.STEPS.ask_bouquet}\n${bouquets.map(b => `- ${b.name}`).join("\n")}`,
-        { step: "ask_color", data }
+        "Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại sau.",
+        state
       ];
-    }
-      default:
-        await StateService.setState(userId, "PLACE_ORDER", "ask_ocassion", {});
-        return [PlaceOrderFlow.STEPS.ask_ocassion, { step: "ask_ocassion", data: {} }];
     }
   }
 }

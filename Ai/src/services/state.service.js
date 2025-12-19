@@ -1,52 +1,73 @@
-/** State service for managing flow and step in Redis. */
-import { getUserContext, setUserContext, deleteUserContext } from '../core/redis.js';
+/** State service for managing flow and step in Redis */
+import {
+  getUserContext,
+  setUserContext,
+  deleteUserContext
+} from '../core/redis.js';
+
+const TTL = 3600;
 
 export class StateService {
 
   static async getState(userId) {
     const context = await getUserContext(userId);
-    if (context) {
-      return {
-        flow: context.flow || null,
-        step: context.step || null,
-        data: context.data || {}
-      };
-    }
-    return { flow: null, step: null, data: {} };
-  }
 
-
-  static async setState(userId, flow = null, step = null, data = {}) {
-    const context = {
-      flow: flow,
-      step: step,
-      data: data
+    return {
+      flow: context?.flow ?? null,
+      step: context?.step ?? null,
+      data: context?.data ?? {}
     };
-    await setUserContext(userId, context, 3600);
   }
 
-  
+  /**
+   * Reset or initialize state
+   * Use when switching flow
+   */
+  static async setState(userId, flow = null, step = null, data = {}) {
+    await setUserContext(
+      userId,
+      { flow, step, data },
+      TTL
+    );
+  }
+
+  /**
+   * Update only step, keep flow & data
+   */
   static async updateStep(userId, step) {
-    const context = await getUserContext(userId);
-    if (context) {
-      context.step = step;
-      await setUserContext(userId, context, 3600);
-    }
+    const context = (await getUserContext(userId)) || {};
+    await setUserContext(
+      userId,
+      {
+        ...context,
+        step
+      },
+      TTL
+    );
   }
 
-
+  /**
+   * Update a single data field
+   */
   static async updateData(userId, key, value) {
-    const context = await getUserContext(userId);
-    if (context) {
-      context.data = context.data || {};
-      context.data[key] = value;
-      await setUserContext(userId, context, 3600);
-    }
+    const context = (await getUserContext(userId)) || {};
+    await setUserContext(
+      userId,
+      {
+        ...context,
+        data: {
+          ...(context.data || {}),
+          [key]: value
+        }
+      },
+      TTL
+    );
   }
 
+  /**
+   * Clear entire state (end flow)
+   */
   static async clearState(userId) {
     await deleteUserContext(userId);
   }
 }
-
-

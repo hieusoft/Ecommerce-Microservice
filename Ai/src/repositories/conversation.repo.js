@@ -3,14 +3,13 @@ import { CONVERSATIONS_TABLE, ConversationColumns } from "../models/conversation
 import { v4 as uuidv4 } from 'uuid';
 
 export class ConversationRepository {
-  /**
-   * Lấy conversation mới nhất của user
-   */
+
   static async getByUserId(userId) {
     const pool = await getDB();
+
     const result = await pool
       .request()
-      .input("user_id", sql.NVarChar(64), userId)
+      .input("user_id", sql.Int, Number(userId))
       .query(`
         SELECT TOP 1 *
         FROM ${CONVERSATIONS_TABLE}
@@ -21,16 +20,14 @@ export class ConversationRepository {
     return result.recordset[0] || null;
   }
 
-  /**
-   * Tạo conversation mới
-   */
   static async create(userId, flow = null) {
     const pool = await getDB();
-    const conversationId = uuidv4(); // sinh id mới
+    const conversationId = uuidv4();
+
     const result = await pool
       .request()
       .input("id", sql.NVarChar(64), conversationId)
-      .input("user_id", sql.NVarChar(64), userId)
+      .input("user_id", sql.Int, Number(userId))
       .input("current_flow", sql.NVarChar(30), flow)
       .query(`
         INSERT INTO ${CONVERSATIONS_TABLE} 
@@ -42,9 +39,9 @@ export class ConversationRepository {
     return result.recordset[0];
   }
 
-
   static async updateFlow(conversationId, flow) {
     const pool = await getDB();
+
     const result = await pool
       .request()
       .input("id", sql.NVarChar(64), conversationId)

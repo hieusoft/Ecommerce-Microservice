@@ -1,0 +1,20 @@
+# Dùng Node.js chính thức (nhẹ)
+FROM node:20-alpine
+
+# Thư mục làm việc trong container
+WORKDIR /app
+
+# Copy package.json trước để cache npm install
+COPY package*.json ./
+
+# Cài dependency (chỉ production)
+RUN npm install --production
+
+# Copy toàn bộ source code
+COPY . .
+
+# Expose port (đúng với app đang listen)
+EXPOSE 8086
+
+# Chạy app.js trong thư mục src
+CMD ["node", "src/app.js"]

@@ -1,151 +1,156 @@
-import { PLACE_ORDER, FAQ } from '../constants/flows.js';
-import { BedrockRuntimeClient, InvokeModelCommand } from "@aws-sdk/client-bedrock-runtime";
-import { config } from '../core/config.js';
+import OpenAI from "openai";
+import { config } from "../core/config.js";
 
-const client = new BedrockRuntimeClient({
-  region: config.AWS_REGION,
-  credentials: {
-    accessKeyId: config.AWS_ACCESS_KEY,
-    secretAccessKey: config.AWS_SECRET_KEY,
-  },
+const openai = new OpenAI({
+  baseURL: "https://openrouter.ai/api/v1",
+  apiKey: config.OPENROUTER_API_KEY,
 });
 
+const MODEL_ID = "xiaomi/mimo-v2-flash:free";
+
 export class AIService {
+  static async detectIntent(message, context = {}) {
+    const prompt = `
+Bạn là một bộ máy NLU cho chatbot cửa hàng hoa.
 
- 
-  static async detectFlow(message) {
-    const prompt = `Bạn là một trợ lý chatbot. Xác định xem người dùng đang muốn "PLACE_ORDER" hay "FAQ" dựa trên nội dung sau:
+CHỈ trả về JSON với format: { "intent": "...", "entities": {...} }
+
+CÁC INTENT VÀ KHI NÀO SỬ DỤNG:
+
+1. START_ORDER: Khi người dùng:
+   - Hỏi về sản phẩm/hoa có trong shop ("shop có hoa gì", "có những loại hoa nào", "show me flowers")
+   - Muốn xem danh mục sản phẩm
+   - Muốn đặt hàng, mua hoa ("tôi muốn mua hoa", "đặt hoa", "order flowers")
+   - Bắt đầu quá trình mua hàng
+
+2. SELECT_OCCASION: Khi người dùng chọn/chỉ định dịp (sinh nhật, kỷ niệm, v.v.)
+   - Ví dụ: "sinh nhật", "birthday", "kỷ niệm"
+
+3. SELECT_SUBOCCASION: Khi người dùng chọn phong cách hoa cụ thể
+   - Ví dụ: "romantic", "elegant", "simple"
+
+4. SELECT_BOUQUET: Khi người dùng chọn bó hoa cụ thể
+   - Ví dụ: "bó hoa hồng đỏ", "bouquet number 5"
+
+5. GREETING: Khi người dùng:
+   - Chào hỏi ("xin chào", "hello", "hi", "chào bạn", "good morning", etc.)
+   - Yêu cầu tạo lời chúc ("tạo lời chúc", "viết lời chúc", "lời chúc sinh nhật", "lời chúc kỷ niệm", etc.)
+   - Hỏi về lời chúc cho các dịp đặc biệt
+
+6. FAQ: Chỉ khi người dùng hỏi về:
+   - Chính sách (giá cả, vận chuyển, đổi trả, thanh toán)
+   - Dịch vụ (thời gian giao hàng, phí ship)
+   - Thông tin shop (địa chỉ, giờ mở cửa, liên hệ)
+   - KHÔNG phải câu hỏi về sản phẩm/hoa cụ thể
+
+7. UNKNOWN: Khi không thể xác định rõ ràng
+
+Trích xuất các entity nếu có (occasion, suboccasion, bouquet, v.v.)
+
+Tin nhắn người dùng:
 "${message}"
-Chỉ trả về "PLACE_ORDER" hoặc "FAQ".`;
 
-    try {
-      // Sử dụng Claude API format
-      const body = JSON.stringify({
-        anthropic_version: "bedrock-2023-05-31",
-        max_tokens: 100,
-        messages: [
-          {
-            role: "user",
-            content: prompt
-          }
-        ]
-      });
+Ngữ cảnh:
+${JSON.stringify(context)}
 
-      const command = new InvokeModelCommand({
-        modelId: config.AWS_BEDROCK_CLAUDE_ARN,
-        contentType: "application/json",
-        accept: "application/json",
-        body: Buffer.from(body)
-      });
+`;
 
-      const response = await client.send(command);
-      const responseBody = JSON.parse(Buffer.from(response.body).toString());
-      
-     
-      const resultText = responseBody.content?.[0]?.text || "";
-      const flowText = resultText.trim().toUpperCase();
-      
-      if (flowText.includes("PLACE_ORDER")) {
-        return PLACE_ORDER;
-      }
-      return FAQ;
-    } catch (err) {
-      console.error("Error calling AWS Bedrock/Claude:", err);
-      // Fallback: sử dụng keyword detection
-      const messageLower = message.toLowerCase();
-      const orderKeywords = ["đặt hàng", "mua", "order", "place order", "thêm vào giỏ"];
-      if (orderKeywords.some(keyword => messageLower.includes(keyword))) {
-        return PLACE_ORDER;
-      }
-      return FAQ;
-    }
+    const res = await openai.chat.completions.create({
+      model: MODEL_ID,
+      messages: [{ role: "user", content: prompt }],
+    });
+
+    let text = res.choices[0].message.content
+      .replace(/```json|```/g, "")
+      .trim();
+
+    return JSON.parse(text);
   }
 
-  static async generateResponse(message, flow, context = {}) {
-    if (flow === PLACE_ORDER) {
-      return "Bạn muốn đặt hàng gì? Vui lòng cho tôi biết tên sản phẩm.";
-    }
-    return "Xin chào! Tôi có thể giúp gì cho bạn? Bạn có thể hỏi về sản phẩm, đơn hàng, hoặc đặt hàng.";
+  static async generateResponse(message, flowType, state = {}) {
+    const prompt = `
+You are a helpful assistant for a flower shop chatbot.
+
+User question: "${message}"
+Flow type: ${flowType}
+Context: ${JSON.stringify(state)}
+
+Provide a helpful, friendly response in Vietnamese. Be concise and helpful.
+`;
+
+    const res = await openai.chat.completions.create({
+      model: MODEL_ID,
+      messages: [{ role: "user", content: prompt }],
+    });
+
+    return res.choices[0].message.content.trim();
   }
 
-  
-  static async shouldEndCurrentFlow(message, currentFlow, currentStep) {
-    // Nếu không có flow hiện tại, không cần check
-    if (!currentFlow) {
-      return true;
-    }
+  static async processFlowStep(step, userMessage, context = {}) {
+    const { occasions = [], subOccasions = [], bouquets = [], data = {} } = context;
+    
+    const prompt = `
+Bạn là trợ lý chatbot cho cửa hàng hoa. Xử lý bước hiện tại trong flow đặt hàng.
 
-    // Nếu flow đã kết thúc (step = "confirm" hoặc không có step), cho phép chuyển flow
-    if (!currentStep || currentStep === "confirm") {
-      return true;
-    }
+Bước hiện tại: ${step}
+Tin nhắn người dùng: "${userMessage}"
+Dữ liệu đã có: ${JSON.stringify(data)}
 
-    // Sử dụng AI để detect xem user có muốn kết thúc flow hiện tại không
-    const prompt = `Bạn là một trợ lý chatbot. Người dùng đang trong flow "${currentFlow}" ở bước "${currentStep}".
+Danh sách có sẵn:
+- Occasions: ${JSON.stringify(occasions.map(o => ({ name: o.name, id: o.id })))}
+- SubOccasions: ${JSON.stringify(subOccasions.map(s => ({ name: s.name || s.title, id: s._id || s.id })))}
+- Bouquets: ${JSON.stringify(bouquets.map(b => ({ name: b.name || b.title, id: b.id || b._id, price: b.price })))}
 
-Tin nhắn của người dùng: "${message}"
+CHỈ trả về JSON với format:
+{
+  "response": "Câu trả lời cho người dùng (tiếng Việt)",
+  "selectedItem": { "type": "occasion|suboccasion|bouquet", "name": "...", "id": "..." } hoặc null,
+  "nextStep": "ASK_OCCASION|ASK_SUBOCCASION|ASK_BOUQUET|DONE" hoặc giữ nguyên step hiện tại
+}
 
-Hãy xác định xem người dùng có muốn KẾT THÚC flow hiện tại và chuyển sang chủ đề khác không, hay họ đang TRẢ LỜI câu hỏi trong flow hiện tại.
+QUY TẮC QUAN TRỌNG:
 
-Chỉ trả về "YES" nếu người dùng muốn kết thúc flow hiện tại và chuyển sang chủ đề khác.
-Trả về "NO" nếu người dùng đang trả lời câu hỏi trong flow hiện tại.
+1. MATCHING LINH HOẠT:
+   - Phân tích tin nhắn người dùng một cách thông minh, không chỉ dựa vào exact match
+   - Ví dụ: "love", "romance", "tình yêu", "lãng mạn" đều có thể match với "Love & Romance"
+   - "hoa hồng", "roses", "rose" có thể match với "Roses" hoặc "Red Roses"
+   - "pink romance" có thể match với "Pink Romance"
+   - Bỏ qua các từ không quan trọng như "đi", "nhé", "ạ", "với", "cho"
+   - Không phân biệt hoa thường/hoa thường: "Love" = "love" = "LOVE"
+   - Không phân biệt ký tự đặc biệt: "Love & Romance" = "Love and Romance" = "Love Romance"
 
-Ví dụ:
-- "Tôi muốn hỏi về giá" → YES (muốn chuyển sang FAQ)
-- "Tôi muốn đặt hàng" → YES (muốn chuyển sang PLACE_ORDER)
-- "Sinh nhật" → NO (đang trả lời câu hỏi về dịp)
-- "2 bó" → NO (đang trả lời về số lượng)
-- "123 ABC" → NO (đang trả lời về địa chỉ)
+2. MATCHING THEO TỪ KHÓA:
+   - Nếu tin nhắn chứa một phần tên item, coi như match
+   - Ví dụ: "love" match với "Love & Romance", "romance" cũng match với "Love & Romance"
+   - Nếu có nhiều item khớp, chọn item có độ tương đồng cao nhất
 
-Chỉ trả về "YES" hoặc "NO".`;
+3. MATCHING ĐA NGÔN NGỮ:
+   - Hiểu cả tiếng Anh và tiếng Việt
+   - Ví dụ: "tình yêu" = "love", "lãng mạn" = "romance", "sinh nhật" = "birthday"
+   - "hoa" = "flower", "hoa hồng" = "rose", "kỷ niệm" = "anniversary"
 
-    try {
-      const body = JSON.stringify({
-        anthropic_version: "bedrock-2023-05-31",
-        max_tokens: 50,
-        messages: [
-          {
-            role: "user",
-            content: prompt
-          }
-        ]
-      });
+4. XỬ LÝ RESPONSE:
+   - Nếu tìm thấy item: trả về selectedItem với name CHÍNH XÁC từ danh sách (không thay đổi)
+   - Nếu không tìm thấy: yêu cầu chọn lại và hiển thị danh sách đầy đủ với format: "1. Tên - Giá$" (nếu có giá)
+   - Response phải thân thiện, bằng tiếng Việt
+   - Khi hiển thị danh sách, format rõ ràng, dễ đọc
 
-      const command = new InvokeModelCommand({
-        modelId: config.AWS_BEDROCK_CLAUDE_ARN,
-        contentType: "application/json",
-        accept: "application/json",
-        body: Buffer.from(body)
-      });
+5. CHUYỂN BƯỚC:
+   - Nếu đã chọn occasion → nextStep = "ASK_SUBOCCASION"
+   - Nếu đã chọn suboccasion → nextStep = "ASK_BOUQUET"
+   - Nếu đã chọn bouquet → nextStep = "DONE"
+   - Nếu chưa chọn được → giữ nguyên step hiện tại
+`;
 
-      const response = await client.send(command);
-      const responseBody = JSON.parse(Buffer.from(response.body).toString());
-      const resultText = responseBody.content?.[0]?.text || "";
-      const shouldEnd = resultText.trim().toUpperCase().includes("YES");
-      
-      console.log(`AI detected shouldEndCurrentFlow: ${shouldEnd} for message: "${message}"`);
-      return shouldEnd;
-    } catch (err) {
-      console.error("Error calling AI to detect flow end:", err);
-      // Fallback: chỉ cho phép chuyển nếu có keyword rõ ràng
-      const messageLower = message.toLowerCase();
-      const endKeywords = ["hủy", "cancel", "thôi", "không", "dừng", "stop", "tôi muốn hỏi", "tôi muốn đặt"];
-      return endKeywords.some(keyword => messageLower.includes(keyword));
-    }
-  }
+    const res = await openai.chat.completions.create({
+      model: MODEL_ID,
+      messages: [{ role: "user", content: prompt }],
+    });
 
-  static shouldChangeFlow(message, currentFlow, detectedFlow) {
-    if (!currentFlow) return true;
-    if (detectedFlow === currentFlow) return false;
+    let text = res.choices[0].message.content
+      .replace(/```json|```/g, "")
+      .trim();
 
-    if (currentFlow === PLACE_ORDER && detectedFlow === FAQ) {
-      const messageLower = message.toLowerCase();
-      const faqKeywords = ["giá", "price", "vận chuyển", "shipping", "trả hàng", "return", "hỏi", "thông tin"];
-      return faqKeywords.some(keyword => messageLower.includes(keyword));
-    }
-
-    if (currentFlow === FAQ && detectedFlow === PLACE_ORDER) return true;
-
-    return false;
+    return JSON.parse(text);
   }
 }

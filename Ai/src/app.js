@@ -22,7 +22,7 @@ app.get('/health', (req, res) => {
   res.json({ status: 'healthy' });
 });
 
-app.use('/chat', chatRoutes);
+app.use('/api/chat', chatRoutes);
 
 app.use((err, req, res, next) => {
   console.error('Error:', err);
