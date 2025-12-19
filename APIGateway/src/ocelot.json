@@ -223,7 +223,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "chatbotservice",
-          "Port": 8086
+          "Port": 8085
         }
       ],
       "UpstreamPathTemplate": "/chat/{everything}",
