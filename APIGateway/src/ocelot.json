@@ -201,7 +201,7 @@
         }
       ],
       "UpstreamPathTemplate": "/payments/{everything}",
-      "UpstreamHttpMethod": [ "GET","POST", "PUT", "DELETE" ],
+      "UpstreamHttpMethod": [ "POST", "PUT", "DELETE" ],
       "Priority": 16,
       "DelegatingHandlers": [ "RedisTokenValidator" ]
     },
@@ -258,4 +258,5 @@
     "LoadBalancer": "RoundRobin"
   }
 }
+
 
