@@ -189,8 +189,20 @@
       "Priority": 14,
       "DelegatingHandlers": [ "RedisTokenValidator" ]
     },
-
-   
+ 
+{
+      "DownstreamPathTemplate": "/api/payments/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "paymentservice",
+          "Port": 8084
+        }
+      ],
+      "UpstreamPathTemplate": "/payments/{everything}",
+      "UpstreamHttpMethod": [ "GET" ],
+      "Priority": 15
+    },
     {
       "DownstreamPathTemplate": "/api/payments/{everything}",
       "DownstreamScheme": "http",
@@ -201,11 +213,10 @@
         }
       ],
       "UpstreamPathTemplate": "/payments/{everything}",
-      "UpstreamHttpMethod": [ "GET","POST", "PUT", "DELETE" ],
+      "UpstreamHttpMethod": [ "POST", "PUT", "DELETE" ],
       "Priority": 16,
       "DelegatingHandlers": [ "RedisTokenValidator" ]
     },
-
     {
       "DownstreamPathTemplate": "/api/coupons/{everything}",
       "DownstreamScheme": "http",
@@ -258,4 +269,8 @@
     "LoadBalancer": "RoundRobin"
   }
 }
+
+
+
+
 
