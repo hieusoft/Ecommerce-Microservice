@@ -41,7 +41,7 @@ export class ChatMessageRepository {
       SELECT TOP 15 *
       FROM ${CHAT_MESSAGES_TABLE}
       WHERE ${ChatMessageColumns.CONVERSATION_ID} = @conversation_id
-      ORDER BY ${ChatMessageColumns.CREATED_AT} DESC;
+      ORDER BY ${ChatMessageColumns.CREATED_AT} ASC;
     `);
 
   return result.recordset;
