@@ -1,7 +1,7 @@
 import { config } from "../core/config.js";
 
 export class ApiService {
-  static baseUrl = config.flowerApiBaseUrl;
+  static baseUrl = config.FlowerApiBaseUrl;
 
   static async fetchJson(url) {
     const res = await fetch(url);

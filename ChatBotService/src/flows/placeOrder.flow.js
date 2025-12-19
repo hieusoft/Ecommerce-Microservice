@@ -6,7 +6,9 @@ export class PlaceOrderFlow {
   static async handle(userId, nlu, state, userMessage = "") {
     const step = state.step ?? "ASK_OCCASION";
     const data = state.data ?? {};
-
+    const encodeForUrl = (text) => {
+      return encodeURIComponent(text ?? '');
+    };
     try {
       let occasions = [];
       let subOccasions = [];
@@ -72,16 +74,15 @@ export class PlaceOrderFlow {
           data.bouquetId = id;
           
           
-          const normalizeForUrl = (text) => {
-            return text?.toLowerCase()
-              .replace(/[&]/g, 'and')
-              .replace(/[^a-z0-9\s-]/g, '')
-              .replace(/\s+/g, '-')
-              .replace(/-+/g, '-')
-              .trim();
-          };
-          
-          const orderLink = `/${normalizeForUrl(data.occasion)}/${normalizeForUrl(data.suboccasion)}/${id}`;
+
+          const orderLink = `${config.ClientUrl}/shop/${
+            encodeForUrl(data.occasion)
+          }/${
+            encodeForUrl(data.suboccasion)
+          }/${
+            id
+          }`;
+
           
           await StateService.clearState(userId);
           

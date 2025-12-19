@@ -6,7 +6,7 @@ const openai = new OpenAI({
   apiKey: config.OPENROUTER_API_KEY,
 });
 
-const MODEL_ID = "xiaomi/mimo-v2-flash:free";
+const MODEL_ID = "mistralai/devstral-2512:free";
 
 export class AIService {
   static async detectIntent(message, context = {}) {

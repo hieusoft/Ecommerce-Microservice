@@ -14,51 +14,59 @@ export class ChatService {
     console.log("userId:", userId);
     console.log("message:", message);
 
+   
     let state = await StateService.getState(userId);
     let flow = state?.flow || null;
+
     console.log("Initial state:", state);
     console.log("Initial flow:", flow);
 
-    const nlu = await AIService.detectIntent(message, state?.data || {});
+ 
+    const nlu = await AIService.detectIntent(message, {
+      flow: state?.flow,
+      step: state?.step,
+      data: state?.data
+    });
     console.log("NLU:", nlu);
 
-    if (!flow) {
-      if (nlu.intent === "GREETING") {
-        flow = GREETING;
-        await StateService.setState(userId, flow, null, {});
-        console.log("Flow set to GREETING (new)");
-      } else if (nlu.intent === "START_ORDER") {
+   
+    if (nlu.intent === "START_ORDER") {
+      if (flow !== PLACE_ORDER) {
         flow = PLACE_ORDER;
         await StateService.setState(userId, flow, "ASK_OCCASION", {});
-        console.log("Flow set to PLACE_ORDER (new)");
+        console.log("Flow set/switched to PLACE_ORDER");
       } else {
-        flow = FAQ;
-        await StateService.setState(userId, flow, null, {});
-        console.log("Flow set to FAQ (new)");
-      }
-    } else {
-      if (nlu.intent === "GREETING") {
-        flow = GREETING;
-        await StateService.setState(userId, flow, null, {});
-        console.log("Flow switched to GREETING");
-      } else if (nlu.intent === "START_ORDER" && flow === FAQ) {
-        flow = PLACE_ORDER;
-        await StateService.setState(userId, flow, "ASK_OCCASION", {});
-        console.log("Flow switched from FAQ to PLACE_ORDER");
-      } else if (nlu.intent === "FAQ" && flow === PLACE_ORDER) {
-        flow = FAQ;
-        await StateService.setState(userId, flow, null, {});
-        console.log("Flow switched from PLACE_ORDER to FAQ");
-      } else {
-        console.log("Flow remains:", flow);
+        console.log("Already in PLACE_ORDER");
       }
     }
+
+   
+    else if (nlu.intent === "GREETING" && flow !== PLACE_ORDER) {
+      flow = GREETING;
+      await StateService.setState(userId, flow, null, {});
+      console.log("Flow set/switched to GREETING");
+    }
+
+    else if (nlu.intent === "FAQ" && flow !== PLACE_ORDER) {
+      flow = FAQ;
+      await StateService.setState(userId, flow, null, {});
+      console.log("Flow set/switched to FAQ");
+    }
+
+   
+    else {
+      console.log("Flow remains:", flow);
+    }
+
     console.log("Selected flow:", flow);
+
 
     state = await StateService.getState(userId);
     console.log("Updated state:", state);
 
+
     let conversation = await ConversationRepository.getByUserId(userId);
+
     if (!conversation) {
       conversation = await ConversationRepository.create(userId, flow);
       console.log("Created new conversation:", conversation);
@@ -78,29 +86,39 @@ export class ChatService {
       message
     });
 
-
+ 
     let response;
     console.log("Dispatching to flow:", flow);
 
-    switch (flow) {
-      case PLACE_ORDER:
-        console.log("Calling PlaceOrderFlow.handle");
-        [response] = await PlaceOrderFlow.handle(userId, nlu, state, message);
-        break;
+    try {
+      switch (flow) {
+        case PLACE_ORDER:
+          console.log("Calling PlaceOrderFlow.handle");
+          [response] = await PlaceOrderFlow.handle(userId, nlu, state, message);
+          break;
 
-      case GREETING:
-        console.log("Calling GreetingFlow.handle");
-        [response] = await GreetingFlow.handle(userId, message, state);
-        break;
+        case GREETING:
+          console.log("Calling GreetingFlow.handle");
+          [response] = await GreetingFlow.handle(userId, message, state);
+          break;
 
-      case FAQ:
-      default:
-        console.log("Calling FAQFlow.handle");
-        [response] = await FAQFlow.handle(userId, message, state);
-        break;
+        case FAQ:
+        default:
+          console.log("Calling FAQFlow.handle");
+          [response] = await FAQFlow.handle(userId, message, state);
+          break;
+      }
+    } catch (err) {
+      console.error("❌ Error in flow handle:", err);
+      response = "Xin lỗi, tôi gặp lỗi khi xử lý yêu cầu của bạn.";
     }
-    console.log("Flow response:", response);
 
+    if (!response) {
+      console.error("❌ Response is NULL/UNDEFINED", { flow, nlu, state });
+      response = "Xin lỗi, tôi chưa hiểu rõ yêu cầu của bạn.";
+    }
+
+    console.log("Flow response:", response);
 
     await ChatMessageRepository.create({
       conversationId,
@@ -113,21 +131,19 @@ export class ChatService {
   }
 
   static async getMessage(userId) {
+    const conversation = await ConversationRepository.getByUserId(userId);
 
-  const conversation = await ConversationRepository.getByUserId(userId);
+    if (!conversation) {
+      return null;
+    }
 
-  if (!conversation) {
-    return null; 
+    const messages = await ChatMessageRepository.getByConversation(
+      conversation.id
+    );
+
+    return {
+      conversationId: conversation.id,
+      messages
+    };
   }
-
-  const messages = await ChatMessageRepository.getByConversation(
-    conversation.id
-  );
-
-  return {
-    conversationId: conversation.id,
-    messages
-  };
-}
-
 }
